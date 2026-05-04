@@ -1,20 +1,30 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { collection, query, where } from 'firebase/firestore';
 import { useFirestore, useUser, useCollection, useAuth, useMemoFirebase } from '@/firebase';
-import { Heart, ExternalLink, Calendar, Loader2, Plus, ArrowLeft, LogOut, Layout, User, Pencil } from 'lucide-react';
+import { Heart, ExternalLink, Calendar, Loader2, Plus, ArrowLeft, LogOut, Layout, User, Pencil, ShieldAlert, Lock, X, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { signOut } from 'firebase/auth';
+import { signOut, updatePassword } from 'firebase/auth';
 
 export default function MyPages() {
   const firestore = useFirestore();
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const [showAlert, setShowAlert] = useState(true);
 
   // Query memoizada para buscar apenas as páginas do usuário logado
   const mySitesQuery = useMemoFirebase(() => {
@@ -29,6 +39,43 @@ export default function MyPages() {
 
   const handleLogout = () => {
     signOut(auth);
+  };
+
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    if (newPassword.length < 6) {
+      setPasswordError('A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('As senhas não coincidem.');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    setPasswordError(null);
+
+    try {
+      await updatePassword(user, newPassword);
+      setPasswordSuccess(true);
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => {
+        setShowPasswordDialog(false);
+        setPasswordSuccess(false);
+        setShowAlert(false);
+      }, 3000);
+    } catch (err: any) {
+      console.error(err);
+      if (err.code === 'auth/requires-recent-login') {
+        setPasswordError('Para sua segurança, saia e entre novamente na conta antes de mudar a senha.');
+      } else {
+        setPasswordError('Erro ao atualizar senha. Tente novamente mais tarde.');
+      }
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   if (isUserLoading) {
@@ -99,6 +146,31 @@ export default function MyPages() {
           </div>
         </header>
 
+        {showAlert && (
+          <div className="mb-10 bg-orange-500/10 border border-orange-500/20 rounded-2xl p-5 flex items-start justify-between gap-4 animate-in fade-in slide-in-from-left-4 duration-500">
+            <div className="flex items-start gap-4">
+              <div className="bg-orange-500/20 p-2 rounded-lg">
+                <ShieldAlert className="w-5 h-5 text-orange-500" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-black uppercase tracking-tight text-white">Segurança da Conta</h4>
+                <p className="text-white/50 text-[11px] font-medium leading-relaxed max-w-md">
+                  Se você acessou com a senha padrão <code className="bg-white/5 px-1.5 py-0.5 rounded text-orange-400 font-mono">Eternize123</code>, recomendamos trocá-la agora para proteger suas memórias.
+                </p>
+                <button 
+                  onClick={() => setShowPasswordDialog(true)}
+                  className="text-orange-500 text-[10px] font-black uppercase tracking-widest hover:underline mt-2 flex items-center gap-2"
+                >
+                  <Lock className="w-3 h-3" /> Trocar senha agora
+                </button>
+              </div>
+            </div>
+            <button onClick={() => setShowAlert(false)} className="text-white/20 hover:text-white transition-colors">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-4">
             <Loader2 className="w-8 h-8 text-primary animate-spin" />
@@ -166,6 +238,92 @@ export default function MyPages() {
           </div>
         )}
       </div>
+
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="bg-[#0c0c0c] border border-white/10 text-white rounded-3xl max-w-[400px] p-0 overflow-hidden">
+          <form onSubmit={handlePasswordUpdate}>
+            <div className="p-8 space-y-6">
+              <DialogHeader className="space-y-3">
+                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mb-2">
+                  <Lock className="w-6 h-6 text-primary" />
+                </div>
+                <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter">Trocar Senha</DialogTitle>
+                <DialogDescription className="text-white/40 text-sm font-medium">
+                  Crie uma nova senha segura para sua conta.
+                </DialogDescription>
+              </DialogHeader>
+
+              {passwordSuccess ? (
+                <div className="bg-green-500/10 border border-green-500/20 p-5 rounded-2xl flex flex-col items-center gap-3 animate-in zoom-in-95 duration-500">
+                  <CheckCircle2 className="w-10 h-10 text-green-500" />
+                  <p className="text-green-500 font-bold text-sm text-center">Senha atualizada com sucesso!</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">Nova Senha</label>
+                    <div className="relative">
+                      <Input 
+                        type={showPass ? "text" : "password"}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="••••••••"
+                        required
+                        className="bg-white/5 border-white/10 h-12 rounded-xl focus:border-primary/50 text-sm font-medium pr-10"
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => setShowPass(!showPass)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors"
+                      >
+                        {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">Confirmar Senha</label>
+                    <Input 
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      className="bg-white/5 border-white/10 h-12 rounded-xl focus:border-primary/50 text-sm font-medium"
+                    />
+                  </div>
+
+                  {passwordError && (
+                    <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-red-500 text-[10px] font-bold text-center">
+                      {passwordError}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {!passwordSuccess && (
+              <DialogFooter className="bg-white/5 p-6 flex items-center justify-between gap-4 border-t border-white/5">
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  onClick={() => setShowPasswordDialog(false)}
+                  className="text-white/40 hover:text-white text-xs font-bold uppercase"
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={isChangingPassword}
+                  className="bg-primary hover:bg-primary/90 rounded-xl px-6 font-black text-xs uppercase tracking-widest"
+                >
+                  {isChangingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirmar'}
+                </Button>
+              </DialogFooter>
+            )}
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
