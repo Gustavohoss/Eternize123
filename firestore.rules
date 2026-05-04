@@ -4,9 +4,8 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * CORE PHILOSOPHY
-     * Strict ownership for user profiles, public read for sites, 
-     * and special allowance for webhooks to liberate pending sites.
+     * ETERNIZE - SECURITY RULES
+     * Permissões granulares para garantir que o Webhook funcione sem Auth.
      */
 
     function isSignedIn() {
@@ -32,16 +31,18 @@ service cloud.firestore {
     }
 
     match /published_sites/{subdomainName} {
-      // Qualquer um pode ver um site publicado
+      // Leitura pública necessária para visualização do presente
       allow read, get, list: if true;
       
-      // Criação permitida para usuários logados ou anônimos (durante a criação)
+      // Criação permitida para salvar o rascunho antes do pagamento
       allow create: if true;
       
-      // Atualização permitida se for o dono OU se o site estiver pendente (para o webhook funcionar)
+      // Permite atualização se:
+      // 1. O site estiver pendente (Liberação via Webhook)
+      // 2. Ou se o usuário logado for o dono (Edição via Painel)
       allow update: if 
         (resource.data.status == 'pending') || 
-        (isSignedIn() && resource.data.userId == request.auth.uid);
+        (isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.customerEmail == request.auth.token.email));
         
       allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
