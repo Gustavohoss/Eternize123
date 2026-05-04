@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -21,6 +20,7 @@ import { StepPageTitle } from '@/components/eternize/creator-steps/step-page-tit
 import { StepMessage } from '@/components/eternize/creator-steps/step-message';
 import { StepMusic } from '@/components/eternize/creator-steps/step-music';
 import { StepDataLocation } from '@/components/eternize/creator-steps/step-data-location';
+import { StepModulesEdit } from '@/components/eternize/creator-steps/step-modules-edit';
 
 const compressImage = (base64Str: string): Promise<string> => {
   return new Promise((resolve) => {
@@ -59,9 +59,9 @@ export default function EditSitePage() {
 
   const [mounted, setMounted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [step, setStep] = useState<Step>('theme-selection');
+  const [step, setStep] = useState<Step>('customize-background');
 
-  // States (Sync with SiteData)
+  // States
   const [selectedTheme, setSelectedTheme] = useState<ThemeId>('classic');
   const [selectedBgColor, setSelectedBgColor] = useState<string>('#000000');
   const [selectedEffect, setSelectedEffect] = useState<string>('none');
@@ -77,6 +77,7 @@ export default function EditSitePage() {
   const [musicData, setMusicData] = useState<{id: string, title: string, thumb: string} | undefined>(undefined);
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
+  const [isPackEnabled, setIsPackEnabled] = useState<boolean>(true);
   
   const [sparklesDensity, setSparklesDensity] = useState<number>(100);
   const [sparklesSpeed, setSparklesSpeed] = useState<number>(0.5);
@@ -132,6 +133,8 @@ export default function EditSitePage() {
         setMessage(config.message || '');
         setMusicData(config.musicData);
         setUploadedPhotos(config.uploadedPhotos || []);
+        setIsPackEnabled(config.isPackEnabled !== undefined ? config.isPackEnabled : true);
+        
         setSparklesDensity(config.sparklesDensity || 100);
         setSparklesSpeed(config.sparklesSpeed || 0.5);
         setSparklesColor(config.sparklesColor || '#ffffff');
@@ -164,7 +167,6 @@ export default function EditSitePage() {
         setIsMusicAutoPlay(config.isMusicAutoPlay || false);
         setLocationQuery(config.locationQuery || '');
         
-        // Se já carregou, pula o tema e vai para a customização
         setStep('customize-background');
       } catch (e) {
         console.error("Erro ao processar conteúdo do site", e);
@@ -175,9 +177,9 @@ export default function EditSitePage() {
   const stepSequence = useMemo((): Step[] => {
     const base: Step[] = ['customize-background'];
     if (selectedTheme === 'netflix' || selectedTheme === 'spotify' || selectedTheme === 'instagram') {
-      return [...base, 'data-location', 'page-title', 'message', 'photos', 'music'];
+      return [...base, 'data-location', 'page-title', 'message', 'photos', 'music', 'modules'];
     }
-    return [...base, 'photos', 'page-title', 'message', 'data-location', 'music'];
+    return [...base, 'photos', 'page-title', 'message', 'data-location', 'music', 'modules'];
   }, [selectedTheme]);
 
   const currentStepIndex = stepSequence.indexOf(step);
@@ -206,7 +208,7 @@ export default function EditSitePage() {
         showCard, titlePosition, titleColor, titleFont, titleIsBold, titleHasNeon, titleNeonStrength,
         dateColor, dateFont, dateIsBold, dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor,
         messageColor, messageFont, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength,
-        isMusicAutoPlay, locationQuery
+        isMusicAutoPlay, locationQuery, isPackEnabled
       };
 
       const jsonContent = JSON.stringify(contentData);
@@ -260,7 +262,7 @@ export default function EditSitePage() {
     dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor, messageColor, messageFont,
     musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength, isAutoPlay: false,
     sparklesDensity, sparklesSpeed, sparklesColor, smokeIntensity, smokeColor, patternDuration,
-    patternDensity, patternColor
+    patternDensity, patternColor, isPackEnabled
   };
 
   if (isAuthLoading || isDocLoading) {
@@ -310,10 +312,11 @@ export default function EditSitePage() {
           <div className="w-full min-w-0">
             {step === 'customize-background' && <StepCustomizeBackground {...{selectedBgColor, onBgColorChange: setSelectedBgColor, selectedEffect, onEffectChange: setSelectedEffect, isEmojiRainEnabled, onEmojiRainToggle: setIsEmojiRainEnabled, selectedEmojis, onToggleEmoji: toggleEmoji, emojiSize, onEmojiSizeChange: setEmojiSize, emojiRainPosition, onEmojiRainPositionChange: setEmojiRainPosition, isEmojiPickerOpen, onEmojiPickerOpenChange: setIsEmojiPickerOpen, sparklesDensity, onSparklesDensityChange: setSparklesDensity, sparklesSpeed, onSparklesSpeedChange: setSparklesSpeed, sparklesColor, onSparklesColorChange: setSparklesColor, smokeIntensity, onSmokeIntensityChange: setSmokeIntensity, smokeColor, onSmokeColorChange: setSmokeColor, patternDuration, onPatternDurationChange: setPatternDuration, patternDensity, onPatternDensityChange: setPatternDensity, patternColor, onPatternColorChange: setPatternColor, onBack: handleBack, onNext: handleNext}} />}
             {step === 'photos' && <StepPhotos {...{selectedTheme, uploadedPhotos, onPhotoUpload: handlePhotoUpload, onRemovePhoto: removePhoto, showCard, onShowCardChange: setShowCard, cardColor, onCardColorChange: setCardColor, titlePosition, onTitlePositionChange: setTitlePosition, photoEffect, onPhotoEffectChange: setPhotoEffect, onBack: handleBack, onNext: handleNext}} />}
-            {step === 'page-title' && <StepPageTitle {...{selectedTheme, pageTitle, onPageTitleChange: setPageTitle, titleFont, onTitleFontChange: setTitleFont, titleIsBold, onTitleIsBoldChange: setTitleIsBold, titleHasNeon, onTitleHasNeonChange: setTitleHasNeon, titleNeonStrength, onTitleNeonStrengthChange: setTitleNeonStrength, titleColor, onTitleColorChange: setSelectedBgColor, onBack: handleBack, onNext: handleNext}} />}
+            {step === 'page-title' && <StepPageTitle {...{selectedTheme, pageTitle, onPageTitleChange: setPageTitle, titleFont, onTitleFontChange: setTitleFont, titleIsBold, onTitleIsBoldChange: setTitleIsBold, titleHasNeon, onTitleHasNeonChange: setTitleHasNeon, titleNeonStrength, onTitleNeonStrengthChange: setTitleNeonStrength, titleColor, onTitleColorChange: (c) => setTitleColor(c), onBack: handleBack, onNext: handleNext}} />}
             {step === 'message' && <StepMessage {...{selectedTheme, message, onMessageChange: setMessage, messageFont, onMessageFontChange: setMessageFont, messageColor, onMessageColorChange: setMessageColor, onBack: handleBack, onNext: handleNext}} />}
             {step === 'music' && <StepMusic {...{selectedTheme, musicData, onMusicSelect: setMusicData, musicBoxColor, onMusicBoxColorChange: setMusicBoxColor, musicTextColor, onMusicTextColorChange: setMusicTextColor, musicHasNeon, onMusicHasNeonChange: setMusicHasNeon, musicNeonStrength, onMusicNeonStrengthChange: setMusicNeonStrength, isAutoPlay: isMusicAutoPlay, onAutoPlayChange: setIsMusicAutoPlay, onBack: handleBack, onNext: handleNext}} />}
             {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: setLocationQuery, showSuggestions, onShowSuggestionsChange: setShowSuggestions, filteredCities, selectedCountStyle, onCountStyleChange: setSelectedCountStyle, dateFont, onDateFontChange: setDateFont, dateIsBold, onDateIsBoldChange: setDateIsBold, dateHasNeon, onDateHasNeonChange: setDateHasNeon, dateNeonStrength, onDateNeonStrengthChange: setDateNeonStrength, dateColor, onDateColorChange: setDateColor, dateBoxBgColor, onDateBoxBgColorChange: setDateBoxBgColor, dateBoxBorderColor, onDateBoxBorderColorChange: setDateBoxBorderColor, onBack: handleBack, onNext: handleNext}} />}
+            {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} onBack={handleBack} onNext={handleSave} />}
 
             <div className="lg:hidden flex flex-col items-center mt-12 w-full gap-4">
                <Dialog>

@@ -111,6 +111,9 @@ export default function CriadorApp() {
   const [isMusicAutoPlay, setIsMusicAutoPlay] = useState<boolean>(false);
   const [locationQuery, setLocationQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  
+  // Pack de Módulos
+  const [isPackEnabled, setIsPackEnabled] = useState<boolean>(true);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -146,24 +149,12 @@ export default function CriadorApp() {
     try {
       let currentUserId: string | null = null;
 
-      // Se for teste, tentamos usar o usuário atual ou anônimo
-      if (isTest) {
-        let currentUser = auth.currentUser;
-        if (!currentUser) {
-          const credential = await signInAnonymously(auth);
-          currentUser = credential.user;
-        }
-        currentUserId = currentUser?.uid || null;
-      } else {
-        // Fluxo de pagamento: usamos um ID temporário ou anônimo.
-        // O Webhook da PerfectPay irá vincular o e-mail real e criar a conta definitiva.
-        let currentUser = auth.currentUser;
-        if (!currentUser) {
-          const credential = await signInAnonymously(auth);
-          currentUser = credential.user;
-        }
-        currentUserId = currentUser?.uid || null;
+      let currentUser = auth.currentUser;
+      if (!currentUser) {
+        const credential = await signInAnonymously(auth);
+        currentUser = credential.user;
       }
+      currentUserId = currentUser?.uid || null;
 
       if (!currentUserId) throw new Error("Falha na identificação do usuário.");
 
@@ -175,7 +166,7 @@ export default function CriadorApp() {
         showCard, titlePosition, titleColor, titleFont, titleIsBold, titleHasNeon, titleNeonStrength,
         dateColor, dateFont, dateIsBold, dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor,
         messageColor, messageFont, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength,
-        isMusicAutoPlay, locationQuery
+        isMusicAutoPlay, locationQuery, isPackEnabled
       };
 
       const jsonContent = JSON.stringify(contentData);
@@ -201,7 +192,6 @@ export default function CriadorApp() {
       if (isTest) {
         window.location.href = `/site/${finalSlug}`;
       } else {
-        // Redireciona para o checkout com o parâmetro 'src' que a PerfectPay usará no Webhook
         const checkoutUrlWithMetadata = `${PERFECTPAY_CHECKOUT_URL}?src=${finalSlug}`;
         window.location.href = checkoutUrlWithMetadata;
       }
@@ -305,7 +295,7 @@ export default function CriadorApp() {
               {step === 'music' && <StepMusic {...{selectedTheme, musicData, onMusicSelect: setMusicData, musicBoxColor, onMusicBoxColorChange: setMusicBoxColor, musicTextColor, onMusicTextColorChange: setMusicTextColor, musicHasNeon, onMusicHasNeonChange: setMusicHasNeon, musicNeonStrength, onMusicNeonStrengthChange: setMusicNeonStrength, isAutoPlay: isMusicAutoPlay, onAutoPlayChange: setIsMusicAutoPlay, onBack: handleBack, onNext: handleNext}} />}
               {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: setLocationQuery, showSuggestions, onShowSuggestionsChange: setShowSuggestions, filteredCities, selectedCountStyle, onCountStyleChange: setSelectedCountStyle, dateFont, onDateFontChange: setDateFont, dateIsBold, onDateIsBoldChange: setDateIsBold, dateHasNeon, onDateHasNeonChange: setDateHasNeon, dateNeonStrength, onDateNeonStrengthChange: setDateNeonStrength, dateColor, onDateColorChange: (c) => { setDateColor(c); setUserHasManuallyChangedDateColor(true); }, dateBoxBgColor, onDateBoxBgColorChange: setDateBoxBgColor, dateBoxBorderColor, onDateBoxBorderColorChange: setDateBoxBorderColor, onBack: handleBack, onNext: handleNext}} />}
               {step === 'plans' && <StepPlans onBack={handleBack} onFinish={handleNext} />}
-              {step === 'order-bump' && <StepOrderBump onBack={handleBack} onFinish={handleNext} date={date} />}
+              {step === 'order-bump' && <StepOrderBump onBack={handleBack} onFinish={handleNext} date={date} isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} />}
               {step === 'subdomain-config' && <StepSubdomainConfig onBack={handleBack} onFinish={handleFinalize} initialValue={pageTitle} />}
 
               <div className="lg:hidden flex flex-col items-center mt-12 w-full gap-4">

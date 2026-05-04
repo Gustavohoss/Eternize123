@@ -44,12 +44,13 @@ interface StepOrderBumpProps {
   onBack: () => void;
   onFinish: () => void;
   date?: Date;
+  isPackEnabled: boolean;
+  onPackToggle: (enabled: boolean) => void;
 }
 
-export function StepOrderBump({ onBack, onFinish, date }: StepOrderBumpProps) {
+export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackToggle }: StepOrderBumpProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'center' });
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isPackEnabled, setIsPackEnabled] = useState(true);
   const [previewModuleId, setPreviewModuleId] = useState<string | null>(null);
 
   const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
@@ -193,7 +194,7 @@ export function StepOrderBump({ onBack, onFinish, date }: StepOrderBumpProps) {
 
       <div className="w-full space-y-4">
         <div 
-          onClick={() => setIsPackEnabled(!isPackEnabled)}
+          onClick={() => onPackToggle(!isPackEnabled)}
           className={cn(
             "w-full bg-[#0c0c0c] border rounded-3xl p-6 flex items-center justify-between cursor-pointer transition-all duration-300",
             isPackEnabled ? "border-primary/50 ring-1 ring-primary/10" : "border-white/5"
@@ -205,7 +206,7 @@ export function StepOrderBump({ onBack, onFinish, date }: StepOrderBumpProps) {
               Adicionar por apenas <span className="text-white">R$ 7,99</span>
             </p>
           </div>
-          <Switch checked={isPackEnabled} onCheckedChange={setIsPackEnabled} />
+          <Switch checked={isPackEnabled} onCheckedChange={onPackToggle} />
         </div>
 
         <div className="w-full bg-white/5 border border-white/5 rounded-2xl p-4 flex items-start gap-4">
