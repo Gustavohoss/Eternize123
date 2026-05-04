@@ -124,7 +124,7 @@ const REVIEWS_1 = [
 const REVIEWS_2 = [
   {
     stars: 5,
-    text: '"Criei pro meu mozão de surpresa e ele ficou sem acreditar que eu fiz isso. Ele disse que foi o presente mais lindo que já recebeu ❤️ Recomendo 10/10!"',
+    text: '"Criei pro meu mozão de surprise e ele ficou sem acreditar que eu fiz isso. Ele disse que foi o presente mais lindo que já recebeu ❤️ Recomendo 10/10!"',
     name: 'Vanessa & Ricardo',
     time: '1 semana atrás',
     initials: 'VR',
@@ -415,15 +415,16 @@ export default function LandingPage() {
 
       {/* Header */}
       <header className="flex justify-between items-center px-[5%] md:px-[8%] py-4 bg-[#0a0a0a]/95 border-b border-[#1a1a1a] sticky top-0 z-[100] backdrop-blur-md">
-        <div className="logo flex items-center shrink-0">
+        <div className="logo flex items-center gap-3 shrink-0">
           <NextImage 
             src="https://s3.typebotstorage.com/public/workspaces/cm7vfrzsh0001xixq5auwzryb/typebots/cmor2i57p000007huwd9cnpp5/blocks/rnrd9dgoh72piuhxaqenuibb?v=1777891185088" 
             alt="Eternize Logo" 
-            width={150} 
-            height={40} 
-            className="h-7 md:h-9 w-auto object-contain"
+            width={48} 
+            height={48} 
+            className="h-10 md:h-12 w-auto object-contain"
             priority
           />
+          <span className="text-xl md:text-2xl font-black italic tracking-tighter uppercase text-white">ETERNIZE</span>
         </div>
         <nav className="hidden lg:flex">
           <NextLink href="/" className="mx-4 text-[13px] opacity-80 hover:opacity-100 hover:text-primary transition-all">Início</NextLink>

@@ -48,18 +48,19 @@ export default function LoginPage() {
 
       <div className="w-full max-w-[400px] relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="text-center mb-10">
-          <div className="mb-6">
+          <div className="mb-6 flex flex-col items-center gap-2">
             <Image 
               src="https://s3.typebotstorage.com/public/workspaces/cm7vfrzsh0001xixq5auwzryb/typebots/cmor2i57p000007huwd9cnpp5/blocks/rnrd9dgoh72piuhxaqenuibb?v=1777891185088" 
               alt="Eternize Logo" 
-              width={180} 
-              height={60} 
-              className="mx-auto h-12 w-auto object-contain"
+              width={64} 
+              height={64} 
+              className="h-14 md:h-16 w-auto object-contain"
               priority
             />
+            <span className="text-2xl md:text-3xl font-black italic tracking-tighter uppercase text-white">ETERNIZE</span>
           </div>
-          <h1 className="text-3xl font-black italic uppercase tracking-tighter mb-2">Bem-vindo de volta<span className="text-primary">.</span></h1>
-          <p className="text-white/40 text-sm font-medium">Acesse suas memórias eternizadas.</p>
+          <h1 className="text-xl font-black italic uppercase tracking-tighter mb-2 text-white/40">Bem-vindo de volta<span className="text-primary">.</span></h1>
+          <p className="text-white/20 text-sm font-medium">Acesse suas memórias eternizadas.</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
@@ -79,7 +80,7 @@ export default function LoginPage() {
 
           <div className="space-y-1.5">
             <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1 flex items-center gap-2">
-              <Lock className="w-3 h-3" /> Sua Senha
+              <Mail className="w-3 h-3" /> Sua Senha
             </label>
             <Input 
               type="password"
