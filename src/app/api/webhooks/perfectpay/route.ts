@@ -11,13 +11,13 @@ const PERFECTPAY_SECURITY_TOKEN = "a57340234e6d72b4ceebbda5bf09f4be";
  * Processa pagamentos e libera sites automaticamente.
  */
 export async function POST(request: Request) {
-  console.log('Webhook PerfectPay: Recebendo nova notificação...');
+  console.log('Webhook PerfectPay: Nova requisição recebida.');
   
   try {
     const contentType = request.headers.get('content-type') || '';
     let data: any = {};
 
-    // 1. Parse do corpo da requisição dependendo do formato enviado
+    // 1. Parse robusto do corpo da requisição
     try {
       if (contentType.includes('application/json')) {
         data = await request.json();
@@ -25,106 +25,94 @@ export async function POST(request: Request) {
         const formData = await request.formData();
         data = Object.fromEntries(formData.entries());
       }
-    } catch (parseError) {
-      console.error('Erro ao ler corpo da requisição:', parseError);
-      return NextResponse.json({ error: 'Formato de corpo inválido' }, { status: 400 });
+    } catch (e) {
+      console.error('Erro ao processar corpo da requisição:', e);
+      return NextResponse.json({ error: 'Corpo inválido' }, { status: 400 });
     }
 
-    console.log('Dados recebidos do Webhook:', JSON.stringify(data, null, 2));
-
-    const { token, sale_status_enum, customer, customer_email } = data;
-    
-    // 2. Validação de segurança (Token)
-    if (!token || token !== PERFECTPAY_SECURITY_TOKEN) {
-      console.error('Webhook: Token de segurança inválido ou ausente.');
+    // 2. Validação do Token
+    if (!data.token || data.token !== PERFECTPAY_SECURITY_TOKEN) {
+      console.error('Webhook: Token inválido.');
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    // 3. Extração do Identificador do Site (Slug) de múltiplos lugares possíveis
+    // 3. Extração do Identificador (Slug)
+    // A PerfectPay envia o parâmetro 'src' que passamos na URL do checkout
     const subdomainName = 
       data.src || 
-      (data.tracking_parameters && typeof data.tracking_parameters === 'object' ? data.tracking_parameters.src : null) ||
-      (data.metadata && typeof data.metadata === 'object' ? data.metadata.src : null) ||
-      data.reference;
+      data.reference || 
+      (data.tracking_parameters?.src) ||
+      (data.metadata?.src);
 
     if (!subdomainName) {
-      console.warn('Webhook: Identificador do site (src) não encontrado nos dados.');
-      return NextResponse.json({ message: 'Parâmetro src não encontrado' }, { status: 200 });
+      console.warn('Webhook: Identificador do site (src) não encontrado.');
+      return NextResponse.json({ message: 'Identificador ausente' }, { status: 200 });
     }
 
     const { firestore, auth } = initializeFirebase();
     const siteRef = doc(firestore, 'published_sites', subdomainName);
     
-    // Verifica se o site existe no banco de dados antes de continuar
+    // Verifica se o documento existe
     const siteSnap = await getDoc(siteRef);
     if (!siteSnap.exists()) {
-      console.error(`Webhook: Site [${subdomainName}] não encontrado no Firestore.`);
-      return NextResponse.json({ message: 'Documento não encontrado no Firestore' }, { status: 200 });
+      console.error(`Webhook: Site [${subdomainName}] não existe no Firestore.`);
+      return NextResponse.json({ message: 'Site não encontrado' }, { status: 200 });
     }
 
-    const status = Number(sale_status_enum);
-    const emailCliente = customer?.email || customer_email || siteSnap.data().customerEmail;
+    const saleStatus = Number(data.sale_status_enum);
+    const emailCliente = data.customer?.email || data.customer_email || siteSnap.data().customerEmail;
 
-    console.log(`Webhook: Processando status ${status} para o site ${subdomainName} (Email: ${emailCliente})`);
+    // 4. LÓGICA DE LIBERAÇÃO (2=Aprovado, 7=Faturado, 10=Completo)
+    if ([2, 7, 10].includes(saleStatus)) {
+      console.log(`Webhook: Liberando site ${subdomainName} para o e-mail ${emailCliente}`);
 
-    // 4. LÓGICA DE LIBERAÇÃO (Status 2=Aprovado, 7=Faturado, 10=Completo)
-    if ([2, 7, 10].includes(status)) {
-      console.log(`Webhook: Iniciando liberação...`);
-      
-      let finalUserId = siteSnap.data().userId;
+      // PRIORIDADE 1: Atualizar o documento para liberado
+      await updateDoc(siteRef, {
+        status: 'published',
+        customerEmail: emailCliente || '',
+        publishedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
 
-      // Tenta criar a conta do usuário (se o e-mail for válido)
-      if (emailCliente && typeof emailCliente === 'string' && emailCliente.includes('@')) {
+      console.log(`Webhook: Site [${subdomainName}] LIBERADO no Firestore.`);
+
+      // PRIORIDADE 2: Tentar criar conta (Opcional, não trava a liberação se falhar)
+      if (emailCliente && emailCliente.includes('@')) {
         try {
-          // Criar conta no Auth para o cliente
           const userCredential = await createUserWithEmailAndPassword(auth, emailCliente, 'Eternize123');
-          finalUserId = userCredential.user.uid;
-          console.log(`Webhook: Conta criada para ${emailCliente}`);
+          const newUserId = userCredential.user.uid;
+          
+          // Vincula o UID do novo usuário ao site
+          await updateDoc(siteRef, { userId: newUserId });
+          console.log(`Webhook: Conta criada e vinculada para ${emailCliente}`);
         } catch (authError: any) {
-          // Se o usuário já existe, não tem problema, apenas logamos
           if (authError.code === 'auth/email-already-in-use') {
-            console.log(`Webhook: Usuário já possui conta (${emailCliente})`);
+            console.log(`Webhook: Usuário ${emailCliente} já possui conta.`);
           } else {
-            console.warn(`Webhook: Erro ao tentar criar conta (ignorado para não travar liberação):`, authError.message);
+            console.warn(`Webhook: Erro ao criar conta (ignorado para manter liberação):`, authError.message);
           }
         }
       }
 
-      // Atualiza o documento no Firestore para "publicado"
-      try {
-        await updateDoc(siteRef, {
-          status: 'published',
-          userId: finalUserId || siteSnap.data().userId,
-          customerEmail: emailCliente || siteSnap.data().customerEmail || '',
-          publishedAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-        console.log(`Webhook: Site [${subdomainName}] LIBERADO com sucesso!`);
-      } catch (dbError: any) {
-        console.error('Erro ao atualizar documento no Firestore:', dbError);
-        throw new Error(`Falha no banco de dados: ${dbError.message}`);
-      }
-
-      return NextResponse.json({ message: 'Site liberado com sucesso.' });
+      return NextResponse.json({ message: 'Sucesso: Site liberado.' });
     }
 
-    // 5. LÓGICA DE BLOQUEIO (Status 3=Cancelado, 4=Devolvido, 6=Chargeback, 11=Estornado)
-    if ([3, 4, 6, 11].includes(status)) {
+    // 5. LÓGICA DE BLOQUEIO (Cancelados, Estornados, etc)
+    if ([3, 4, 6, 11].includes(saleStatus)) {
       await updateDoc(siteRef, {
         status: 'pending',
         updatedAt: serverTimestamp()
       });
-      console.log(`Webhook: Site [${subdomainName}] BLOQUEADO por status de pagamento.`);
-      return NextResponse.json({ message: 'Acesso revogado.' });
+      console.log(`Webhook: Site [${subdomainName}] BLOQUEADO (Pagamento cancelado/estornado).`);
+      return NextResponse.json({ message: 'Sucesso: Acesso revogado.' });
     }
 
-    return NextResponse.json({ message: `Evento status ${status} recebido e ignorado.` });
+    return NextResponse.json({ message: `Status ${saleStatus} ignorado.` });
 
   } catch (error: any) {
     console.error('Webhook Fatal Error:', error);
-    // Retornamos o erro no JSON para você conseguir ver o que aconteceu no painel da PerfectPay
     return NextResponse.json({ 
-      error: 'Erro interno ao processar webhook', 
+      error: 'Erro interno no Webhook', 
       details: error.message 
     }, { status: 500 });
   }

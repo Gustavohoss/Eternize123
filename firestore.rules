@@ -5,7 +5,7 @@ service cloud.firestore {
 
     /**
      * ETERNIZE - SECURITY RULES
-     * Permissões granulares para garantir que o Webhook funcione sem Auth.
+     * Atualizado para permitir liberação via Webhook.
      */
 
     function isSignedIn() {
@@ -31,15 +31,15 @@ service cloud.firestore {
     }
 
     match /published_sites/{subdomainName} {
-      // Leitura pública necessária para visualização do presente
+      // Leitura pública necessária para visualização do presente e validação no editor
       allow read, get, list: if true;
       
       // Criação permitida para salvar o rascunho antes do pagamento
       allow create: if true;
       
       // Permite atualização se:
-      // 1. O site estiver pendente (Liberação via Webhook)
-      // 2. Ou se o usuário logado for o dono (Edição via Painel)
+      // 1. O site estiver pendente (Permite a liberação automática via Webhook sem auth)
+      // 2. O usuário for o dono (Edição via Painel)
       allow update: if 
         (resource.data.status == 'pending') || 
         (isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.customerEmail == request.auth.token.email));
