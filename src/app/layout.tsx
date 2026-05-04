@@ -5,6 +5,9 @@ import { FirebaseClientProvider } from '@/firebase';
 export const metadata: Metadata = {
   title: 'Eternize | Presentes Digitais Personalizados',
   description: 'Crie um presente digital com fotos, música e textos personalizados para quem você ama.',
+  icons: {
+    icon: 'https://s3.typebotstorage.com/public/workspaces/cm7vfrzsh0001xixq5auwzryb/typebots/cmor2i57p000007huwd9cnpp5/blocks/rnrd9dgoh72piuhxaqenuibb?v=1777891185088',
+  },
 };
 
 export default function RootLayout({

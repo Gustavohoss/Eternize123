@@ -40,6 +40,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 's3.typebotstorage.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

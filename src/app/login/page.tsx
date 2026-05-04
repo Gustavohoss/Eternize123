@@ -6,8 +6,9 @@ import { useAuth } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Heart, Loader2, Mail, Lock, ArrowLeft } from 'lucide-react';
+import { Loader2, Mail, Lock, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const auth = useAuth();
@@ -47,8 +48,15 @@ export default function LoginPage() {
 
       <div className="w-full max-w-[400px] relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="text-center mb-10">
-          <div className="bg-primary/10 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-primary/20 shadow-2xl shadow-primary/20">
-            <Heart className="w-8 h-8 text-primary fill-primary animate-pulse" />
+          <div className="mb-6">
+            <Image 
+              src="https://s3.typebotstorage.com/public/workspaces/cm7vfrzsh0001xixq5auwzryb/typebots/cmor2i57p000007huwd9cnpp5/blocks/rnrd9dgoh72piuhxaqenuibb?v=1777891185088" 
+              alt="Eternize Logo" 
+              width={180} 
+              height={60} 
+              className="mx-auto h-12 w-auto object-contain"
+              priority
+            />
           </div>
           <h1 className="text-3xl font-black italic uppercase tracking-tighter mb-2">Bem-vindo de volta<span className="text-primary">.</span></h1>
           <p className="text-white/40 text-sm font-medium">Acesse suas memórias eternizadas.</p>
