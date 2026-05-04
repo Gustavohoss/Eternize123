@@ -1,8 +1,7 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Link2, ChevronLeft, ChevronRight, Lock, Info, CheckCircle2, Mail, TestTube2 } from 'lucide-react';
+import { Link2, ChevronLeft, ChevronRight, Lock, Info, CheckCircle2, TestTube2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -11,11 +10,9 @@ interface StepSubdomainConfigProps {
   onBack: () => void;
   onFinish: (subdomain: string, isTest?: boolean) => void;
   initialValue: string;
-  email: string;
-  onEmailChange: (email: string) => void;
 }
 
-export function StepSubdomainConfig({ onBack, onFinish, initialValue, email, onEmailChange }: StepSubdomainConfigProps) {
+export function StepSubdomainConfig({ onBack, onFinish, initialValue }: StepSubdomainConfigProps) {
   const [subdomain, setSubdomain] = useState('');
   const [randomId] = useState(() => Math.random().toString(36).substring(2, 6));
 
@@ -40,16 +37,8 @@ export function StepSubdomainConfig({ onBack, onFinish, initialValue, email, onE
     setSubdomain(value);
   };
 
-  const validateEmail = (email: string) => {
-    return String(email)
-      .toLowerCase()
-      .match(
-        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-      );
-  };
-
   const finalSlug = `${subdomain}-${randomId}`;
-  const isFormValid = subdomain.length >= 2 && validateEmail(email);
+  const isFormValid = subdomain.length >= 2;
 
   return (
     <div className="space-y-8 md:space-y-10 flex flex-col items-center md:items-start w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -58,30 +47,16 @@ export function StepSubdomainConfig({ onBack, onFinish, initialValue, email, onE
           <div className="bg-white/5 p-2 rounded-2xl border border-white/10">
             <Link2 className="w-5 h-5 md:w-6 md:h-6 text-white/80" />
           </div>
-          <h2 className="text-2xl md:text-4xl font-black tracking-tight">Finalizar Presente</h2>
+          <h2 className="text-2xl md:text-4xl font-black tracking-tight">Finalizar Link</h2>
         </div>
         <p className="text-xs md:text-base text-white/40 font-medium max-w-xl">
-          Escolha seu link e informe seu e-mail para receber o acesso após o pagamento.
+          Escolha o endereço exclusivo da sua página. O acesso será enviado para o e-mail que você usar no pagamento.
         </p>
       </div>
 
       <div className="w-full space-y-6">
         <div className="bg-[#0c0c0c] border border-white/5 rounded-3xl p-6 md:p-8 space-y-6">
           <div className="space-y-4">
-            <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1 flex items-center gap-2">
-              <Mail className="w-3 h-3" /> Seu melhor E-mail
-            </label>
-            <Input 
-              type="email"
-              value={email}
-              onChange={(e) => onEmailChange(e.target.value)}
-              placeholder="ex: voce@email.com"
-              className="bg-white/5 border-white/10 h-14 md:h-16 pl-6 rounded-xl text-sm md:text-base font-medium focus:border-primary/50 transition-all shadow-inner"
-            />
-            <p className="text-[9px] text-white/20 italic ml-1">Criaremos uma conta para você com este e-mail.</p>
-          </div>
-
-          <div className="space-y-4 pt-4 border-t border-white/5">
             <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">
               Nome do link desejado
             </label>
@@ -116,7 +91,7 @@ export function StepSubdomainConfig({ onBack, onFinish, initialValue, email, onE
           <div className="space-y-1">
             <p className="text-[11px] font-black uppercase text-primary tracking-widest">Acesso Imediato</p>
             <p className="text-[11px] font-medium text-white/50 leading-relaxed">
-              Após a confirmação do pagamento, sua conta será criada automaticamente com a senha <span className="text-white font-bold">Eternize123</span>. Você poderá alterá-la depois.
+              Após a confirmação do pagamento, sua página será liberada e sua conta será criada automaticamente com o e-mail do checkout.
             </p>
           </div>
         </div>

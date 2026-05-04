@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -76,7 +75,6 @@ export default function CriadorApp() {
   const [musicData, setMusicData] = useState<{id: string, title: string, thumb: string} | undefined>(undefined);
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
-  const [customerEmail, setCustomerEmail] = useState('');
   
   const [sparklesDensity, setSparklesDensity] = useState<number>(100);
   const [sparklesSpeed, setSparklesSpeed] = useState<number>(0.5);
@@ -148,23 +146,17 @@ export default function CriadorApp() {
     try {
       let currentUserId: string | null = null;
 
-      // Tenta criar ou recuperar conta para o usuário
-      if (customerEmail) {
-        try {
-          const userCredential = await createUserWithEmailAndPassword(auth, customerEmail, 'Eternize123');
-          currentUserId = userCredential.user.uid;
-          console.log("Conta criada com sucesso!");
-        } catch (authError: any) {
-          if (authError.code === 'auth/email-already-in-use') {
-            console.log("Usuário já existe. Vinculando site ao e-mail.");
-          } else {
-            console.error("Erro ao criar conta:", authError);
-          }
+      // Se for teste, tentamos usar o usuário atual ou anônimo
+      if (isTest) {
+        let currentUser = auth.currentUser;
+        if (!currentUser) {
+          const credential = await signInAnonymously(auth);
+          currentUser = credential.user;
         }
-      }
-
-      // Se ainda não temos um ID de usuário, usamos o anônimo ou atual
-      if (!currentUserId) {
+        currentUserId = currentUser?.uid || null;
+      } else {
+        // Fluxo de pagamento: usamos um ID temporário ou anônimo.
+        // O Webhook da PerfectPay irá vincular o e-mail real e criar a conta definitiva.
         let currentUser = auth.currentUser;
         if (!currentUser) {
           const credential = await signInAnonymously(auth);
@@ -195,7 +187,6 @@ export default function CriadorApp() {
       const docData = {
         id: finalSlug,
         userId: currentUserId,
-        customerEmail, 
         name: pageTitle || 'Meu Presente',
         status: isTest ? 'published' : 'pending',
         subdomainName: finalSlug,
@@ -211,7 +202,7 @@ export default function CriadorApp() {
         window.location.href = `/site/${finalSlug}`;
       } else {
         // Redireciona para o checkout com o parâmetro 'src' que a PerfectPay usará no Webhook
-        const checkoutUrlWithMetadata = `${PERFECTPAY_CHECKOUT_URL}?src=${finalSlug}&email=${customerEmail}`;
+        const checkoutUrlWithMetadata = `${PERFECTPAY_CHECKOUT_URL}?src=${finalSlug}`;
         window.location.href = checkoutUrlWithMetadata;
       }
 
@@ -315,7 +306,7 @@ export default function CriadorApp() {
               {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: setLocationQuery, showSuggestions, onShowSuggestionsChange: setShowSuggestions, filteredCities, selectedCountStyle, onCountStyleChange: setSelectedCountStyle, dateFont, onDateFontChange: setDateFont, dateIsBold, onDateIsBoldChange: setDateIsBold, dateHasNeon, onDateHasNeonChange: setDateHasNeon, dateNeonStrength, onDateNeonStrengthChange: setDateNeonStrength, dateColor, onDateColorChange: (c) => { setDateColor(c); setUserHasManuallyChangedDateColor(true); }, dateBoxBgColor, onDateBoxBgColorChange: setDateBoxBgColor, dateBoxBorderColor, onDateBoxBorderColorChange: setDateBoxBorderColor, onBack: handleBack, onNext: handleNext}} />}
               {step === 'plans' && <StepPlans onBack={handleBack} onFinish={handleNext} />}
               {step === 'order-bump' && <StepOrderBump onBack={handleBack} onFinish={handleNext} date={date} />}
-              {step === 'subdomain-config' && <StepSubdomainConfig onBack={handleBack} onFinish={handleFinalize} initialValue={pageTitle} email={customerEmail} onEmailChange={setCustomerEmail} />}
+              {step === 'subdomain-config' && <StepSubdomainConfig onBack={handleBack} onFinish={handleFinalize} initialValue={pageTitle} />}
 
               <div className="lg:hidden flex flex-col items-center mt-12 w-full gap-4">
                  <Dialog>
