@@ -26,8 +26,9 @@ import { StepPlans } from '@/components/eternize/creator-steps/step-plans';
 import { StepOrderBump } from '@/components/eternize/creator-steps/step-order-bump';
 import { StepSubdomainConfig } from '@/components/eternize/creator-steps/step-subdomain-config';
 
-// LINK DO SEU PRODUTO NA PERFECTPAY
+// LINKS DO CHECKOUT NA PERFECTPAY
 const PERFECTPAY_CHECKOUT_URL = "https://go.perfectpay.com.br/PPU38CQBEQN";
+const PERFECTPAY_ORDERBUMP_URL = "https://go.perfectpay.com.br/PPU38CQBF2L";
 
 const compressImage = (base64Str: string): Promise<string> => {
   return new Promise((resolve) => {
@@ -192,7 +193,9 @@ export default function CriadorApp() {
       if (isTest) {
         window.location.href = `/site/${finalSlug}`;
       } else {
-        const checkoutUrlWithMetadata = `${PERFECTPAY_CHECKOUT_URL}?src=${finalSlug}`;
+        // Redireciona para o link correspondente se o order bump está ativo ou não
+        const baseUrl = isPackEnabled ? PERFECTPAY_ORDERBUMP_URL : PERFECTPAY_CHECKOUT_URL;
+        const checkoutUrlWithMetadata = `${baseUrl}?src=${finalSlug}`;
         window.location.href = checkoutUrlWithMetadata;
       }
 
