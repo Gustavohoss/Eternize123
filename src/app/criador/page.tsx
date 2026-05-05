@@ -88,7 +88,7 @@ export default function CriadorApp() {
   const [cardColor, setCardColor] = useState<string>('#ffffff');
   const [showCard, setShowCard] = useState<boolean>(true);
   const [titlePosition, setTitlePosition] = useState<'top' | 'bottom'>('bottom');
-  const [titleColor, setTitleColor] = useState<string>('#111111');
+  const [titleColor, setTitleColor] =string>('#111111');
   const [titleFont, setTitleFont] = useState<string>('dancing-script');
   const [titleIsBold, setTitleIsBold] = useState<boolean>(false);
   const [titleHasNeon, setTitleHasNeon] = useState<boolean>(false);
@@ -114,7 +114,7 @@ export default function CriadorApp() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   
   // Pack de Módulos (Order Bump)
-  const [isPackEnabled, setIsPackEnabled] = useState<boolean>(true);
+  const [isPackEnabled, setIsPackEnabled] = useState<boolean>(false);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -184,6 +184,7 @@ export default function CriadorApp() {
         subdomainName: finalSlug,
         pageUrl: `https://eternizee.shop/site/${finalSlug}`,
         contentJson: jsonContent,
+        isPackEnabled: isPackEnabled, // CAMPO DE TRAVA NO ROOT DO DOCUMENTO
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
@@ -334,7 +335,7 @@ export default function CriadorApp() {
                    <DialogTitle className="sr-only">Prévia do Presente</DialogTitle>
                    <DialogDescription className="sr-only">Visualização em tela cheia do seu presente personalizado.</DialogDescription>
                    <div className="flex-1 overflow-hidden relative flex flex-col">
-                     <div className="absolute top-6 right-6 z-[250]"><DialogClose className="p-2.5 bg-black/60 hover:bg-black/80 rounded-full text-white transition-all border border-white/20 shadow-2xl backdrop-blur-md"><X className="w-5 h-5" /></X></DialogClose></div>
+                     <div className="absolute top-6 right-6 z-[250]"><DialogClose className="p-2.5 bg-black/60 hover:bg-black/80 rounded-full text-white transition-all border border-white/20 shadow-2xl backdrop-blur-md"><X className="w-5 h-5" /></DialogClose></div>
                      {mounted && <DeviceMockup {...previewProps} isFullscreen />}
                    </div>
                  </DialogContent>

@@ -77,7 +77,8 @@ export default function EditSitePage() {
   const [musicData, setMusicData] = useState<{id: string, title: string, thumb: string} | undefined>(undefined);
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
-  const [isPackEnabled, setIsPackEnabled] = useState<boolean>(true);
+  const [isPackEnabled, setIsPackEnabled] = useState<boolean>(false);
+  const [hasPackPurchased, setHasPackPurchased] = useState<boolean>(false);
   
   const [sparklesDensity, setSparklesDensity] = useState<number>(100);
   const [sparklesSpeed, setSparklesSpeed] = useState<number>(0.5);
@@ -133,7 +134,13 @@ export default function EditSitePage() {
         setMessage(config.message || '');
         setMusicData(config.musicData);
         setUploadedPhotos(config.uploadedPhotos || []);
-        setIsPackEnabled(config.isPackEnabled !== undefined ? config.isPackEnabled : true);
+        
+        // Verifica se o pack foi comprado (campo isPackEnabled na raiz do documento)
+        const packPurchased = siteData.isPackEnabled === true;
+        setHasPackPurchased(packPurchased);
+        
+        // Estado atual do toggle (pode ser false mesmo se comprou, se o usuário desligar)
+        setIsPackEnabled(config.isPackEnabled !== undefined ? config.isPackEnabled : packPurchased);
         
         setSparklesDensity(config.sparklesDensity || 100);
         setSparklesSpeed(config.sparklesSpeed || 0.5);
@@ -176,11 +183,21 @@ export default function EditSitePage() {
 
   const stepSequence = useMemo((): Step[] => {
     const base: Step[] = ['customize-background'];
+    let steps: Step[] = [];
+
     if (selectedTheme === 'netflix' || selectedTheme === 'spotify' || selectedTheme === 'instagram') {
-      return [...base, 'data-location', 'page-title', 'message', 'photos', 'music', 'modules'];
+      steps = [...base, 'data-location', 'page-title', 'message', 'photos', 'music'];
+    } else {
+      steps = [...base, 'photos', 'page-title', 'message', 'data-location', 'music'];
     }
-    return [...base, 'photos', 'page-title', 'message', 'data-location', 'music', 'modules'];
-  }, [selectedTheme]);
+
+    // Apenas adiciona o passo de módulos se o usuário tiver comprado o Pack
+    if (hasPackPurchased) {
+      steps.push('modules');
+    }
+
+    return steps;
+  }, [selectedTheme, hasPackPurchased]);
 
   const currentStepIndex = stepSequence.indexOf(step);
 
