@@ -44,7 +44,12 @@ export default function MyPages() {
     );
   }, [firestore, user?.uid]);
 
-  const { data: sites, isLoading, error } = useCollection(mySitesQuery as any);
+  const { data: allSites, isLoading, error } = useCollection(mySitesQuery as any);
+
+  // Filtramos apenas os sites que estão PUBLICADOS para não mostrar rascunhos pendentes de pagamento
+  const sites = React.useMemo(() => {
+    return allSites?.filter((site: any) => site.status === 'published') || [];
+  }, [allSites]);
 
   const handleLogout = () => {
     signOut(auth);
