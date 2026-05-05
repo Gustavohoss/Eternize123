@@ -1,18 +1,12 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import dynamic from 'next/dynamic';
+import React, { useState, useEffect } from 'react';
 import { X, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import 'leaflet/dist/leaflet.css';
-
-// Import Leaflet components dynamically to avoid SSR issues
-const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
-const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
-const Polyline = dynamic(() => import('react-leaflet').then(mod => mod.Polyline), { ssr: false });
-const useMap = dynamic(() => import('react-leaflet').then(mod => mod.useMap), { ssr: false });
+import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
+import L from 'leaflet';
 
 export interface JourneyPoint {
   id: string;
@@ -64,7 +58,8 @@ const DEFAULT_POINTS: JourneyPoint[] = [
 
 // Componente para controlar o vôo do mapa até o ponto selecionado
 function MapController({ center }: { center: [number, number] }) {
-  const map = (useMap as any)();
+  const map = useMap();
+  
   useEffect(() => {
     if (center && map) {
       map.flyTo(center, 12, {
@@ -72,26 +67,23 @@ function MapController({ center }: { center: [number, number] }) {
       });
     }
   }, [center, map]);
+  
   return null;
 }
 
 export function JourneyModulePreview({ points }: JourneyModulePreviewProps) {
-  const [L, setL] = useState<any>(null);
   const [selectedPoint, setSelectedPoint] = useState<JourneyPoint | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    import('leaflet').then((leaflet) => {
-      setL(leaflet.default);
-    });
+    setIsClient(true);
   }, []);
 
   const displayPoints = points && points.length > 0 ? points : DEFAULT_POINTS;
-
-  // Se o usuário adicionou um ponto agora, vamos focar nele
   const lastPoint = displayPoints[displayPoints.length - 1];
   const centerCoords: [number, number] = lastPoint ? [lastPoint.lat, lastPoint.lng] : [-15.78, -47.92];
 
-  if (!L) return (
+  if (!isClient) return (
     <div className="w-full h-full bg-[#0d1117] flex items-center justify-center">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div>
     </div>

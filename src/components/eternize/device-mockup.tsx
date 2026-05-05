@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { Lock, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { intervalToDuration } from 'date-fns';
@@ -13,8 +14,14 @@ import { ThemeId } from '@/app/criador/constants';
 import { MemoriesModulePreview } from './memories-module-preview';
 import { AchievementsModulePreview } from './achievements-module-preview';
 import { CuriosidadesModulePreview } from './curiosidades-module-preview';
-import { JourneyModulePreview, type JourneyPoint } from './journey-module-preview';
 import { Button } from '@/components/ui/button';
+import { type JourneyPoint } from './journey-module-preview';
+
+// Importação dinâmica para evitar erros de SSR com Leaflet
+const JourneyModulePreview = dynamic(
+  () => import('./journey-module-preview').then(mod => mod.JourneyModulePreview),
+  { ssr: false, loading: () => <div className="flex-1 bg-black flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div></div> }
+);
 
 // Theme-specific view components
 import { ClassicView } from './themes/classic-view';
