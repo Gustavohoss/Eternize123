@@ -66,7 +66,7 @@ export function StepPageTitle({
           <Input 
             value={pageTitle} 
             onChange={(e) => onPageTitleChange(e.target.value)} 
-            placeholder="GUSTAVO E LUISA" 
+            placeholder="NOSSA HISTÓRIA" 
             className="bg-[#1a1a1a] border-white/10 h-14 md:h-16 rounded-xl text-sm md:text-base font-medium focus:border-primary/50 transition-all shadow-inner" 
           />
           
@@ -89,7 +89,14 @@ export function StepPageTitle({
             </div>
             <div className="space-y-4 pt-4 border-t border-white/5"><Label className="text-[11px] font-bold text-white/50 uppercase">Cor do Texto</Label><div className="flex items-center gap-4">
                 <Popover><PopoverTrigger asChild><button className="flex items-center gap-3 bg-white/5 border border-white/10 p-2 rounded-xl hover:bg-white/10 transition-all group"><div className="w-10 h-10 rounded-lg shadow-inner border border-white/10" style={{ backgroundColor: titleColor }} /><div className="text-left pr-4"><p className="text-[10px] font-black uppercase text-white/30 group-hover:text-primary transition-colors">Personalizar</p><p className="text-xs font-mono font-bold">{titleColor}</p></div></button></PopoverTrigger><PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" align="start"><ColorPicker selectedBgColor={titleColor} onChange={onTitleColorChange} /></PopoverContent></Popover>
-                <div className="flex flex-wrap gap-1.5">{['#ffffff', '#e11d48', '#ff4da6', '#7c3aed', '#2563eb', '#111111'].map((color) => (<button key={color} onClick={() => onTitleColorChange(color)} className={cn("w-6 h-6 rounded-full border transition-transform active:scale-90", titleColor === color ? "border-white scale-110" : "border-white/10")} style={{ backgroundColor: color }} />))}</div>
+                <div className="flex flex-wrap gap-1.5">{['#ffffff', '#e11d48', '#ff4da6', '#7c3aed', '#2563eb', '#111111'].map((color) => (
+                    <button 
+                      key={color} 
+                      onClick={() => onTitleColorChange(color)} 
+                      className={cn("w-6 h-6 rounded-full border transition-transform active:scale-90", titleColor === color ? "border-white scale-110" : "border-white/10")} 
+                      style={{ backgroundColor: color }} 
+                    />
+                  ))}</div>
             </div></div>
           </div>
         ) : (

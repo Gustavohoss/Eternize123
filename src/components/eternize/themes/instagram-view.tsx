@@ -68,7 +68,7 @@ export function InstagramView({
               </div>
               <div className="flex flex-col -space-y-0.5">
                 <div className="flex items-center gap-1">
-                  <span className="font-bold text-sm tracking-tight">{pageTitle || 'Usuario'}</span>
+                  <span className="font-bold text-sm tracking-tight">{pageTitle || 'Nossa História'}</span>
                   <div className="bg-[#0095F6] rounded-full p-0.5"><CheckCircle2 className="w-2.5 h-2.5 text-white" /></div>
                 </div>
                 <span className="text-[10px] text-neutral-400 font-medium">{date ? format(date, 'dd/MM/yyyy') : '01/05/2026'}</span>
@@ -96,7 +96,7 @@ export function InstagramView({
           <div className="space-y-1.5">
             <p className="text-sm font-bold text-white">{(totalDays + (likedPosts[selectedPostIndex] ? 1 : 0)).toLocaleString('pt-BR')} curtidas</p>
             <div className="text-sm">
-              <span className="font-bold mr-2">{pageTitle || 'Usuario'}</span>
+              <span className="font-bold mr-2">{pageTitle || 'Nossa História'}</span>
               <span className="text-neutral-200">Juntos desde {date ? format(date, 'dd/MM/yyyy') : '01/05/2026'} ❤️</span>
             </div>
           </div>
@@ -111,7 +111,7 @@ export function InstagramView({
         <div className="flex items-center gap-3">
           <ChevronLeft className="w-6 h-6" />
           <div className="flex items-center gap-1">
-            <span className="font-bold text-lg tracking-tight truncate max-w-[150px]">{pageTitle || 'Gustavo E Luisa'}</span>
+            <span className="font-bold text-lg tracking-tight truncate max-w-[150px]">{pageTitle || 'Nossa História'}</span>
             <div className="bg-[#0095F6] rounded-full p-0.5"><CheckCircle2 className="w-3 h-3 text-white" /></div>
           </div>
         </div>
@@ -136,8 +136,8 @@ export function InstagramView({
           </div>
           
           <div className="space-y-0.5 mb-6">
-            <p className="font-bold text-sm">{pageTitle || 'Gustavo E Luisa'}</p>
-            <div className="text-sm text-neutral-200 leading-tight" dangerouslySetInnerHTML={{ __html: message || 'Te amo meu amor' }} />
+            <p className="font-bold text-sm">{pageTitle || 'Nossa História'}</p>
+            <div className="text-sm text-neutral-200 leading-tight" dangerouslySetInnerHTML={{ __html: message || 'Nossa jornada inesquecível...' }} />
             <p className="text-sm text-neutral-500 pt-1"> Juntos desde {date ? format(date, 'dd/MM/yyyy') : '07/04/2017'}</p>
           </div>
 
