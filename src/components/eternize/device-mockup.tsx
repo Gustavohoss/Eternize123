@@ -275,6 +275,14 @@ export function DeviceMockup({
   }, []);
 
   const handleStartNetflixExperience = useCallback(() => {
+    // SÓ ATIVA SE O TEMA FOR NETFLIX
+    if (selectedTheme !== 'netflix') {
+      setShowStories(true);
+      setCurrentStoryIndex(0);
+      setStoryProgress(0);
+      return;
+    }
+
     setIsIntroActive(true);
     setIntroPhase('closing');
     
@@ -291,7 +299,7 @@ export function DeviceMockup({
       setCurrentStoryIndex(0);
       setStoryProgress(0);
     }, 4500);
-  }, []);
+  }, [selectedTheme]);
 
   return (
     <div className={cn("w-full transition-all duration-500 flex flex-col relative", isFullscreen ? "h-full" : "max-w-[400px] mx-auto")}>
@@ -299,10 +307,10 @@ export function DeviceMockup({
         <MusicPlayer musicData={musicData} isAutoPlay={isAudioPlaying} hideUI={selectedTheme !== 'classic'} onStateChange={setIsAudioPlaying} />
       )}
 
-      {/* Intro Animation Layer (Eternize Effect) */}
-      {isIntroActive && (
+      {/* Intro Animation Layer (Eternize Effect) - SÓ RENDERIZA SE FOR TEMA NETFLIX */}
+      {selectedTheme === 'netflix' && isIntroActive && (
         <div className="absolute inset-0 z-[1000] bg-black flex items-center justify-center overflow-hidden">
-           <div className={cn("curtain-container", introPhase !== 'idle' && "curtain-active")}>
+           <div className={cn("curtain-container", (introPhase === 'closing' || introPhase === 'logo') && "curtain-active")}>
              {curtainBars.map((bar, i) => (
                <div 
                  key={i} 
