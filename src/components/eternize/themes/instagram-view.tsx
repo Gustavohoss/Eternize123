@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Bell, ChevronLeft, UserSquare2, CheckCircle2, UserPlus, Grid as GridIcon, MoreHorizontal, Heart, MessageCircle, Send, Bookmark, Plus } from 'lucide-react';
+import { Bell, ChevronLeft, UserSquare2, CheckCircle2, UserPlus, Grid as GridIcon, MoreHorizontal, Heart, MessageCircle, Send, Bookmark, Plus, Trophy, Star, MapPin, RotateCcw } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -29,6 +29,8 @@ interface InstagramViewProps {
   onSavePost: (index: number) => void;
   isAudioPlaying: boolean;
   onAudioToggle: (playing: boolean) => void;
+  isPackEnabled?: boolean;
+  onModuleClick?: (id: string) => void;
 }
 
 export function InstagramView({
@@ -53,9 +55,19 @@ export function InstagramView({
   savedPosts,
   onSavePost,
   isAudioPlaying,
-  onAudioToggle
+  onAudioToggle,
+  isPackEnabled,
+  onModuleClick
 }: InstagramViewProps) {
   
+  const modules = [
+    { id: 'memorias', title: 'Memórias', icon: Heart, color: 'text-red-500', bg: 'bg-red-500/10' },
+    { id: 'conquistas', title: 'Conquistas', icon: Trophy, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
+    { id: 'curiosidades', title: 'Curiosidades', icon: Star, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { id: 'jornada', title: 'Jornada', icon: MapPin, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { id: 'surpresa', title: 'Surpresa', icon: RotateCcw, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+  ];
+
   if (showPostDetail) {
     return (
       <div className="absolute inset-0 z-[500] bg-black flex flex-col animate-in fade-in duration-300 no-scrollbar overflow-y-auto">
@@ -156,17 +168,34 @@ export function InstagramView({
                 <span className="text-[11px] text-white font-medium">Novo</span>
              </div>
              
-             {/* Dynamic Highlights based on photos (Optional visual enhancement) */}
-             {uploadedPhotos.slice(1, 4).map((photo, i) => (
-                <div key={i} className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer active:scale-95 transition-transform">
-                   <div className="w-14 h-14 rounded-full border border-neutral-800 overflow-hidden relative p-[2px] bg-black">
-                      <div className="w-full h-full rounded-full overflow-hidden relative">
-                         <Image src={photo} fill className="object-cover" alt="" />
-                      </div>
-                   </div>
-                   <span className="text-[11px] text-white font-medium truncate max-w-[56px]">Memória {i+1}</span>
-                </div>
-             ))}
+             {isPackEnabled ? (
+               modules.map((mod) => (
+                 <div 
+                   key={mod.id} 
+                   onClick={() => onModuleClick?.(mod.id)}
+                   className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer active:scale-95 transition-transform group"
+                 >
+                    <div className={cn(
+                      "w-14 h-14 rounded-full border border-neutral-800 flex items-center justify-center transition-all",
+                      mod.bg
+                    )}>
+                       <mod.icon className={cn("w-6 h-6", mod.color)} />
+                    </div>
+                    <span className="text-[11px] text-white font-medium truncate max-w-[64px]">{mod.title}</span>
+                 </div>
+               ))
+             ) : (
+               uploadedPhotos.slice(1, 4).map((photo, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer active:scale-95 transition-transform">
+                     <div className="w-14 h-14 rounded-full border border-neutral-800 overflow-hidden relative p-[2px] bg-black">
+                        <div className="w-full h-full rounded-full overflow-hidden relative">
+                           <Image src={photo} fill className="object-cover" alt="" />
+                        </div>
+                     </div>
+                     <span className="text-[11px] text-white font-medium truncate max-w-[56px]">Memória {i+1}</span>
+                  </div>
+               ))
+             )}
           </div>
         </section>
 
