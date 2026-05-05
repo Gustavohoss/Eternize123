@@ -45,6 +45,11 @@ import { SparklesCore } from '@/components/ui/sparkles';
 import { SmokeBackground } from '@/components/ui/spooky-smoke-animation';
 import { FallingPattern } from '@/components/ui/falling-pattern';
 import { ThemeId } from '@/app/criador/constants';
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
+import { MemoriesModulePreview } from './memories-module-preview';
+import { AchievementsModulePreview } from './achievements-module-preview';
+import { CuriosidadesModulePreview } from './curiosidades-module-preview';
+import { Button } from '@/components/ui/button';
 
 // Import Swiper styles
 import 'swiper/css';
@@ -160,6 +165,7 @@ export function DeviceMockup({
 }: DeviceMockupProps) {
   const [activeHeroIndex, setActiveHeroIndex] = useState(0);
   const [timeDiff, setTimeDiff] = useState<any>(null);
+  const [previewModuleId, setPreviewModuleId] = useState<string | null>(null);
 
   // States for Special Experiences
   const [isIntroActive, setIsIntroActive] = useState(false);
@@ -387,6 +393,15 @@ export function DeviceMockup({
     ) : null
   );
 
+  const renderModuleContent = () => {
+    switch (previewModuleId) {
+      case 'memorias': return <MemoriesModulePreview />;
+      case 'conquistas': return <AchievementsModulePreview />;
+      case 'curiosidades': return <CuriosidadesModulePreview date={date} />;
+      default: return null;
+    }
+  };
+
   return (
     <div className={cn("w-full transition-all duration-500 flex flex-col relative", isFullscreen ? "h-full" : "max-w-[400px] mx-auto")}>
       {musicData && (
@@ -592,7 +607,9 @@ export function DeviceMockup({
                           box-shadow: 3px 3px 0px #000;
                           overflow: hidden;
                           transition: transform 0.2s ease;
+                          cursor: pointer;
                         }
+                        .organic-card:active { transform: scale(0.95); }
                         .organic-card:nth-child(1), .organic-card:nth-child(4), .organic-card:nth-child(5) { transform: rotate(-1.5deg); }
                         .organic-card:nth-child(2), .organic-card:nth-child(3), .organic-card:nth-child(6) { transform: rotate(1.5deg); }
                         .organic-icon-area {
@@ -627,15 +644,15 @@ export function DeviceMockup({
                       </div>
                       
                       <div className="organic-grid">
-                        <div className="organic-card">
+                        <div className="organic-card" onClick={() => setPreviewModuleId('memorias')}>
                           <div className="organic-icon-area pink-bg">♡</div>
                           <div className="organic-label">Memórias</div>
                         </div>
-                        <div className="organic-card">
+                        <div className="organic-card" onClick={() => setPreviewModuleId('conquistas')}>
                           <div className="organic-icon-area yellow-bg">🏆</div>
                           <div className="organic-label">Conquistas</div>
                         </div>
-                        <div className="organic-card">
+                        <div className="organic-card" onClick={() => setPreviewModuleId('curiosidades')}>
                           <div className="organic-icon-area purple-bg">✨</div>
                           <div className="organic-label">Curiosidades</div>
                         </div>
@@ -662,6 +679,27 @@ export function DeviceMockup({
           </div>
         </div>
       </div>
+
+      <Dialog open={!!previewModuleId} onOpenChange={(open) => !open && setPreviewModuleId(null)}>
+        <DialogContent className="max-w-full w-full h-full sm:max-w-[450px] sm:h-[92vh] p-0 bg-black border-none overflow-hidden flex flex-col z-[700] [&>button]:hidden rounded-none sm:rounded-[2.5rem]">
+          <DialogTitle className="sr-only">Módulo Interativo</DialogTitle>
+          <DialogDescription className="sr-only">Visualize o conteúdo interativo deste presente.</DialogDescription>
+          
+          <div className="relative h-full flex flex-col">
+             <div className="absolute top-6 right-6 z-[750]">
+                <DialogClose asChild>
+                  <Button className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/10 hover:bg-black/80 flex items-center justify-center text-white shadow-2xl transition-all active:scale-95">
+                    <X className="w-5 h-5" />
+                  </Button>
+                </DialogClose>
+             </div>
+
+             <div className="flex-1 overflow-y-auto no-scrollbar custom-scroll">
+                {renderModuleContent()}
+             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
