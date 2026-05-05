@@ -26,9 +26,9 @@ import { StepPlans } from '@/components/eternize/creator-steps/step-plans';
 import { StepOrderBump } from '@/components/eternize/creator-steps/step-order-bump';
 import { StepSubdomainConfig } from '@/components/eternize/creator-steps/step-subdomain-config';
 
-// LINKS DO CHECKOUT NA PERFECTPAY
-const PERFECTPAY_CHECKOUT_URL = "https://go.perfectpay.com.br/PPU38CQBEQN";
-const PERFECTPAY_ORDERBUMP_URL = "https://go.perfectpay.com.br/PPU38CQBF2L";
+// LINKS DO CHECKOUT NA PERFECTPAY (DOMÍNIO PERSONALIZADO / TRANSPARENTE)
+const PERFECTPAY_CHECKOUT_URL = "https://go.eternizeee.shop/PPU38CQBEQN";
+const PERFECTPAY_ORDERBUMP_URL = "https://go.eternizeee.shop/PPU38CQBF2L";
 
 const compressImage = (base64Str: string): Promise<string> => {
   return new Promise((resolve) => {
@@ -88,7 +88,7 @@ export default function CriadorApp() {
   const [cardColor, setCardColor] = useState<string>('#ffffff');
   const [showCard, setShowCard] = useState<boolean>(true);
   const [titlePosition, setTitlePosition] = useState<'top' | 'bottom'>('bottom');
-  const [titleColor, setTitleColor] =string>('#111111');
+  const [titleColor, setTitleColor] = useState<string>('#111111');
   const [titleFont, setTitleFont] = useState<string>('dancing-script');
   const [titleIsBold, setTitleIsBold] = useState<boolean>(false);
   const [titleHasNeon, setTitleHasNeon] = useState<boolean>(false);
@@ -184,7 +184,7 @@ export default function CriadorApp() {
         subdomainName: finalSlug,
         pageUrl: `https://eternizee.shop/site/${finalSlug}`,
         contentJson: jsonContent,
-        isPackEnabled: isPackEnabled, // CAMPO DE TRAVA NO ROOT DO DOCUMENTO
+        isPackEnabled: isPackEnabled,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
@@ -194,7 +194,6 @@ export default function CriadorApp() {
       if (isTest) {
         window.location.href = `/site/${finalSlug}`;
       } else {
-        // Redireciona para o link correspondente se o order bump está ativo ou não
         const baseUrl = isPackEnabled ? PERFECTPAY_ORDERBUMP_URL : PERFECTPAY_CHECKOUT_URL;
         const checkoutUrlWithMetadata = `${baseUrl}?src=${finalSlug}`;
         window.location.href = checkoutUrlWithMetadata;
