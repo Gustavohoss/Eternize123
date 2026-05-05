@@ -32,10 +32,15 @@ export function StoriesView({
   onNext,
   onPauseToggle
 }: StoriesViewProps) {
+  // Garantir que temos fotos e que a foto atual não é uma string vazia antes de renderizar o Image do Next.js
   if (photos.length === 0) return null;
+
+  const currentPhoto = photos[currentIndex];
+  const profilePhoto = photos[0];
 
   return (
     <div className="absolute inset-0 z-[600] bg-black flex flex-col animate-in fade-in duration-500 overflow-hidden">
+      {/* Barras de progresso no topo */}
       <div className="absolute top-4 left-0 right-0 z-[610] px-3 flex gap-1.5 pointer-events-none">
         {photos.map((_, i) => (
           <div key={i} className="flex-1 h-0.5 bg-white/20 rounded-full overflow-hidden">
@@ -46,10 +51,18 @@ export function StoriesView({
           </div>
         ))}
       </div>
+
+      {/* Cabeçalho do Story */}
       <div className="absolute top-8 left-0 right-0 z-[620] px-4 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full border border-white/20 overflow-hidden relative bg-neutral-900">
-            <Image src={photos[0]} fill className="object-cover" alt="Profile" />
+            {profilePhoto && profilePhoto.length > 0 ? (
+              <Image src={profilePhoto} fill className="object-cover" alt="Profile" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                <Heart className="w-3 h-3 text-primary" />
+              </div>
+            )}
           </div>
           <div className="flex flex-col">
             <span className="text-white text-xs font-bold leading-tight">{pageTitle || 'Eternize'}</span>
@@ -60,6 +73,8 @@ export function StoriesView({
           <X className="w-6 h-6" />
         </button>
       </div>
+
+      {/* Áreas de toque para navegação */}
       <div className="absolute inset-0 z-[605] flex">
         <div className="flex-1 h-full cursor-pointer" onClick={onPrev} />
         <div 
@@ -71,13 +86,28 @@ export function StoriesView({
         />
         <div className="flex-1 h-full cursor-pointer" onClick={onNext} />
       </div>
+
+      {/* Visualização da Imagem */}
       <div className="flex-1 relative flex flex-col items-center justify-center bg-black">
         <div className={cn("absolute inset-0 transition-all duration-[800ms] ease-in-out", isFading ? "opacity-0 scale-95" : "opacity-100 scale-100")}>
-          <Image src={photos[currentIndex]} fill className="object-cover" alt={`Story ${currentIndex}`} priority />
+          {currentPhoto && currentPhoto.length > 0 ? (
+            <Image src={currentPhoto} fill className="object-cover" alt={`Story ${currentIndex}`} priority />
+          ) : (
+            <div className="w-full h-full bg-neutral-900 flex flex-col items-center justify-center gap-2">
+              <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center">
+                 <Heart className="w-5 h-5 text-white/20" />
+              </div>
+              <span className="text-[10px] font-black uppercase text-white/20 tracking-widest">Carregando memória...</span>
+            </div>
+          )}
         </div>
+        
+        {/* Gradients para leitura */}
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/40 to-transparent pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
       </div>
+
+      {/* Rodapé do Story */}
       <div className="absolute bottom-6 left-0 right-0 z-[620] px-4 flex items-center gap-3">
         <div className="flex-1 bg-transparent border border-white/30 rounded-full h-10 px-4 flex items-center">
           <span className="text-white/60 text-xs">Enviar mensagem</span>
