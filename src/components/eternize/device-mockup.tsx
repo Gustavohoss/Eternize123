@@ -9,7 +9,6 @@ import { SparklesCore } from '@/components/ui/sparkles';
 import { SmokeBackground } from '@/components/ui/spooky-smoke-animation';
 import { FallingPattern } from '@/components/ui/falling-pattern';
 import { ThemeId } from '@/app/criador/constants';
-import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { MemoriesModulePreview } from './memories-module-preview';
 import { AchievementsModulePreview } from './achievements-module-preview';
 import { CuriosidadesModulePreview } from './curiosidades-module-preview';
@@ -274,7 +273,7 @@ export function DeviceMockup({
         <div className="bg-white border-x border-t border-neutral-200 p-2.5 flex items-center justify-center shrink-0 rounded-t-2xl">
           <div className="bg-neutral-100 rounded-full h-8 w-full flex items-center px-4 gap-2 border border-neutral-200 max-w-[400px]">
             <Lock className="w-3 h-3 text-neutral-400" />
-            <div className="text-[11px] text-neutral-600 font-medium truncate">eternizee.shop/{slugifiedTitle || 'seu-nome'}</div>
+            <div className="text-[11px] text-neutral-600 font-medium truncate">eternizee.shop/site/{slugifiedTitle || 'seu-nome'}</div>
           </div>
         </div>
       )}
@@ -311,24 +310,29 @@ export function DeviceMockup({
               )}
             </div>
           </div>
+
+          {/* Module Overlay (Interno ao Mockup) */}
+          {previewModuleId && (
+            <div className="absolute inset-0 z-[500] bg-black flex flex-col animate-in slide-in-from-bottom-4 duration-500 overflow-hidden">
+               <div className="relative h-full flex flex-col">
+                  <div className="absolute top-6 right-6 z-[550]">
+                    <Button 
+                      onClick={() => setPreviewModuleId(null)}
+                      className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/10 hover:bg-black/80 flex items-center justify-center text-white shadow-2xl transition-all active:scale-95"
+                    >
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto no-scrollbar custom-scroll">
+                     {previewModuleId === 'memorias' && <MemoriesModulePreview memories={memories} />}
+                     {previewModuleId === 'conquistas' && <AchievementsModulePreview />}
+                     {previewModuleId === 'curiosidades' && <CuriosidadesModulePreview date={date} />}
+                  </div>
+               </div>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Module Dialog */}
-      <Dialog open={!!previewModuleId} onOpenChange={(open) => !open && setPreviewModuleId(null)}>
-        <DialogContent className="max-w-full w-full h-full sm:max-w-[450px] sm:h-[92vh] p-0 bg-black border-none overflow-hidden flex flex-col z-[700] [&>button]:hidden rounded-none sm:rounded-[2.5rem]">
-          <DialogTitle className="sr-only">Módulo Interativo</DialogTitle>
-          <DialogDescription className="sr-only">Visualização do conteúdo interativo.</DialogDescription>
-          <div className="relative h-full flex flex-col">
-             <div className="absolute top-6 right-6 z-[750]"><DialogClose asChild><Button className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/10 hover:bg-black/80 flex items-center justify-center text-white shadow-2xl transition-all active:scale-95"><X className="w-5 h-5" /></Button></DialogClose></div>
-             <div className="flex-1 overflow-y-auto no-scrollbar custom-scroll">
-                {previewModuleId === 'memorias' && <MemoriesModulePreview memories={memories} />}
-                {previewModuleId === 'conquistas' && <AchievementsModulePreview />}
-                {previewModuleId === 'curiosidades' && <CuriosidadesModulePreview date={date} />}
-             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
