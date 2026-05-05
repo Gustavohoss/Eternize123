@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Bell, ChevronLeft, UserSquare2, CheckCircle2, UserPlus, Grid as GridIcon, MoreHorizontal, Heart, MessageCircle, Send, Bookmark, Plus, Trophy, Star, MapPin, RotateCcw } from 'lucide-react';
+import { Bell, ChevronLeft, UserSquare2, CheckCircle2, UserPlus, Grid as GridIcon, MoreHorizontal, Heart, MessageCircle, Send, Bookmark, Plus, Trophy, Star, MapPin, RotateCcw, Play, Pause } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -161,13 +161,6 @@ export function InstagramView({
 
           {/* Highlights Section */}
           <div className="flex gap-4 overflow-x-auto no-scrollbar mb-4 py-1">
-             <div className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group">
-                <div className="w-14 h-14 rounded-full border border-neutral-800 flex items-center justify-center bg-black group-active:scale-95 transition-transform">
-                   <Plus className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-[11px] text-white font-medium">Novo</span>
-             </div>
-             
              {isPackEnabled ? (
                modules.map((mod) => (
                  <div 
@@ -185,16 +178,24 @@ export function InstagramView({
                  </div>
                ))
              ) : (
-               uploadedPhotos.slice(1, 4).map((photo, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer active:scale-95 transition-transform">
-                     <div className="w-14 h-14 rounded-full border border-neutral-800 overflow-hidden relative p-[2px] bg-black">
-                        <div className="w-full h-full rounded-full overflow-hidden relative">
-                           <Image src={photo} fill className="object-cover" alt="" />
-                        </div>
-                     </div>
-                     <span className="text-[11px] text-white font-medium truncate max-w-[56px]">Memória {i+1}</span>
-                  </div>
-               ))
+               <>
+                 <div className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group">
+                    <div className="w-14 h-14 rounded-full border border-neutral-800 flex items-center justify-center bg-black group-active:scale-95 transition-transform">
+                       <Plus className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-[11px] text-white font-medium">Novo</span>
+                 </div>
+                 {uploadedPhotos.slice(1, 4).map((photo, i) => (
+                    <div key={i} className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer active:scale-95 transition-transform">
+                       <div className="w-14 h-14 rounded-full border border-neutral-800 overflow-hidden relative p-[2px] bg-black">
+                          <div className="w-full h-full rounded-full overflow-hidden relative">
+                             <Image src={photo} fill className="object-cover" alt="" />
+                          </div>
+                       </div>
+                       <span className="text-[11px] text-white font-medium truncate max-w-[56px]">Memória {i+1}</span>
+                    </div>
+                 ))}
+               </>
              )}
           </div>
         </section>
