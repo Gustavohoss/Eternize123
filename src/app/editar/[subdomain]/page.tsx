@@ -1,7 +1,8 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { useDoc, useFirestore, useUser, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { DeviceMockup } from '@/components/eternize/device-mockup';
@@ -45,6 +46,7 @@ const compressImage = (base64Str: string): Promise<string> => {
 export default function EditSitePage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const subdomain = params.subdomain as string;
   const firestore = useFirestore();
   const { user, isUserLoading: isAuthLoading } = useUser();
@@ -170,11 +172,17 @@ export default function EditSitePage() {
         setMusicNeonStrength(config.musicNeonStrength || 15);
         setIsMusicAutoPlay(config.isMusicAutoPlay || false);
         setLocationQuery(config.locationQuery || '');
+
+        // Handle initial step from query param
+        const startStep = searchParams.get('startStep');
+        if (startStep === 'modules' && packPurchased) {
+          setStep('modules');
+        }
       } catch (e) {
         console.error("Erro ao processar conteúdo do site", e);
       }
     }
-  }, [siteData]);
+  }, [siteData, searchParams]);
 
   const stepSequence = useMemo((): Step[] => {
     const base: Step[] = ['customize-background'];

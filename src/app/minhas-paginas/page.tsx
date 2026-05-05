@@ -5,18 +5,23 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { collection, query, where } from 'firebase/firestore';
 import { useFirestore, useUser, useCollection, useAuth, useMemoFirebase } from '@/firebase';
-import { Heart, ExternalLink, Calendar, Loader2, Plus, ArrowLeft, LogOut, Layout, User, Pencil, ShieldAlert, Lock, X, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Heart, ExternalLink, Calendar, Loader2, Plus, ArrowLeft, LogOut, Layout, User, Pencil, ShieldAlert, Lock, X, CheckCircle2, Eye, EyeOff, Sparkles, Settings2, LayoutGrid, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { signOut, updatePassword } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export default function MyPages() {
   const firestore = useFirestore();
   const auth = useAuth();
+  const router = useRouter();
   const { user, isUserLoading } = useUser();
+  
+  // Password States
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,6 +30,10 @@ export default function MyPages() {
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [showAlert, setShowAlert] = useState(true);
+
+  // Edit Choice States
+  const [choiceDialogOpen, setChoiceDialogOpen] = useState(false);
+  const [selectedSite, setSelectedSite] = useState<any>(null);
 
   // Query memoizada para buscar apenas as páginas do usuário logado
   const mySitesQuery = useMemoFirebase(() => {
@@ -76,6 +85,11 @@ export default function MyPages() {
     } finally {
       setIsChangingPassword(false);
     }
+  };
+
+  const openEditChoice = (site: any) => {
+    setSelectedSite(site);
+    setChoiceDialogOpen(true);
   };
 
   if (isUserLoading) {
@@ -226,11 +240,13 @@ export default function MyPages() {
                       </Link>
                     </div>
                     
-                    <Link href={`/editar/${site.id}`}>
-                      <Button variant="outline" className="w-full border-white/5 bg-white/5 h-10 rounded-xl text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-white/10">
-                        <Pencil className="w-3 h-3" /> Editar Site
-                      </Button>
-                    </Link>
+                    <Button 
+                      onClick={() => openEditChoice(site)}
+                      variant="outline" 
+                      className="w-full border-white/5 bg-white/5 h-10 rounded-xl text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-white/10"
+                    >
+                      <Pencil className="w-3 h-3" /> Editar Site
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -239,6 +255,90 @@ export default function MyPages() {
         )}
       </div>
 
+      {/* Choice Dialog */}
+      <Dialog open={choiceDialogOpen} onOpenChange={setChoiceDialogOpen}>
+        <DialogContent className="bg-[#0c0c0c] border border-white/10 text-white rounded-[2rem] max-w-[500px] p-0 overflow-hidden outline-none">
+          <div className="p-8 space-y-8">
+            <DialogHeader className="space-y-3">
+              <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mb-2">
+                <Settings2 className="w-6 h-6 text-primary" />
+              </div>
+              <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter">O que vamos editar?</DialogTitle>
+              <DialogDescription className="text-white/40 text-sm font-medium">
+                Escolha qual parte da sua experiência você deseja personalizar agora.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid grid-cols-1 gap-4">
+               {/* Option 1: Main Site */}
+               <Link href={`/editar/${selectedSite?.id}`}>
+                 <div className="group relative bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-5 hover:bg-white/10 hover:border-primary/50 transition-all cursor-pointer">
+                    <div className="w-12 h-12 bg-black rounded-xl border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                       <LayoutGrid className="w-6 h-6 text-white/40 group-hover:text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                       <h4 className="text-sm font-black uppercase italic text-white group-hover:text-primary transition-colors">Personalizar Página</h4>
+                       <p className="text-[10px] font-medium text-white/30 leading-relaxed uppercase tracking-widest">Fotos, Músicas, Cores e Mensagem</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-white/10 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                 </div>
+               </Link>
+
+               {/* Option 2: Modules */}
+               <Link 
+                 href={selectedSite?.isPackEnabled ? `/editar/${selectedSite?.id}?startStep=modules` : '#'} 
+                 onClick={(e) => !selectedSite?.isPackEnabled && e.preventDefault()}
+                 className={cn(!selectedSite?.isPackEnabled && "opacity-50 cursor-not-allowed")}
+               >
+                 <div className={cn(
+                   "group relative border rounded-2xl p-5 flex items-center gap-5 transition-all",
+                   selectedSite?.isPackEnabled 
+                    ? "bg-white/5 border-white/10 hover:bg-white/10 hover:border-primary/50 cursor-pointer" 
+                    : "bg-black/40 border-white/5 grayscale"
+                 )}>
+                    <div className="w-12 h-12 bg-black rounded-xl border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                       <Sparkles className={cn("w-6 h-6", selectedSite?.isPackEnabled ? "text-primary" : "text-white/10")} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                       <div className="flex items-center gap-2">
+                          <h4 className="text-sm font-black uppercase italic text-white group-hover:text-primary transition-colors">Configurar Módulos</h4>
+                          {!selectedSite?.isPackEnabled && (
+                            <span className="bg-white/10 text-[8px] font-black uppercase px-1.5 py-0.5 rounded text-white/40 border border-white/10">Bloqueado</span>
+                          )}
+                       </div>
+                       <p className="text-[10px] font-medium text-white/30 leading-relaxed uppercase tracking-widest">Memórias, Conquistas e Curiosidades</p>
+                    </div>
+                    {selectedSite?.isPackEnabled ? (
+                      <ChevronRight className="w-4 h-4 text-white/10 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                    ) : (
+                      <Lock className="w-3.5 h-3.5 text-white/10" />
+                    )}
+                 </div>
+               </Link>
+            </div>
+            
+            {!selectedSite?.isPackEnabled && (
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-center gap-3">
+                 <Sparkles className="w-4 h-4 text-primary shrink-0" />
+                 <p className="text-[10px] font-black text-primary uppercase leading-relaxed tracking-wider">
+                   Adicione o Pack de Módulos para desbloquear a linha do tempo de memórias e conquistas!
+                 </p>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white/5 p-4 flex justify-end px-8 pb-8">
+             <button 
+               onClick={() => setChoiceDialogOpen(false)} 
+               className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-white transition-colors"
+             >
+               Cancelar
+             </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Password Dialog */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
         <DialogContent className="bg-[#0c0c0c] border border-white/10 text-white rounded-3xl max-w-[400px] p-0 overflow-hidden">
           <form onSubmit={handlePasswordUpdate}>
