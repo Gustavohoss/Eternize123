@@ -75,6 +75,7 @@ export function StepModulesEdit({
   const [locationSearch, setLocationSearch] = useState('');
   const [locationResults, setSearchResults] = useState<any[]>([]);
   const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Notifica o pai sobre a mudança do submódulo para atualizar a prévia
@@ -159,48 +160,48 @@ export function StepModulesEdit({
     onJourneyPointsChange(journeyPoints.map(p => p.id === id ? { ...p, ...updates } : p));
   };
 
-  // Busca de local via Nominatim (OpenStreetMap) com Debounce e Error Handling
+  // Busca de local com Geocode.maps.co (mais estável para front-end)
   const searchLocation = (query: string) => {
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     
     if (query.length < 3) {
       setSearchResults([]);
+      setHasSearched(false);
       return;
     }
 
     debounceTimerRef.current = setTimeout(async () => {
       setIsSearchingLocation(true);
+      setHasSearched(true);
       try {
+        // Usando geocode.maps.co que é mais amigável a CORS direto do navegador
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
-          {
-            headers: {
-              'Accept-Language': 'pt-BR,pt;q=0.9',
-            }
-          }
+          `https://geocode.maps.co/search?q=${encodeURIComponent(query)}&api_key=67b2049e7b250266042435ncae3a968`
         );
         
-        if (!response.ok) throw new Error('Falha na resposta da API de mapas');
+        if (!response.ok) throw new Error('API Rate Limit or Error');
         
         const data = await response.json();
         setSearchResults(Array.isArray(data) ? data : []);
       } catch (error) {
-        console.warn("Erro ao buscar local (Nominatim):", error);
+        console.warn("Erro ao buscar local:", error);
+        // Fallback simples caso a API chave falhe
         setSearchResults([]);
       } finally {
         setIsSearchingLocation(false);
       }
-    }, 1000); // 1 segundo de debounce para respeitar a política da Nominatim
+    }, 800);
   };
 
   const handleLocationSelect = (id: string, result: any) => {
     updateJourneyPoint(id, {
       lat: parseFloat(result.lat),
       lng: parseFloat(result.lon),
-      title: result.display_name.split(',')[0] // Sugere o nome curto do local
+      title: result.display_name.split(',')[0] 
     });
     setLocationSearch('');
     setSearchResults([]);
+    setHasSearched(false);
   };
 
   const MODULE_MENU_ITEMS = [
@@ -450,7 +451,11 @@ export function StepModulesEdit({
                   >
                     <div 
                       className="p-5 flex items-center justify-between cursor-pointer"
-                      onClick={() => setEditingPointId(editingPointId === point.id ? null : point.id)}
+                      onClick={() => {
+                        setEditingPointId(editingPointId === point.id ? null : point.id);
+                        setSearchResults([]); // Limpa resultados ao trocar de item
+                        setHasSearched(false);
+                      }}
                     >
                       <div className="flex items-center gap-4 min-w-0">
                          <div className="w-10 h-10 rounded-xl overflow-hidden bg-white/5 border border-white/10 shrink-0 relative">
@@ -498,18 +503,22 @@ export function StepModulesEdit({
                                {isSearchingLocation && <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-primary animate-spin" />}
                             </div>
                             
-                            {locationResults.length > 0 && (
+                            {(locationResults.length > 0 || (hasSearched && !isSearchingLocation && locationResults.length === 0)) && (
                               <div className="absolute top-full left-0 right-0 mt-2 bg-[#1a1a1a] border border-white/10 rounded-xl overflow-hidden z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1">
-                                {locationResults.map((res: any, i) => (
-                                  <button 
-                                    key={i}
-                                    onClick={() => handleLocationSelect(point.id, res)}
-                                    className="w-full text-left px-4 py-3 text-[10px] font-bold text-white/60 hover:bg-primary/10 hover:text-white border-b border-white/5 last:border-0 transition-colors flex items-center gap-3"
-                                  >
-                                    <MapPin className="w-3 h-3 text-primary shrink-0" />
-                                    <span className="truncate">{res.display_name}</span>
-                                  </button>
-                                ))}
+                                {locationResults.length > 0 ? (
+                                  locationResults.map((res: any, i) => (
+                                    <button 
+                                      key={i}
+                                      onClick={() => handleLocationSelect(point.id, res)}
+                                      className="w-full text-left px-4 py-3 text-[10px] font-bold text-white/60 hover:bg-primary/10 hover:text-white border-b border-white/5 last:border-0 transition-colors flex items-center gap-3"
+                                    >
+                                      <MapPin className="w-3 h-3 text-primary shrink-0" />
+                                      <span className="truncate">{res.display_name}</span>
+                                    </button>
+                                  ))
+                                ) : (
+                                  <div className="px-4 py-3 text-[10px] font-bold text-white/20 italic text-center">Nenhum local encontrado para "{locationSearch}"</div>
+                                )}
                               </div>
                             )}
                          </div>
