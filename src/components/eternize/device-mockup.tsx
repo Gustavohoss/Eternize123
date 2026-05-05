@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
@@ -70,6 +71,7 @@ interface DeviceMockupProps {
   isFullscreen?: boolean;
   isPackEnabled?: boolean;
   step?: string;
+  memories?: any[];
 }
 
 export function DeviceMockup({
@@ -118,7 +120,8 @@ export function DeviceMockup({
   patternDensity = 1,
   patternColor = '#ffffff',
   isFullscreen = false,
-  isPackEnabled = false
+  isPackEnabled = false,
+  memories = []
 }: DeviceMockupProps) {
   
   // Shared State
@@ -311,7 +314,7 @@ export function DeviceMockup({
           <div className="relative h-full flex flex-col">
              <div className="absolute top-6 right-6 z-[750]"><DialogClose asChild><Button className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/10 hover:bg-black/80 flex items-center justify-center text-white shadow-2xl transition-all active:scale-95"><X className="w-5 h-5" /></Button></DialogClose></div>
              <div className="flex-1 overflow-y-auto no-scrollbar custom-scroll">
-                {previewModuleId === 'memorias' && <MemoriesModulePreview />}
+                {previewModuleId === 'memorias' && <MemoriesModulePreview memories={memories} />}
                 {previewModuleId === 'conquistas' && <AchievementsModulePreview />}
                 {previewModuleId === 'curiosidades' && <CuriosidadesModulePreview date={date} />}
              </div>

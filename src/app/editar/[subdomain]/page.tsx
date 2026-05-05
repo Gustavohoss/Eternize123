@@ -81,6 +81,7 @@ export default function EditSitePage() {
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const [isPackEnabled, setIsPackEnabled] = useState<boolean>(false);
   const [hasPackPurchased, setHasPackPurchased] = useState<boolean>(false);
+  const [memories, setMemories] = useState<any[]>([]);
   
   const [sparklesDensity, setSparklesDensity] = useState<number>(100);
   const [sparklesSpeed, setSparklesSpeed] = useState<number>(0.5);
@@ -136,6 +137,7 @@ export default function EditSitePage() {
         setMessage(config.message || '');
         setMusicData(config.musicData);
         setUploadedPhotos(config.uploadedPhotos || []);
+        setMemories(config.memories || []);
         
         const packPurchased = siteData.isPackEnabled === true;
         setHasPackPurchased(packPurchased);
@@ -227,7 +229,7 @@ export default function EditSitePage() {
         showCard, titlePosition, titleColor, titleFont, titleIsBold, titleHasNeon, titleNeonStrength,
         dateColor, dateFont, dateIsBold, dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor,
         messageColor, messageFont, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength,
-        isMusicAutoPlay, locationQuery, isPackEnabled
+        isMusicAutoPlay, locationQuery, isPackEnabled, memories
       };
 
       const jsonContent = JSON.stringify(contentData);
@@ -281,7 +283,7 @@ export default function EditSitePage() {
     dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor, messageColor, messageFont,
     musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength, isAutoPlay: false,
     sparklesDensity, sparklesSpeed, sparklesColor, smokeIntensity, smokeColor, patternDuration,
-    patternDensity, patternColor, isPackEnabled
+    patternDensity, patternColor, isPackEnabled, memories
   };
 
   if (isAuthLoading || isDocLoading) {
@@ -335,7 +337,7 @@ export default function EditSitePage() {
             {step === 'message' && <StepMessage {...{selectedTheme, message, onMessageChange: setMessage, messageFont, onMessageFontChange: setMessageFont, messageColor, onMessageColorChange: setMessageColor, onBack: handleBack, onNext: handleNext}} />}
             {step === 'music' && <StepMusic {...{selectedTheme, musicData, onMusicSelect: setMusicData, musicBoxColor, onMusicBoxColorChange: setMusicBoxColor, musicTextColor, onMusicTextColorChange: setMusicTextColor, musicHasNeon, onMusicHasNeonChange: setMusicHasNeon, musicNeonStrength, onMusicNeonStrengthChange: setMusicNeonStrength, isAutoPlay: isMusicAutoPlay, onAutoPlayChange: setIsMusicAutoPlay, onBack: handleBack, onNext: handleNext}} />}
             {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: setLocationQuery, showSuggestions, onShowSuggestionsChange: setShowSuggestions, filteredCities, selectedCountStyle, onCountStyleChange: setSelectedCountStyle, dateFont, onDateFontChange: setDateFont, dateIsBold, onDateIsBoldChange: setDateIsBold, dateHasNeon, onDateHasNeonChange: setDateHasNeon, dateNeonStrength, onDateNeonStrengthChange: setDateNeonStrength, dateColor, onDateColorChange: setDateColor, dateBoxBgColor, onDateBoxBgColorChange: setDateBoxBgColor, dateBoxBorderColor, onDateBoxBorderColorChange: setDateBoxBorderColor, onBack: handleBack, onNext: handleNext}} />}
-            {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} onBack={handleBack} onNext={handleSave} />}
+            {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} memories={memories} onMemoriesChange={setMemories} onBack={handleBack} onNext={handleSave} />}
 
             <div className="lg:hidden flex flex-col items-center mt-12 w-full gap-4">
                <Dialog>
