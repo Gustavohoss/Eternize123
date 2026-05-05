@@ -2,11 +2,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { LayoutGrid, Check, X, CreditCard, Sparkles, Info, Plus, Image as ImageIcon, Trash2, Calendar, MessageSquare, Type } from 'lucide-react';
+import { LayoutGrid, Check, X, CreditCard, Sparkles, Info, Plus, Image as ImageIcon, Trash2, Calendar, MessageSquare, Type, ChevronLeft, ChevronRight, Heart, Trophy, Star, Compass, RotateCcw, Map as MapIcon } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
@@ -29,7 +30,7 @@ interface StepModulesEditProps {
 
 const compressImage = (base64Str: string): Promise<string> => {
   return new Promise((resolve) => {
-    const img = new Image();
+    const img = new (window as any).Image();
     img.src = base64Str;
     img.onload = () => {
       const canvas = document.createElement('canvas');
@@ -47,7 +48,10 @@ const compressImage = (base64Str: string): Promise<string> => {
   });
 };
 
+type SubModule = 'menu' | 'memories' | 'achievements' | 'curiosities';
+
 export function StepModulesEdit({ isPackEnabled, onPackToggle, memories, onMemoriesChange, onBack, onNext }: StepModulesEditProps) {
+  const [activeSubModule, setActiveSubModule] = useState<SubModule>('menu');
   const [editingMemoryId, setEditingMemoryId] = useState<string | null>(null);
 
   const addMemory = () => {
@@ -83,52 +87,107 @@ export function StepModulesEdit({ isPackEnabled, onPackToggle, memories, onMemor
     reader.readAsDataURL(file);
   };
 
-  return (
-    <div className="space-y-8 md:space-y-10 flex flex-col items-center md:items-start w-full max-w-xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="space-y-3 text-center md:text-left w-full">
-        <div className="flex flex-col md:flex-row items-center gap-4">
-          <div className="bg-white/5 p-2 rounded-2xl border border-white/10">
-            <LayoutGrid className="w-5 h-5 md:w-6 md:h-6 text-white/80" />
-          </div>
-          <h2 className="text-2xl md:text-4xl font-black tracking-tight">Personalizar Módulos</h2>
-        </div>
-        <p className="text-xs md:text-base text-white/40 font-medium">
-          Personalize as seções extras que aparecerão no presente.
-        </p>
-      </div>
+  const MODULE_MENU_ITEMS = [
+    { id: 'memories' as SubModule, title: 'Memórias', description: 'Linha do tempo interativa', icon: Heart, color: 'text-red-500', bg: 'bg-red-500/10' },
+    { id: 'achievements' as SubModule, title: 'Conquistas', description: 'Níveis e marcos do casal', icon: Trophy, color: 'text-yellow-500', bg: 'bg-yellow-500/10', locked: true },
+    { id: 'curiosities' as SubModule, title: 'Curiosidades', description: 'Fatos sobre o dia do início', icon: Star, color: 'text-purple-500', bg: 'bg-purple-500/10', locked: true },
+    { id: 'astral' as SubModule, title: 'Mapa Astral', description: 'Energia do universo', icon: Sparkles, color: 'text-blue-500', bg: 'bg-blue-500/10', locked: true },
+    { id: 'journey' as SubModule, title: 'Jornada', description: 'Locais onde estiveram', icon: MapIcon, color: 'text-green-500', bg: 'bg-green-500/10', locked: true },
+    { id: 'surprise' as SubModule, title: 'Surpresa', description: 'Roleta de momentos', icon: RotateCcw, color: 'text-orange-500', bg: 'bg-orange-500/10', locked: true },
+  ];
 
-      <div className="w-full space-y-8">
-        {/* Toggle do Pack */}
-        <div 
-          className={cn(
-            "w-full bg-[#0c0c0c] border rounded-3xl p-6 flex flex-col gap-4 transition-all duration-300",
-            isPackEnabled ? "border-primary/50 ring-1 ring-primary/10" : "border-white/5"
-          )}
-        >
+  if (!isPackEnabled) {
+    return (
+      <div className="space-y-8 md:space-y-10 flex flex-col items-center md:items-start w-full max-w-xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="space-y-3 text-center md:text-left w-full">
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <div className="bg-white/5 p-2 rounded-2xl border border-white/10">
+              <LayoutGrid className="w-5 h-5 md:w-6 md:h-6 text-white/80" />
+            </div>
+            <h2 className="text-2xl md:text-4xl font-black tracking-tight">Personalizar Módulos</h2>
+          </div>
+          <p className="text-xs md:text-base text-white/40 font-medium">O Pack de Módulos está desativado para este site.</p>
+        </div>
+        <div className="w-full bg-[#0c0c0c] border border-white/5 rounded-3xl p-6 flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-               <div className="bg-primary/20 p-2 rounded-xl">
-                  <Sparkles className="w-5 h-5 text-primary" />
-               </div>
+               <div className="bg-primary/20 p-2 rounded-xl"><Sparkles className="w-5 h-5 text-primary" /></div>
                <div>
-                  <h4 className="text-sm font-black text-white uppercase tracking-wider">Pack de Módulos</h4>
-                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                    {isPackEnabled ? 'Exibindo no site' : 'Oculto no site'}
-                  </p>
+                  <h4 className="text-sm font-black text-white uppercase tracking-wider">Ativar Pack</h4>
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Exibir extras no site</p>
                </div>
             </div>
             <Switch checked={isPackEnabled} onCheckedChange={onPackToggle} />
           </div>
         </div>
+        <Button onClick={onBack} variant="outline" className="w-full h-14 rounded-2xl border-white/10 bg-white/5 font-black text-sm">Voltar</Button>
+      </div>
+    );
+  }
 
-        {isPackEnabled && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
-             <div className="flex items-center justify-between px-2">
-                <div className="flex items-center gap-2">
-                   <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                   <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white/60">Linha do Tempo de Memórias</h3>
+  return (
+    <div className="space-y-8 md:space-y-10 flex flex-col items-center md:items-start w-full max-w-xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Header Centralizado ou à Esquerda */}
+      <div className="space-y-3 text-center md:text-left w-full">
+        <div className="flex flex-col md:flex-row items-center gap-4">
+          <div className="bg-white/5 p-2 rounded-2xl border border-white/10">
+            <LayoutGrid className="w-5 h-5 md:w-6 md:h-6 text-white/80" />
+          </div>
+          <h2 className="text-2xl md:text-4xl font-black tracking-tight">
+            {activeSubModule === 'menu' ? 'Painel de Módulos' : activeSubModule === 'memories' ? 'Editar Memórias' : 'Personalizar'}
+          </h2>
+        </div>
+        <p className="text-xs md:text-base text-white/40 font-medium">
+          {activeSubModule === 'menu' 
+            ? 'Selecione o módulo que deseja configurar agora.' 
+            : 'Personalize os detalhes deste módulo para deixar do seu jeito.'}
+        </p>
+      </div>
+
+      <div className="w-full space-y-6">
+        {activeSubModule === 'menu' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-500">
+             {MODULE_MENU_ITEMS.map((item) => (
+               <div 
+                 key={item.id}
+                 onClick={() => !item.locked && setActiveSubModule(item.id)}
+                 className={cn(
+                   "group relative bg-[#0c0c0c] border rounded-2xl p-5 flex items-center gap-4 transition-all duration-300",
+                   item.locked ? "opacity-50 grayscale cursor-not-allowed border-white/5" : "hover:bg-white/5 hover:border-primary/40 cursor-pointer border-white/10"
+                 )}
+               >
+                  <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110", item.bg)}>
+                     <item.icon className={cn("w-6 h-6", item.color)} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                     <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-black text-white uppercase tracking-tight truncate">{item.title}</h4>
+                        {item.locked && <span className="bg-white/10 text-[7px] font-black uppercase px-1.5 py-0.5 rounded text-white/30 border border-white/10">Em breve</span>}
+                     </div>
+                     <p className="text-[10px] font-medium text-white/30 uppercase tracking-widest truncate">{item.description}</p>
+                  </div>
+                  {!item.locked && <ChevronRight className="w-4 h-4 text-white/10 group-hover:text-primary transition-all group-hover:translate-x-1" />}
+               </div>
+             ))}
+          </div>
+        ) : activeSubModule === 'memories' ? (
+          <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
+             {/* Header Memórias */}
+             <div className="flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl">
+                <div className="flex items-center gap-3">
+                   <div className="bg-red-500/20 p-2 rounded-xl"><Heart className="w-4 h-4 text-red-500" /></div>
+                   <div>
+                      <h4 className="text-xs font-black text-white uppercase tracking-wider">Módulo Memórias</h4>
+                      <p className="text-[9px] font-bold text-white/30 uppercase">{memories.length}/10 momentos</p>
+                   </div>
                 </div>
-                <span className="text-[10px] font-bold text-white/20">{memories.length}/10</span>
+                <Button 
+                  onClick={() => setActiveSubModule('menu')}
+                  variant="ghost" 
+                  className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 gap-1"
+                >
+                   <ChevronLeft className="w-3 h-3" /> Voltar ao menu
+                </Button>
              </div>
 
              <div className="grid grid-cols-1 gap-4">
@@ -164,8 +223,8 @@ export function StepModulesEdit({ isPackEnabled, onPackToggle, memories, onMemor
                          >
                            <Trash2 className="w-4 h-4" />
                          </button>
-                         <div className={cn("transition-transform duration-300", editingMemoryId === memory.id ? "rotate-180" : "")}>
-                            <ChevronLeft className="w-4 h-4 text-white/20 -rotate-90" />
+                         <div className={cn("transition-transform duration-300 text-white/20", editingMemoryId === memory.id ? "rotate-180" : "rotate-90")}>
+                            <ChevronDown className="w-4 h-4" />
                          </div>
                       </div>
                     </div>
@@ -239,7 +298,7 @@ export function StepModulesEdit({ isPackEnabled, onPackToggle, memories, onMemor
                 {memories.length < 10 && (
                   <button 
                     onClick={addMemory}
-                    className="w-full h-16 rounded-[2rem] border-2 border-dashed border-white/5 bg-white/[0.02] hover:bg-white/5 hover:border-white/10 transition-all flex items-center justify-center gap-3 text-white/20 hover:text-primary transition-all group"
+                    className="w-full h-16 rounded-[2rem] border-2 border-dashed border-white/5 bg-white/[0.02] hover:bg-white/5 hover:border-white/10 transition-all flex items-center justify-center gap-3 text-white/20 hover:text-primary group"
                   >
                     <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-black uppercase tracking-widest">Adicionar nova memória</span>
@@ -247,18 +306,65 @@ export function StepModulesEdit({ isPackEnabled, onPackToggle, memories, onMemor
                 )}
              </div>
           </div>
-        )}
+        ) : null}
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-start gap-4">
           <Info className="w-5 h-5 text-white/30 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <p className="text-[11px] font-black uppercase text-white/60 tracking-widest">Configuração Visual</p>
             <p className="text-[11px] font-medium text-white/30 leading-relaxed">
-              As memórias aparecem em ordem de adição. Você pode clicar no título de uma memória para expandir os detalhes e editá-la.
+              Você pode ativar ou desativar a exibição do Pack inteiro no site a qualquer momento usando a chave no final da página.
             </p>
           </div>
         </div>
+
+        {/* Global Toggle at bottom */}
+        <div className="pt-6 border-t border-white/5">
+           <div className="w-full bg-[#0c0c0c] border border-white/5 rounded-2xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                 <Sparkles className="w-4 h-4 text-primary" />
+                 <span className="text-[10px] font-black uppercase text-white/60 tracking-widest">Exibir Pack no Site</span>
+              </div>
+              <Switch checked={isPackEnabled} onCheckedChange={onPackToggle} />
+           </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 w-full pt-6">
+        <Button 
+          onClick={activeSubModule === 'menu' ? onBack : () => setActiveSubModule('menu')} 
+          variant="outline" 
+          className="h-14 rounded-2xl border-white/10 bg-white/5 font-black text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-3 group"
+        >
+          <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> 
+          {activeSubModule === 'menu' ? 'Voltar Etapa' : 'Voltar ao Menu'}
+        </Button>
+        <Button 
+          onClick={onNext}
+          className="h-14 rounded-2xl bg-[#15803d] hover:bg-[#166534] text-white font-black text-sm transition-all flex items-center justify-center gap-3 shadow-2xl active:scale-95 group"
+        >
+          Finalizar Edição <Check className="w-4 h-4" />
+        </Button>
       </div>
     </div>
   );
+}
+
+function ChevronDown(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  )
 }
