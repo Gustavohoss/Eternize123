@@ -294,3 +294,35 @@
 .animation-delay-200 { animation-delay: 0.2s; }
 .animation-delay-300 { animation-delay: 0.3s; }
 .animation-delay-400 { animation-delay: 0.4s; }
+
+/* Efeito de Cortina Netflix */
+.curtain-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background-color: #E50914;
+  z-index: 1100;
+  transition: transform 1.2s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+.curtain-left {
+  left: 0;
+  transform: translateX(-100%);
+}
+
+.curtain-right {
+  right: 0;
+  transform: translateX(100%);
+}
+
+.intro-closing .curtain-left,
+.intro-closing .curtain-right {
+  transform: translateX(0);
+}
+
+.intro-blackout .curtain-left,
+.intro-blackout .curtain-right {
+  background-color: #000;
+  transition: background-color 0.4s ease;
+}

@@ -270,8 +270,22 @@ export function DeviceMockup({
 
       {/* Intro Animation Layer */}
       {isIntroActive && (
-        <div className="absolute inset-0 z-[1000] bg-black flex items-center justify-center">
-           <h1 className={cn("text-[#E50914] text-4xl md:text-6xl font-bebas tracking-[15px] uppercase transition-all duration-1000", introPhase === 'logo' ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-90 blur-xl")}>ETERNIZE</h1>
+        <div className={cn(
+          "absolute inset-0 z-[1000] bg-black flex items-center justify-center overflow-hidden",
+          introPhase === 'closing' && "intro-closing",
+          introPhase === 'blackout' && "intro-blackout"
+        )}>
+           {/* Painéis da Cortina */}
+           <div className="curtain-panel curtain-left"></div>
+           <div className="curtain-panel curtain-right"></div>
+           
+           {/* Logo */}
+           <h1 className={cn(
+             "text-[#E50914] text-4xl md:text-6xl font-bebas tracking-[15px] uppercase transition-all duration-1000 relative z-[1200]", 
+             introPhase === 'logo' ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-90 blur-xl"
+           )}>
+             ETERNIZE
+           </h1>
         </div>
       )}
 
@@ -324,7 +338,7 @@ export function DeviceMockup({
                 <ClassicView {...{uploadedPhotos, photoEffect, showCard, cardColor, titlePosition, pageTitle, titleStyle, message, messageColor, messageFontFamily: getFontFamily(messageFont || 'inter'), date, selectedCountStyle, dateStyle, dateIsBold, dateBoxBgColor, dateBoxBorderColor, timeDiff, totalDays, musicData, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength, isAudioPlaying, onAudioToggle: setIsAudioPlaying, isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'netflix' && (
-                <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: () => { setIsIntroActive(true); setIntroPhase('closing'); setTimeout(() => setIntroPhase('blackout'), 1500); setTimeout(() => setIntroPhase('logo'), 1600); setTimeout(() => { setIsIntroActive(false); setIntroPhase('idle'); setShowStories(true); setCurrentStoryIndex(0); setStoryProgress(0); }, 4500); }, onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList), isPackEnabled, onModuleClick: setPreviewModuleId}} />
+                <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: () => { setIsIntroActive(true); setIntroPhase('closing'); setTimeout(() => setIntroPhase('blackout'), 1300); setTimeout(() => setIntroPhase('logo'), 1600); setTimeout(() => { setIsIntroActive(false); setIntroPhase('idle'); setShowStories(true); setCurrentStoryIndex(0); setStoryProgress(0); }, 4500); }, onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList), isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'spotify' && (
                 <SpotifyView {...{uploadedPhotos, activeHeroIndex, pageTitle, totalDays, timeDiff, date, activeTab, onTabChange: setActiveTab, onPhotoClick: (i) => { setActiveHeroIndex(i); setShowSpotifyFullscreen(true); }, isLiked, onLikeToggle: () => setIsLiked(!isLiked), isAudioPlaying, onAudioToggle: setIsAudioPlaying, dynamicSpotifyColor, spotifyHeaderOpacity, onHeaderScroll: (e) => setSpotifyHeaderOpacity(Math.min(1, e.currentTarget.scrollTop / 100)), onShowFullscreen: () => setShowSpotifyFullscreen(true), onCloseFullscreen: () => setShowSpotifyFullscreen(false), showSpotifyFullscreen, message, musicData}} />
