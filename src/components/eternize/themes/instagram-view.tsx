@@ -56,16 +56,16 @@ export function InstagramView({
   onSavePost,
   isAudioPlaying,
   onAudioToggle,
-  isPackEnabled,
+  isPackEnabled = false,
   onModuleClick
 }: InstagramViewProps) {
   
   const modules = [
-    { id: 'memorias', title: 'Memórias', icon: Heart, color: 'text-red-500', bg: 'bg-red-500/10' },
-    { id: 'conquistas', title: 'Conquistas', icon: Trophy, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
-    { id: 'curiosidades', title: 'Curiosidades', icon: Star, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-    { id: 'jornada', title: 'Jornada', icon: MapPin, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { id: 'surpresa', title: 'Surpresa', icon: RotateCcw, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+    { id: 'memorias', title: 'Memórias', icon: Heart, color: 'text-red-500', borderColor: 'border-red-500/20' },
+    { id: 'conquistas', title: 'Conquistas', icon: Trophy, color: 'text-yellow-500', borderColor: 'border-yellow-500/20' },
+    { id: 'curiosidades', title: 'Curiosida...', icon: Star, color: 'text-purple-500', borderColor: 'border-purple-500/20' },
+    { id: 'jornada', title: 'Jornada', icon: MapPin, color: 'text-emerald-500', borderColor: 'border-emerald-500/20' },
+    { id: 'surpresa', title: 'Surpresa', icon: RotateCcw, color: 'text-orange-500', borderColor: 'border-orange-500/20' },
   ];
 
   if (showPostDetail) {
@@ -159,40 +159,40 @@ export function InstagramView({
             <button className="px-2 bg-neutral-800 rounded-lg transition active:scale-95 text-white"><UserPlus className="w-4.5 h-4.5" /></button>
           </div>
 
-          {/* Highlights Section */}
-          <div className="flex gap-4 overflow-x-auto no-scrollbar mb-4 py-1">
+          {/* Highlights Section - Módulos ou Fotos do Feed */}
+          <div className="flex gap-5 overflow-x-auto no-scrollbar mb-4 py-2 px-1">
              {isPackEnabled ? (
                modules.map((mod) => (
                  <div 
                    key={mod.id} 
                    onClick={() => onModuleClick?.(mod.id)}
-                   className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer active:scale-95 transition-transform group"
+                   className="flex flex-col items-center gap-2 shrink-0 cursor-pointer active:scale-95 transition-transform"
                  >
                     <div className={cn(
-                      "w-14 h-14 rounded-full border border-neutral-800 flex items-center justify-center transition-all",
-                      mod.bg
+                      "w-[68px] h-[68px] rounded-full border bg-black flex items-center justify-center transition-all",
+                      mod.borderColor
                     )}>
-                       <mod.icon className={cn("w-6 h-6", mod.color)} />
+                       <mod.icon className={cn("w-7 h-7", mod.color)} />
                     </div>
-                    <span className="text-[11px] text-white font-medium truncate max-w-[64px]">{mod.title}</span>
+                    <span className="text-[11px] text-white font-bold tracking-tight">{mod.title}</span>
                  </div>
                ))
              ) : (
                <>
-                 <div className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group">
-                    <div className="w-14 h-14 rounded-full border border-neutral-800 flex items-center justify-center bg-black group-active:scale-95 transition-transform">
-                       <Plus className="w-6 h-6 text-white" />
+                 <div className="flex flex-col items-center gap-2 shrink-0 cursor-pointer group">
+                    <div className="w-[68px] h-[68px] rounded-full border border-neutral-800 flex items-center justify-center bg-black group-active:scale-95 transition-transform">
+                       <Plus className="w-7 h-7 text-white" />
                     </div>
                     <span className="text-[11px] text-white font-medium">Novo</span>
                  </div>
                  {uploadedPhotos.slice(1, 4).map((photo, i) => (
-                    <div key={i} className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer active:scale-95 transition-transform">
-                       <div className="w-14 h-14 rounded-full border border-neutral-800 overflow-hidden relative p-[2px] bg-black">
+                    <div key={i} className="flex flex-col items-center gap-2 shrink-0 active:scale-95 transition-transform">
+                       <div className="w-[68px] h-[68px] rounded-full border border-neutral-800 overflow-hidden relative p-[2px] bg-black">
                           <div className="w-full h-full rounded-full overflow-hidden relative">
                              <Image src={photo} fill className="object-cover" alt="" />
                           </div>
                        </div>
-                       <span className="text-[11px] text-white font-medium truncate max-w-[56px]">Memória {i+1}</span>
+                       <span className="text-[11px] text-white font-medium truncate max-w-[64px]">Destaque {i+1}</span>
                     </div>
                  ))}
                </>
