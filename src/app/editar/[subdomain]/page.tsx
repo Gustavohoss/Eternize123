@@ -135,11 +135,8 @@ export default function EditSitePage() {
         setMusicData(config.musicData);
         setUploadedPhotos(config.uploadedPhotos || []);
         
-        // Verifica se o pack foi comprado (campo isPackEnabled na raiz do documento)
         const packPurchased = siteData.isPackEnabled === true;
         setHasPackPurchased(packPurchased);
-        
-        // Estado atual do toggle (pode ser false mesmo se comprou, se o usuário desligar)
         setIsPackEnabled(config.isPackEnabled !== undefined ? config.isPackEnabled : packPurchased);
         
         setSparklesDensity(config.sparklesDensity || 100);
@@ -173,8 +170,6 @@ export default function EditSitePage() {
         setMusicNeonStrength(config.musicNeonStrength || 15);
         setIsMusicAutoPlay(config.isMusicAutoPlay || false);
         setLocationQuery(config.locationQuery || '');
-        
-        setStep('customize-background');
       } catch (e) {
         console.error("Erro ao processar conteúdo do site", e);
       }
@@ -191,7 +186,6 @@ export default function EditSitePage() {
       steps = [...base, 'photos', 'page-title', 'message', 'data-location', 'music'];
     }
 
-    // Apenas adiciona o passo de módulos se o usuário tiver comprado o Pack
     if (hasPackPurchased) {
       steps.push('modules');
     }
