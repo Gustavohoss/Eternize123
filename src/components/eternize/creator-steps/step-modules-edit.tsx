@@ -52,7 +52,7 @@ const compressImage = (base64Str: string): Promise<string> => {
   });
 };
 
-type SubModule = 'menu' | 'memories' | 'achievements' | 'curiosities' | 'astral' | 'journey' | 'surprise';
+type SubModule = 'menu' | 'memories' | 'achievements' | 'curiosities' | 'journey' | 'surprise';
 
 export function StepModulesEdit({ 
   isPackEnabled, 
@@ -217,7 +217,6 @@ export function StepModulesEdit({
     { id: 'memories' as SubModule, title: 'Memórias', description: 'Linha do tempo interativa', icon: Heart, color: 'text-red-500', bg: 'bg-red-500/10' },
     { id: 'achievements' as SubModule, title: 'Conquistas', description: 'Níveis e marcos do casal', icon: Trophy, color: 'text-yellow-500', bg: 'bg-yellow-500/10', locked: false },
     { id: 'curiosities' as SubModule, title: 'Curiosidades', description: 'Fatos sobre o dia do início', icon: Star, color: 'text-purple-500', bg: 'bg-purple-500/10', locked: false },
-    { id: 'astral' as SubModule, title: 'Mapa Astral', description: 'Energia do universo', icon: Sparkles, color: 'text-blue-500', bg: 'bg-blue-500/10', locked: true },
     { id: 'journey' as SubModule, title: 'Jornada', description: 'Locais onde estiveram', icon: MapIcon, color: 'text-green-500', bg: 'bg-green-500/10', locked: false },
     { id: 'surprise' as SubModule, title: 'Surpresa', description: 'Roleta de momentos', icon: RotateCcw, color: 'text-orange-500', bg: 'bg-orange-500/10', locked: false },
   ];

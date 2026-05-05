@@ -14,7 +14,7 @@ export function OrganicModuleGrid({ onModuleClick, pageTitle }: OrganicModuleGri
       <style jsx>{`
         .organic-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(2, 1fr);
           gap: 10px;
           width: 100%;
         }
@@ -30,8 +30,8 @@ export function OrganicModuleGrid({ onModuleClick, pageTitle }: OrganicModuleGri
           cursor: pointer;
         }
         .organic-card:active { transform: scale(0.95); }
-        .organic-card:nth-child(1), .organic-card:nth-child(4), .organic-card:nth-child(5) { transform: rotate(-1.5deg); }
-        .organic-card:nth-child(2), .organic-card:nth-child(3), .organic-card:nth-child(6) { transform: rotate(1.5deg); }
+        .organic-card:nth-child(1), .organic-card:nth-child(4) { transform: rotate(-1.5deg); }
+        .organic-card:nth-child(2), .organic-card:nth-child(3), .organic-card:nth-child(5) { transform: rotate(1.5deg); }
         .organic-icon-area {
           height: 70px;
           margin: 4px;
@@ -54,7 +54,6 @@ export function OrganicModuleGrid({ onModuleClick, pageTitle }: OrganicModuleGri
         .pink-bg { background-color: #ffeff1; color: #ff4d6d; }
         .yellow-bg { background-color: #fff9e6; color: #f9a825; }
         .purple-bg { background-color: #f5f0ff; color: #8e24aa; }
-        .blue-bg { background-color: #f0f9ff; color: #039be5; }
         .green-bg { background-color: #f0fff4; color: #2e7d32; }
         .orange-bg { background-color: #fff4e6; color: #ef6c00; }
       `}</style>
@@ -75,10 +74,6 @@ export function OrganicModuleGrid({ onModuleClick, pageTitle }: OrganicModuleGri
         <div className="organic-card" onClick={() => onModuleClick('curiosidades')}>
           <div className="organic-icon-area purple-bg">✨</div>
           <div className="organic-label">Curiosidades</div>
-        </div>
-        <div className="organic-card">
-          <div className="organic-icon-area blue-bg">☆</div>
-          <div className="organic-label">Mapa Astral</div>
         </div>
         <div className="organic-card" onClick={() => onModuleClick('jornada')}>
           <div className="organic-icon-area green-bg">🧭</div>

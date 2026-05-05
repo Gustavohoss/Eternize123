@@ -39,12 +39,6 @@ const MODULES: ModuleItem[] = [
     image: 'https://picsum.photos/seed/curiosities-module/600/800'
   },
   {
-    id: 'mapa-astral',
-    title: 'Mapa Astral',
-    description: 'O alinhamento dos astros e a energia do universo no exato momento em que essa história começou.',
-    image: 'https://picsum.photos/seed/astral-module/600/800'
-  },
-  {
     id: 'jornada',
     title: 'Jornada no Mapa',
     description: 'Um rastro interativo no mapa mundi conectando os lugares onde vocês criaram as melhores lembranças.',
@@ -114,7 +108,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
           <h2 className="text-2xl md:text-4xl font-black tracking-tight">Pack de Módulos</h2>
         </div>
         <p className="text-xs md:text-base text-white/40 font-medium max-w-xl">
-          Adicione 6 módulos exclusivos ao presente. Você poderá editar e personalizar cada módulo após a compra.
+          Adicione 5 módulos exclusivos ao presente. Você poderá editar e personalizar cada módulo após a compra.
         </p>
       </div>
 
@@ -189,27 +183,6 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
         </div>
       </div>
 
-      <Dialog open={!!previewModuleId} onOpenChange={(open) => !open && setPreviewModuleId(null)}>
-        <DialogContent className="max-w-full w-full h-full sm:max-w-[450px] sm:h-[92vh] p-0 bg-black border-none overflow-hidden flex flex-col z-[300] [&>button]:hidden">
-          <DialogTitle className="sr-only">Visualização do Módulo</DialogTitle>
-          <DialogDescription className="sr-only">Visualize como este módulo exclusivo aparecerá na sua página.</DialogDescription>
-          
-          <div className="relative h-full flex flex-col">
-             <div className="absolute top-6 right-6 z-[350]">
-                <DialogClose asChild>
-                  <Button className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/10 hover:bg-black/80 flex items-center justify-center text-white shadow-2xl transition-all active:scale-95">
-                    <X className="w-5 h-5" />
-                  </Button>
-                </DialogClose>
-             </div>
-
-             <div className="flex-1 overflow-y-auto no-scrollbar custom-scroll">
-                {renderPreviewContent()}
-             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       <div className="w-full space-y-4">
         <div 
           onClick={() => onPackToggle(!isPackEnabled)}
@@ -249,12 +222,21 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
         >
           <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> Voltar
         </Button>
-        <Button 
-          onClick={onFinish}
-          className="h-14 rounded-2xl bg-[#15803d] hover:bg-[#166534] text-white font-black text-sm transition-all flex items-center justify-center gap-3 shadow-2xl active:scale-95 group"
-        >
-          Finalizar <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-        </Button>
+        <div className="flex flex-col gap-3">
+          <Button 
+            onClick={onFinish}
+            className="h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-sm transition-all flex items-center justify-center gap-3 shadow-2xl active:scale-95 group disabled:opacity-50 disabled:grayscale"
+          >
+            Ir para Pagamento <CheckCircle2 className="w-4 h-4 transition-transform group-hover:scale-110" />
+          </Button>
+          <Button 
+            onClick={() => onFinish()}
+            variant="outline"
+            className="h-10 rounded-xl border-white/10 bg-white/5 text-white/40 font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white"
+          >
+            Finalizar Edição
+          </Button>
+        </div>
       </div>
     </div>
   );
