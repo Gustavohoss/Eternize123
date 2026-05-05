@@ -160,7 +160,7 @@ export function StepModulesEdit({
     onJourneyPointsChange(journeyPoints.map(p => p.id === id ? { ...p, ...updates } : p));
   };
 
-  // Busca de local com Photon API (Komoot) - Muito estável e rápida
+  // Busca de local usando Nominatim (Exatamente como no script fornecido)
   const searchLocation = (query: string) => {
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     
@@ -174,40 +174,33 @@ export function StepModulesEdit({
       setIsSearchingLocation(true);
       setHasSearched(true);
       try {
+        // Usa o motor Nominatim que o leaflet-control-geocoder usa por padrão
         const response = await fetch(
-          `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5&lang=pt`
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&accept-language=pt-BR`
         );
         
         if (!response.ok) throw new Error('API Error');
         
         const data = await response.json();
         
-        // Formata os resultados do Photon para a nossa UI
-        const formattedResults = (data.features || []).map((f: any) => {
-          const props = f.properties;
-          const labelParts = [
-            props.name,
-            props.city || props.town,
-            props.state,
-            props.country
-          ].filter(Boolean);
-
+        const formattedResults = (data || []).map((res: any) => {
           return {
-            display_name: labelParts.join(', '),
-            lat: f.geometry.coordinates[1],
-            lon: f.geometry.coordinates[0],
-            name: props.name || props.city || "Local Desconhecido"
+            display_name: res.display_name,
+            lat: parseFloat(res.lat),
+            lon: parseFloat(res.lon),
+            name: res.address.city || res.address.town || res.address.municipality || res.address.suburb || res.name || "Local Encontrado"
           };
         });
 
         setSearchResults(formattedResults);
       } catch (error) {
-        console.warn("Erro ao buscar local:", error);
+        console.warn("Erro ao buscar local no Nominatim:", error);
+        // Fallback silencioso para não quebrar a UI
         setSearchResults([]);
       } finally {
         setIsSearchingLocation(false);
       }
-    }, 600);
+    }, 800);
   };
 
   const handleLocationSelect = (id: string, result: any) => {
@@ -219,6 +212,7 @@ export function StepModulesEdit({
     setLocationSearch('');
     setSearchResults([]);
     setHasSearched(false);
+    setEditingPointId(id); // Mantém aberto
   };
 
   const MODULE_MENU_ITEMS = [
@@ -503,44 +497,51 @@ export function StepModulesEdit({
                     {editingPointId === point.id && (
                       <div className="px-5 pb-6 space-y-5 border-t border-white/5 pt-6 animate-in slide-in-from-top-2">
                          
-                         {/* Campo de Busca de Local (Photon API Integration) */}
-                         <div className="space-y-2 relative">
-                            <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Search className="w-2.5 h-2.5" /> Pesquisar Localização</Label>
-                            <div className="relative">
+                         {/* Busca de Local (Inspirada no script de referência) */}
+                         <div className="space-y-3 relative">
+                            <Label className="text-[10px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5">
+                               <Search className="w-3 h-3 text-primary" /> Pesquisar Cidade ou Lugar
+                            </Label>
+                            <div className="relative group">
                                <Input 
                                  value={locationSearch}
                                  onChange={(e) => {
                                    setLocationSearch(e.target.value);
                                    searchLocation(e.target.value);
                                  }}
-                                 placeholder="Digite a cidade ou lugar..."
-                                 className="bg-white/5 border-primary/20 h-11 rounded-xl text-xs font-bold pl-10 focus:border-primary/50 transition-all"
+                                 placeholder="Digite o nome do lugar..."
+                                 className="bg-black border-primary/20 h-12 rounded-xl text-xs font-bold pl-10 focus:border-primary/50 transition-all shadow-inner"
                                />
                                <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary opacity-50" />
-                               {isSearchingLocation && <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-primary animate-spin" />}
+                               {isSearchingLocation && <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />}
                             </div>
                             
                             {(locationResults.length > 0 || (hasSearched && !isSearchingLocation && locationResults.length === 0)) && (
-                              <div className="absolute top-full left-0 right-0 mt-2 bg-[#1a1a1a] border border-white/10 rounded-xl overflow-hidden z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1">
+                              <div className="absolute top-full left-0 right-0 mt-2 bg-[#161b22] border border-[#30363d] rounded-xl overflow-hidden z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1">
                                 {locationResults.length > 0 ? (
                                   locationResults.map((res: any, i) => (
                                     <button 
                                       key={i}
                                       onClick={() => handleLocationSelect(point.id, res)}
-                                      className="w-full text-left px-4 py-3 text-[10px] font-bold text-white/60 hover:bg-primary/10 hover:text-white border-b border-white/5 last:border-0 transition-colors flex items-center gap-3"
+                                      className="w-full text-left px-4 py-3 text-[10px] font-bold text-[#c9d1d9] hover:bg-[#1f6feb] hover:text-white border-b border-white/5 last:border-0 transition-colors flex items-center gap-3 group/item"
                                     >
-                                      <MapPin className="w-3 h-3 text-primary shrink-0" />
+                                      <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+                                         <MapPin className="w-3 h-3 text-primary" />
+                                      </div>
                                       <span className="truncate">{res.display_name}</span>
                                     </button>
                                   ))
                                 ) : (
-                                  <div className="px-4 py-3 text-[10px] font-bold text-white/20 italic text-center">Nenhum local encontrado para "{locationSearch}"</div>
+                                  <div className="px-4 py-6 text-[10px] font-bold text-white/20 italic text-center flex flex-col items-center gap-2">
+                                     <Info className="w-4 h-4" />
+                                     Local não encontrado. Tente outro nome.
+                                  </div>
                                 )}
                               </div>
                             )}
                          </div>
 
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                             <div className="space-y-2">
                                <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Type className="w-2.5 h-2.5" /> Nome do Local</Label>
                                <Input 
@@ -556,29 +557,6 @@ export function StepModulesEdit({
                                  value={point.date}
                                  onChange={(e) => updateJourneyPoint(point.id, { date: e.target.value })}
                                  placeholder="Ex: 20 de Maio, 2023"
-                                 className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"
-                               />
-                            </div>
-                         </div>
-
-                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                               <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><MapPin className="w-2.5 h-2.5" /> Latitude</Label>
-                               <Input 
-                                 type="number"
-                                 step="any"
-                                 value={point.lat}
-                                 onChange={(e) => updateJourneyPoint(point.id, { lat: parseFloat(e.target.value) || 0 })}
-                                 className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"
-                               />
-                            </div>
-                            <div className="space-y-2">
-                               <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><MapPin className="w-2.5 h-2.5" /> Longitude</Label>
-                               <Input 
-                                 type="number"
-                                 step="any"
-                                 value={point.lng}
-                                 onChange={(e) => updateJourneyPoint(point.id, { lng: parseFloat(e.target.value) || 0 })}
                                  className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"
                                />
                             </div>
@@ -617,9 +595,32 @@ export function StepModulesEdit({
                                   )}
                                </div>
                                <div className="flex-1 space-y-1">
-                                  <p className="text-[10px] font-bold text-white/60">Escolha a melhor foto desse dia.</p>
-                                  <p className="text-[9px] text-white/20 leading-relaxed">Dica: Use a busca automática acima para encontrar o local exato!</p>
+                                  <p className="text-[10px] font-bold text-white/60">Posicionamos no mapa para você!</p>
+                                  <p className="text-[9px] text-white/20 leading-relaxed">Dica: Use a busca acima para encontrar a cidade. A latitude e longitude serão preenchidas automaticamente.</p>
                                </div>
+                            </div>
+                         </div>
+
+                         <div className="grid grid-cols-2 gap-4 pt-2 opacity-30 hover:opacity-100 transition-opacity">
+                            <div className="space-y-2">
+                               <Label className="text-[8px] font-black uppercase text-white/40 ml-1">Latitude (Ajuste Fino)</Label>
+                               <Input 
+                                 type="number"
+                                 step="any"
+                                 value={point.lat}
+                                 onChange={(e) => updateJourneyPoint(point.id, { lat: parseFloat(e.target.value) || 0 })}
+                                 className="bg-white/5 border-white/5 h-8 rounded-lg text-[10px] font-bold"
+                               />
+                            </div>
+                            <div className="space-y-2">
+                               <Label className="text-[8px] font-black uppercase text-white/40 ml-1">Longitude (Ajuste Fino)</Label>
+                               <Input 
+                                 type="number"
+                                 step="any"
+                                 value={point.lng}
+                                 onChange={(e) => updateJourneyPoint(point.id, { lng: parseFloat(e.target.value) || 0 })}
+                                 className="bg-white/5 border-white/5 h-8 rounded-lg text-[10px] font-bold"
+                               />
                             </div>
                          </div>
                       </div>

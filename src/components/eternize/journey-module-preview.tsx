@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { X, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,7 @@ const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapCo
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 const Polyline = dynamic(() => import('react-leaflet').then(mod => mod.Polyline), { ssr: false });
+const useMap = dynamic(() => import('react-leaflet').then(mod => mod.useMap), { ssr: false });
 
 export interface JourneyPoint {
   id: string;
@@ -61,6 +62,19 @@ const DEFAULT_POINTS: JourneyPoint[] = [
   }
 ];
 
+// Componente para controlar o vôo do mapa até o ponto selecionado
+function MapController({ center }: { center: [number, number] }) {
+  const map = (useMap as any)();
+  useEffect(() => {
+    if (center && map) {
+      map.flyTo(center, 12, {
+        duration: 2
+      });
+    }
+  }, [center, map]);
+  return null;
+}
+
 export function JourneyModulePreview({ points }: JourneyModulePreviewProps) {
   const [L, setL] = useState<any>(null);
   const [selectedPoint, setSelectedPoint] = useState<JourneyPoint | null>(null);
@@ -73,6 +87,10 @@ export function JourneyModulePreview({ points }: JourneyModulePreviewProps) {
 
   const displayPoints = points && points.length > 0 ? points : DEFAULT_POINTS;
 
+  // Se o usuário adicionou um ponto agora, vamos focar nele
+  const lastPoint = displayPoints[displayPoints.length - 1];
+  const centerCoords: [number, number] = lastPoint ? [lastPoint.lat, lastPoint.lng] : [-15.78, -47.92];
+
   if (!L) return (
     <div className="w-full h-full bg-[#0d1117] flex items-center justify-center">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div>
@@ -84,8 +102,8 @@ export function JourneyModulePreview({ points }: JourneyModulePreviewProps) {
       className: 'custom-marker',
       html: `
         <div class="marcador-polaroid" style="transform: rotate(${point.rotation || '0deg'})">
-          <img src="${point.photo}" alt="Foto">
-          <div class="marcador-legenda">${point.title}</div>
+          <img src="${point.photo || 'https://picsum.photos/seed/empty/200/200'}" alt="Foto">
+          <div class="marcador-legenda">${point.title || 'Local'}</div>
         </div>
       `,
       iconSize: [64, 75],
@@ -94,9 +112,6 @@ export function JourneyModulePreview({ points }: JourneyModulePreviewProps) {
   };
 
   const polylineCoords: [number, number][] = displayPoints.map(p => [p.lat, p.lng]);
-  const centerCoords: [number, number] = displayPoints.length > 0 
-    ? [displayPoints[0].lat, displayPoints[0].lng] 
-    : [-23.5505, -46.6333];
 
   return (
     <div className="relative w-full h-full bg-[#0d1117] overflow-hidden text-white font-sans">
@@ -141,14 +156,15 @@ export function JourneyModulePreview({ points }: JourneyModulePreviewProps) {
       {/* Cabeçalho */}
       <div className="absolute top-0 left-0 right-0 z-[1000] flex justify-between items-center px-4 py-6 bg-gradient-to-b from-[#0d1117]/95 to-transparent pointer-events-none">
         <div className="flex items-center gap-2 pointer-events-auto">
-          <MapPin className="w-5 h-5 text-emerald-400" />
+          <div className="bg-[#161b22] border border-[#30363d] p-1.5 rounded-lg">
+             <MapPin className="w-4 h-4 text-emerald-400" />
+          </div>
           <span className="text-lg font-bold bg-gradient-to-r from-white to-emerald-400 bg-clip-text text-transparent">Jornada no Mapa</span>
         </div>
       </div>
 
       {/* Mapa */}
       <MapContainer 
-        key={displayPoints.length} // Force re-render when points change to update center/poly
         center={centerCoords} 
         zoom={5} 
         style={{ width: '100%', height: '100%' }}
@@ -157,7 +173,9 @@ export function JourneyModulePreview({ points }: JourneyModulePreviewProps) {
       >
         <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
         
-        {displayPoints.map((point, index) => (
+        <MapController center={centerCoords} />
+
+        {displayPoints.map((point) => (
           <Marker 
             key={point.id} 
             position={[point.lat, point.lng]} 
@@ -201,7 +219,7 @@ export function JourneyModulePreview({ points }: JourneyModulePreviewProps) {
           </div>
 
           <div className="flex-1 relative">
-            <img src={selectedPoint.photo} className="w-full h-full object-cover" alt="" />
+            <img src={selectedPoint.photo || 'https://picsum.photos/seed/empty/400/600'} className="w-full h-full object-cover" alt="" />
             <div className="absolute bottom-0 left-0 right-0 p-10 pb-16 text-center bg-gradient-to-t from-black/95 via-black/40 to-transparent">
               <p className="text-xs text-white/60 mb-2 font-mono">{selectedPoint.date}</p>
               <p className="text-base font-medium leading-relaxed">{selectedPoint.description}</p>
