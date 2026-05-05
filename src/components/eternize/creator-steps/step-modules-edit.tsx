@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LayoutGrid, Check, X, CreditCard, Sparkles, Info, Plus, Image as ImageIcon, Trash2, Calendar, MessageSquare, Type, ChevronLeft, ChevronRight, Heart, Trophy, Star, Compass, RotateCcw, Map as MapIcon, ChevronDown, MapPin, Search, Loader2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
@@ -75,6 +75,7 @@ export function StepModulesEdit({
   const [locationSearch, setLocationSearch] = useState('');
   const [locationResults, setSearchResults] = useState<any[]>([]);
   const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Notifica o pai sobre a mudança do submódulo para atualizar a prévia
   useEffect(() => {
@@ -158,19 +159,38 @@ export function StepModulesEdit({
     onJourneyPointsChange(journeyPoints.map(p => p.id === id ? { ...p, ...updates } : p));
   };
 
-  // Busca de local via Nominatim (OpenStreetMap)
-  const searchLocation = async (query: string) => {
-    if (query.length < 3) return;
-    setIsSearchingLocation(true);
-    try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
-      const data = await response.json();
-      setSearchResults(data);
-    } catch (error) {
-      console.error("Erro ao buscar local:", error);
-    } finally {
-      setIsSearchingLocation(false);
+  // Busca de local via Nominatim (OpenStreetMap) com Debounce e Error Handling
+  const searchLocation = (query: string) => {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    
+    if (query.length < 3) {
+      setSearchResults([]);
+      return;
     }
+
+    debounceTimerRef.current = setTimeout(async () => {
+      setIsSearchingLocation(true);
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
+          {
+            headers: {
+              'Accept-Language': 'pt-BR,pt;q=0.9',
+            }
+          }
+        );
+        
+        if (!response.ok) throw new Error('Falha na resposta da API de mapas');
+        
+        const data = await response.json();
+        setSearchResults(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.warn("Erro ao buscar local (Nominatim):", error);
+        setSearchResults([]);
+      } finally {
+        setIsSearchingLocation(false);
+      }
+    }, 1000); // 1 segundo de debounce para respeitar a política da Nominatim
   };
 
   const handleLocationSelect = (id: string, result: any) => {
