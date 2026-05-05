@@ -1,8 +1,7 @@
-
 'use client';
 
-import React, { useState } from 'react';
-import { LayoutGrid, Check, X, CreditCard, Sparkles, Info, Plus, Image as ImageIcon, Trash2, Calendar, MessageSquare, Type, ChevronLeft, ChevronRight, Heart, Trophy, Star, Compass, RotateCcw, Map as MapIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LayoutGrid, Check, X, CreditCard, Sparkles, Info, Plus, Image as ImageIcon, Trash2, Calendar, MessageSquare, Type, ChevronLeft, ChevronRight, Heart, Trophy, Star, Compass, RotateCcw, Map as MapIcon, ChevronDown } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +26,7 @@ interface StepModulesEditProps {
   onBack: () => void;
   onNext: () => void;
   isModulesOnlyMode?: boolean;
+  onSubModuleChange?: (subModule: string | null) => void;
 }
 
 const compressImage = (base64Str: string): Promise<string> => {
@@ -58,10 +58,28 @@ export function StepModulesEdit({
   onMemoriesChange, 
   onBack, 
   onNext,
-  isModulesOnlyMode = false
+  isModulesOnlyMode = false,
+  onSubModuleChange
 }: StepModulesEditProps) {
   const [activeSubModule, setActiveSubModule] = useState<SubModule>('menu');
   const [editingMemoryId, setEditingMemoryId] = useState<string | null>(null);
+
+  // Notifica o pai sobre a mudança do submódulo para atualizar a prévia
+  useEffect(() => {
+    if (onSubModuleChange) {
+      if (activeSubModule === 'menu') {
+        onSubModuleChange(null);
+      } else {
+        // Mapeia os nomes para os IDs usados na prévia
+        const mapping: Record<string, string> = {
+          'memories': 'memorias',
+          'achievements': 'conquistas',
+          'curiosities': 'curiosidades'
+        };
+        onSubModuleChange(mapping[activeSubModule] || activeSubModule);
+      }
+    }
+  }, [activeSubModule, onSubModuleChange]);
 
   const addMemory = () => {
     if (memories.length >= 10) return;
@@ -98,8 +116,8 @@ export function StepModulesEdit({
 
   const MODULE_MENU_ITEMS = [
     { id: 'memories' as SubModule, title: 'Memórias', description: 'Linha do tempo interativa', icon: Heart, color: 'text-red-500', bg: 'bg-red-500/10' },
-    { id: 'achievements' as SubModule, title: 'Conquistas', description: 'Níveis e marcos do casal', icon: Trophy, color: 'text-yellow-500', bg: 'bg-yellow-500/10', locked: true },
-    { id: 'curiosities' as SubModule, title: 'Curiosidades', description: 'Fatos sobre o dia do início', icon: Star, color: 'text-purple-500', bg: 'bg-purple-500/10', locked: true },
+    { id: 'achievements' as SubModule, title: 'Conquistas', description: 'Níveis e marcos do casal', icon: Trophy, color: 'text-yellow-500', bg: 'bg-yellow-500/10', locked: false },
+    { id: 'curiosities' as SubModule, title: 'Curiosidades', description: 'Fatos sobre o dia do início', icon: Star, color: 'text-purple-500', bg: 'bg-purple-500/10', locked: false },
     { id: 'astral' as SubModule, title: 'Mapa Astral', description: 'Energia do universo', icon: Sparkles, color: 'text-blue-500', bg: 'bg-blue-500/10', locked: true },
     { id: 'journey' as SubModule, title: 'Jornada', description: 'Locais onde estiveram', icon: MapIcon, color: 'text-green-500', bg: 'bg-green-500/10', locked: true },
     { id: 'surprise' as SubModule, title: 'Surpresa', description: 'Roleta de momentos', icon: RotateCcw, color: 'text-orange-500', bg: 'bg-orange-500/10', locked: true },
@@ -143,7 +161,7 @@ export function StepModulesEdit({
             <LayoutGrid className="w-5 h-5 md:w-6 md:h-6 text-white/80" />
           </div>
           <h2 className="text-2xl md:text-4xl font-black tracking-tight">
-            {activeSubModule === 'menu' ? 'Painel de Módulos' : activeSubModule === 'memories' ? 'Editar Memórias' : 'Personalizar'}
+            {activeSubModule === 'menu' ? 'Painel de Módulos' : activeSubModule === 'memories' ? 'Editar Memórias' : activeSubModule === 'achievements' ? 'Ver Conquistas' : activeSubModule === 'curiosities' ? 'Ver Curiosidades' : 'Personalizar'}
           </h2>
         </div>
         <p className="text-xs md:text-base text-white/40 font-medium">
@@ -315,14 +333,51 @@ export function StepModulesEdit({
                 )}
              </div>
           </div>
+        ) : (activeSubModule === 'achievements' || activeSubModule === 'curiosities') ? (
+          <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
+             <div className="flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl">
+                <div className="flex items-center gap-3">
+                   <div className={cn("p-2 rounded-xl", activeSubModule === 'achievements' ? "bg-yellow-500/20" : "bg-purple-500/20")}>
+                     {activeSubModule === 'achievements' ? <Trophy className="w-4 h-4 text-yellow-500" /> : <Star className="w-4 h-4 text-purple-500" />}
+                   </div>
+                   <div>
+                      <h4 className="text-xs font-black text-white uppercase tracking-wider">
+                        {activeSubModule === 'achievements' ? 'Módulo Conquistas' : 'Módulo Curiosidades'}
+                      </h4>
+                      <p className="text-[9px] font-bold text-white/30 uppercase">Configuração Automática</p>
+                   </div>
+                </div>
+                <Button 
+                  onClick={() => setActiveSubModule('menu')}
+                  variant="ghost" 
+                  className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 gap-1"
+                >
+                   <ChevronLeft className="w-3 h-3" /> Voltar ao menu
+                </Button>
+             </div>
+
+             <div className="bg-[#0c0c0c] border border-white/5 rounded-[2rem] p-6 text-center space-y-4">
+                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
+                   <RotateCcw className="w-6 h-6 text-primary" />
+                </div>
+                <div className="space-y-1">
+                   <h4 className="text-sm font-black text-white uppercase tracking-tight">Conteúdo Inteligente</h4>
+                   <p className="text-[11px] text-white/40 leading-relaxed font-medium">
+                     {activeSubModule === 'achievements' 
+                        ? 'As conquistas são calculadas automaticamente com base na data que você definiu no início da página. Não é necessário editar nada!'
+                        : 'As curiosidades astronômicas e climáticas são buscadas automaticamente de acordo com o dia em que vocês se conheceram.'}
+                   </p>
+                </div>
+             </div>
+          </div>
         ) : null}
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-start gap-4">
           <Info className="w-5 h-5 text-white/30 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <p className="text-[11px] font-black uppercase text-white/60 tracking-widest">Configuração Visual</p>
+            <p className="text-[11px] font-black uppercase text-white/60 tracking-widest">Dica de Edição</p>
             <p className="text-[11px] font-medium text-white/30 leading-relaxed">
-              Você pode ativar ou desativar a exibição do Pack inteiro no site a qualquer momento usando a chave no final da página.
+              O celular ao lado mostra exatamente o que você está editando. Clique nos itens acima para ver a mágica acontecer!
             </p>
           </div>
         </div>
@@ -359,23 +414,4 @@ export function StepModulesEdit({
       </div>
     </div>
   );
-}
-
-function ChevronDown(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  )
 }

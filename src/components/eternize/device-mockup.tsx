@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
@@ -72,6 +71,7 @@ interface DeviceMockupProps {
   isPackEnabled?: boolean;
   step?: string;
   memories?: any[];
+  activeModuleId?: string | null;
 }
 
 export function DeviceMockup({
@@ -121,7 +121,8 @@ export function DeviceMockup({
   patternColor = '#ffffff',
   isFullscreen = false,
   isPackEnabled = false,
-  memories = []
+  memories = [],
+  activeModuleId = null
 }: DeviceMockupProps) {
   
   // Shared State
@@ -130,6 +131,13 @@ export function DeviceMockup({
   const [previewModuleId, setPreviewModuleId] = useState<string | null>(null);
   const [isAudioPlaying, setIsAudioPlaying] = useState(isAutoPlay);
   const [activeTab, setActiveTab] = useState<string>('grid');
+
+  // Sincroniza a abertura do módulo com o comando externo (editor)
+  useEffect(() => {
+    if (activeModuleId !== undefined) {
+      setPreviewModuleId(activeModuleId);
+    }
+  }, [activeModuleId]);
 
   // Animation/Experience States
   const [isIntroActive, setIsIntroActive] = useState(false);
