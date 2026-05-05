@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Bell, ChevronLeft, UserSquare2, CheckCircle2, UserPlus, Grid as GridIcon, MoreHorizontal, Heart, MessageCircle, Send, Bookmark } from 'lucide-react';
+import { Bell, ChevronLeft, UserSquare2, CheckCircle2, UserPlus, Grid as GridIcon, MoreHorizontal, Heart, MessageCircle, Send, Bookmark, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -68,7 +68,7 @@ export function InstagramView({
               </div>
               <div className="flex flex-col -space-y-0.5">
                 <div className="flex items-center gap-1">
-                  <span className="font-bold text-sm tracking-tight">{pageTitle || 'Nossa História'}</span>
+                  <span className="font-bold text-sm tracking-tight">{pageTitle || 'NOSSA HISTÓRIA'}</span>
                   <div className="bg-[#0095F6] rounded-full p-0.5"><CheckCircle2 className="w-2.5 h-2.5 text-white" /></div>
                 </div>
                 <span className="text-[10px] text-neutral-400 font-medium">{date ? format(date, 'dd/MM/yyyy') : '01/05/2026'}</span>
@@ -96,7 +96,7 @@ export function InstagramView({
           <div className="space-y-1.5">
             <p className="text-sm font-bold text-white">{(totalDays + (likedPosts[selectedPostIndex] ? 1 : 0)).toLocaleString('pt-BR')} curtidas</p>
             <div className="text-sm">
-              <span className="font-bold mr-2">{pageTitle || 'Nossa História'}</span>
+              <span className="font-bold mr-2">{pageTitle || 'NOSSA HISTÓRIA'}</span>
               <span className="text-neutral-200">Juntos desde {date ? format(date, 'dd/MM/yyyy') : '01/05/2026'} ❤️</span>
             </div>
           </div>
@@ -111,7 +111,7 @@ export function InstagramView({
         <div className="flex items-center gap-3">
           <ChevronLeft className="w-6 h-6" />
           <div className="flex items-center gap-1">
-            <span className="font-bold text-lg tracking-tight truncate max-w-[150px]">{pageTitle || 'Nossa História'}</span>
+            <span className="font-bold text-lg tracking-tight truncate max-w-[150px]">{pageTitle || 'NOSSA HISTÓRIA'}</span>
             <div className="bg-[#0095F6] rounded-full p-0.5"><CheckCircle2 className="w-3 h-3 text-white" /></div>
           </div>
         </div>
@@ -136,7 +136,7 @@ export function InstagramView({
           </div>
           
           <div className="space-y-0.5 mb-6">
-            <p className="font-bold text-sm">{pageTitle || 'Nossa História'}</p>
+            <p className="font-bold text-sm">{pageTitle || 'NOSSA HISTÓRIA'}</p>
             <div className="text-sm text-neutral-200 leading-tight" dangerouslySetInnerHTML={{ __html: message || 'Nossa jornada inesquecível...' }} />
             <p className="text-sm text-neutral-500 pt-1"> Juntos desde {date ? format(date, 'dd/MM/yyyy') : '07/04/2017'}</p>
           </div>
@@ -145,6 +145,28 @@ export function InstagramView({
             <button onClick={onFollowToggle} className={cn("flex-1 py-1.5 rounded-lg text-sm font-semibold transition active:scale-95", isFollowing ? "bg-neutral-800 text-white" : "bg-[#0095F6] text-white")}>{isFollowing ? 'Seguindo' : 'Seguir'}</button>
             <button className="flex-1 bg-neutral-800 py-1.5 rounded-lg text-sm font-semibold transition active:scale-95 text-white">Mensagem</button>
             <button className="px-2 bg-neutral-800 rounded-lg transition active:scale-95 text-white"><UserPlus className="w-4.5 h-4.5" /></button>
+          </div>
+
+          {/* Highlights Section */}
+          <div className="flex gap-4 overflow-x-auto no-scrollbar mb-4 py-1">
+             <div className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group">
+                <div className="w-14 h-14 rounded-full border border-neutral-800 flex items-center justify-center bg-black group-active:scale-95 transition-transform">
+                   <Plus className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-[11px] text-white font-medium">Novo</span>
+             </div>
+             
+             {/* Dynamic Highlights based on photos (Optional visual enhancement) */}
+             {uploadedPhotos.slice(1, 4).map((photo, i) => (
+                <div key={i} className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer active:scale-95 transition-transform">
+                   <div className="w-14 h-14 rounded-full border border-neutral-800 overflow-hidden relative p-[2px] bg-black">
+                      <div className="w-full h-full rounded-full overflow-hidden relative">
+                         <Image src={photo} fill className="object-cover" alt="" />
+                      </div>
+                   </div>
+                   <span className="text-[11px] text-white font-medium truncate max-w-[56px]">Memória {i+1}</span>
+                </div>
+             ))}
           </div>
         </section>
 
@@ -172,7 +194,7 @@ export function InstagramView({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold truncate text-white">{musicData.title}</p>
-              <p className="text-[10px] text-neutral-400 truncate">{pageTitle || 'Nossa História'}</p>
+              <p className="text-[10px] text-neutral-400 truncate">{pageTitle || 'NOSSA HISTÓRIA'}</p>
             </div>
             <button onClick={() => onAudioToggle(!isAudioPlaying)} className="text-white">
               {isAudioPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
