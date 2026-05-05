@@ -186,12 +186,12 @@ export function NetflixView({
       {isPackEnabled && (
         <div className="px-4 py-8 border-t border-white/5">
           <h3 className="text-white text-lg font-bold mb-5 tracking-tight">Veja também</h3>
-          <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-4">
+          <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-4 snap-x snap-mandatory">
             {modules.map((mod) => (
               <div 
                 key={mod.id} 
                 onClick={() => onModuleClick?.(mod.id)}
-                className="flex-shrink-0 w-36 group cursor-pointer"
+                className="flex-shrink-0 w-36 group cursor-pointer snap-start"
               >
                 <div className={cn(
                   "aspect-[1.5/1] rounded-lg mb-2.5 flex items-center justify-center shadow-lg transition-transform group-hover:scale-105 duration-300",
