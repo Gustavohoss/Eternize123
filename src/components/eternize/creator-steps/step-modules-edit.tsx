@@ -26,6 +26,7 @@ interface StepModulesEditProps {
   onMemoriesChange: (memories: Memory[]) => void;
   onBack: () => void;
   onNext: () => void;
+  isModulesOnlyMode?: boolean;
 }
 
 const compressImage = (base64Str: string): Promise<string> => {
@@ -50,7 +51,15 @@ const compressImage = (base64Str: string): Promise<string> => {
 
 type SubModule = 'menu' | 'memories' | 'achievements' | 'curiosities';
 
-export function StepModulesEdit({ isPackEnabled, onPackToggle, memories, onMemoriesChange, onBack, onNext }: StepModulesEditProps) {
+export function StepModulesEdit({ 
+  isPackEnabled, 
+  onPackToggle, 
+  memories, 
+  onMemoriesChange, 
+  onBack, 
+  onNext,
+  isModulesOnlyMode = false
+}: StepModulesEditProps) {
   const [activeSubModule, setActiveSubModule] = useState<SubModule>('menu');
   const [editingMemoryId, setEditingMemoryId] = useState<string | null>(null);
 
@@ -337,7 +346,9 @@ export function StepModulesEdit({ isPackEnabled, onPackToggle, memories, onMemor
           className="h-14 rounded-2xl border-white/10 bg-white/5 font-black text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-3 group"
         >
           <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> 
-          {activeSubModule === 'menu' ? 'Voltar Etapa' : 'Voltar ao Menu'}
+          {activeSubModule === 'menu' 
+            ? (isModulesOnlyMode ? 'Sair do Editor' : 'Voltar Etapa') 
+            : 'Voltar ao Menu'}
         </Button>
         <Button 
           onClick={onNext}

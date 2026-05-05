@@ -63,6 +63,9 @@ export default function EditSitePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [step, setStep] = useState<Step>('customize-background');
 
+  // Identifica se entrou direto para editar módulos
+  const isModulesOnlyMode = useMemo(() => searchParams.get('startStep') === 'modules', [searchParams]);
+
   // States
   const [selectedTheme, setSelectedTheme] = useState<ThemeId>('classic');
   const [selectedBgColor, setSelectedBgColor] = useState<string>('#000000');
@@ -205,16 +208,25 @@ export default function EditSitePage() {
 
   const currentStepIndex = stepSequence.indexOf(step);
 
-  const handleBack = () => {
-    if (currentStepIndex <= 0) { router.push('/minhas-paginas'); return; }
-    setStep(stepSequence[currentStepIndex - 1]);
-  };
+  const handleBack = useCallback(() => {
+    // Se for modo dedicado de módulos, volta direto pro dashboard
+    if (isModulesOnlyMode && step === 'modules') {
+      router.push('/minhas-paginas');
+      return;
+    }
 
-  const handleNext = () => {
+    if (currentStepIndex <= 0) { 
+      router.push('/minhas-paginas'); 
+      return; 
+    }
+    setStep(stepSequence[currentStepIndex - 1]);
+  }, [currentStepIndex, stepSequence, router, isModulesOnlyMode, step]);
+
+  const handleNext = useCallback(() => {
     if (currentStepIndex < stepSequence.length - 1) {
       setStep(stepSequence[currentStepIndex + 1]);
     }
-  };
+  }, [currentStepIndex, stepSequence]);
 
   const handleSave = async () => {
     if (!firestore || !siteRef || !user) return;
@@ -290,7 +302,7 @@ export default function EditSitePage() {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 text-white">
         <Loader2 className="w-10 h-10 text-primary animate-spin" />
-        <p className="text-xs font-black uppercase tracking-widest opacity-40">Carregando editor...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Carregando editor...</p>
       </div>
     );
   }
@@ -337,7 +349,7 @@ export default function EditSitePage() {
             {step === 'message' && <StepMessage {...{selectedTheme, message, onMessageChange: setMessage, messageFont, onMessageFontChange: setMessageFont, messageColor, onMessageColorChange: setMessageColor, onBack: handleBack, onNext: handleNext}} />}
             {step === 'music' && <StepMusic {...{selectedTheme, musicData, onMusicSelect: setMusicData, musicBoxColor, onMusicBoxColorChange: setMusicBoxColor, musicTextColor, onMusicTextColorChange: setMusicTextColor, musicHasNeon, onMusicHasNeonChange: setMusicHasNeon, musicNeonStrength, onMusicNeonStrengthChange: setMusicNeonStrength, isAutoPlay: isMusicAutoPlay, onAutoPlayChange: setIsMusicAutoPlay, onBack: handleBack, onNext: handleNext}} />}
             {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: setLocationQuery, showSuggestions, onShowSuggestionsChange: setShowSuggestions, filteredCities, selectedCountStyle, onCountStyleChange: setSelectedCountStyle, dateFont, onDateFontChange: setDateFont, dateIsBold, onDateIsBoldChange: setDateIsBold, dateHasNeon, onDateHasNeonChange: setDateHasNeon, dateNeonStrength, onDateNeonStrengthChange: setDateNeonStrength, dateColor, onDateColorChange: setDateColor, dateBoxBgColor, onDateBoxBgColorChange: setDateBoxBgColor, dateBoxBorderColor, onDateBoxBorderColorChange: setDateBoxBorderColor, onBack: handleBack, onNext: handleNext}} />}
-            {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} memories={memories} onMemoriesChange={setMemories} onBack={handleBack} onNext={handleSave} />}
+            {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} memories={memories} onMemoriesChange={setMemories} onBack={handleBack} onNext={handleSave} isModulesOnlyMode={isModulesOnlyMode} />}
 
             <div className="lg:hidden flex flex-col items-center mt-12 w-full gap-4">
                <Dialog>
@@ -354,16 +366,19 @@ export default function EditSitePage() {
                {mounted && isMobile && <DeviceMockup {...previewProps} />}
             </div>
 
-            <div className="mt-12 flex flex-col gap-6 max-w-md mx-auto md:mx-0">
-              <div className="flex flex-col gap-4 pt-10 border-t border-white/5">
-                <Button onClick={handleBack} variant="outline" className="w-full h-14 rounded-2xl border-white/10 bg-white/5 font-black text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2"><ChevronLeft className="w-4 h-4" /> Etapa Anterior</Button>
-                {currentStepIndex < stepSequence.length - 1 ? (
-                  <Button onClick={handleNext} className="w-full h-14 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 bg-primary text-white hover:bg-primary/90 shadow-2xl shadow-primary/20">Próxima Etapa <ChevronRight className="w-4 h-4" /></Button>
-                ) : (
-                  <Button onClick={handleSave} className="w-full h-14 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 bg-[#15803d] text-white hover:bg-[#166534] shadow-2xl shadow-green-500/20">Finalizar Edição <CheckCircle2 className="w-4 h-4" /></Button>
-                )}
+            {/* Global navigation footer - Hidden in modules step to avoid duplication */}
+            {step !== 'modules' && (
+              <div className="mt-12 flex flex-col gap-6 max-w-md mx-auto md:mx-0">
+                <div className="flex flex-col gap-4 pt-10 border-t border-white/5">
+                  <Button onClick={handleBack} variant="outline" className="w-full h-14 rounded-2xl border-white/10 bg-white/5 font-black text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2"><ChevronLeft className="w-4 h-4" /> Etapa Anterior</Button>
+                  {currentStepIndex < stepSequence.length - 1 ? (
+                    <Button onClick={handleNext} className="w-full h-14 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 bg-primary text-white hover:bg-primary/90 shadow-2xl shadow-primary/20">Próxima Etapa <ChevronRight className="w-4 h-4" /></Button>
+                  ) : (
+                    <Button onClick={handleSave} className="w-full h-14 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 bg-[#15803d] text-white hover:bg-[#166534] shadow-2xl shadow-green-500/20">Finalizar Edição <CheckCircle2 className="w-4 h-4" /></Button>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="lg:sticky lg:top-24 self-start hidden lg:flex flex-col items-center gap-6">
