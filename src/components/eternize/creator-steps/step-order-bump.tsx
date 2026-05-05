@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Zap, Flame, ExternalLink, X, CreditCard } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Zap, Flame, ExternalLink, X, CreditCard, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
@@ -37,6 +37,24 @@ const MODULES: ModuleItem[] = [
     title: 'Curiosidades',
     description: 'Descubra a fase da lua, a estação do ano e fatos astronômicos do dia em que vocês se conheceram.',
     image: 'https://picsum.photos/seed/curiosities-module/600/800'
+  },
+  {
+    id: 'mapa-astral',
+    title: 'Mapa Astral',
+    description: 'O alinhamento dos astros e a energia do universo no exato momento em que essa história começou.',
+    image: 'https://picsum.photos/seed/astral-module/600/800'
+  },
+  {
+    id: 'jornada',
+    title: 'Jornada no Mapa',
+    description: 'Um rastro interativo no mapa mundi conectando os lugares onde vocês criaram as melhores lembranças.',
+    image: 'https://picsum.photos/seed/journey-module/600/800'
+  },
+  {
+    id: 'roleta',
+    title: 'Roleta Surpresa',
+    description: 'Um jogo interativo para sortear desafios, encontros e momentos divertidos para fazerem juntos.',
+    image: 'https://picsum.photos/seed/roulette-module/600/800'
   }
 ];
 
@@ -96,7 +114,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
           <h2 className="text-2xl md:text-4xl font-black tracking-tight">Pack de Módulos</h2>
         </div>
         <p className="text-xs md:text-base text-white/40 font-medium max-w-xl">
-          Adicione 3 módulos exclusivos ao presente. Você poderá editar e personalizar cada módulo após a compra.
+          Adicione 6 módulos exclusivos ao presente. Você poderá editar e personalizar cada módulo após a compra.
         </p>
       </div>
 

@@ -29,7 +29,11 @@ import {
   CheckCircle2,
   MessageCircle,
   Send,
-  Bookmark
+  Bookmark,
+  Trophy,
+  Sparkles,
+  Star,
+  Compass
 } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow, Autoplay, EffectCreative } from 'swiper/modules';
@@ -100,7 +104,17 @@ interface DeviceMockupProps {
   patternColor?: string;
   
   isFullscreen?: boolean;
+  isPackEnabled?: boolean;
 }
+
+const PACK_MODULES = [
+  { id: 'memorias', label: 'Memórias', icon: Heart, bgColor: '#ffe4e6', iconColor: '#e11d48' },
+  { id: 'conquistas', label: 'Conquistas', icon: Trophy, bgColor: '#fef3c7', iconColor: '#d97706' },
+  { id: 'curiosidades', label: 'Curiosidades', icon: Sparkles, bgColor: '#f3e8ff', iconColor: '#7c3aed' },
+  { id: 'mapa-astral', label: 'Mapa Astral', icon: Star, bgColor: '#e0f2fe', iconColor: '#0284c7' },
+  { id: 'jornada', label: 'Jornada no Mapa', icon: Compass, bgColor: '#d1fae5', iconColor: '#059669' },
+  { id: 'roleta', label: 'Roleta Surpresa', icon: RotateCcw, bgColor: '#ffedd5', iconColor: '#ea580c' },
+];
 
 export function DeviceMockup({
   selectedTheme = 'classic',
@@ -150,7 +164,8 @@ export function DeviceMockup({
   patternDensity = 1,
   patternColor = '#ffffff',
   
-  isFullscreen = false
+  isFullscreen = false,
+  isPackEnabled = false
 }: DeviceMockupProps) {
   const [activeHeroIndex, setActiveHeroIndex] = useState(0);
   const [timeDiff, setTimeDiff] = useState<any>(null);
@@ -648,19 +663,22 @@ export function DeviceMockup({
           {/* Header do Post */}
           <header className="flex items-center justify-between px-4 py-3 sticky top-0 bg-black z-50 border-b border-white/5">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full border border-white/10 overflow-hidden relative bg-neutral-900">
-                {uploadedPhotos.length > 0 ? (
-                  <Image src={uploadedPhotos[0]} fill className="object-cover" alt="Profile" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center"><UserSquare2 className="w-4 h-4 text-white/20" /></div>
-                )}
-              </div>
-              <div className="flex flex-col -space-y-0.5">
-                <div className="flex items-center gap-1">
-                   <span className="font-bold text-sm tracking-tight">{pageTitle || 'Usuario'}</span>
-                   <svg width="10" height="10" viewBox="0 0 24 24" fill="#0095F6"><circle cx="12" cy="12" r="11"/><path d="M7 12l3.5 3.5L17 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <ChevronLeft className="w-6 h-6" />
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full border border-white/10 overflow-hidden relative bg-neutral-900">
+                  {uploadedPhotos.length > 0 ? (
+                    <Image src={uploadedPhotos[0]} fill className="object-cover" alt="Profile" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center"><UserSquare2 className="w-4 h-4 text-white/20" /></div>
+                  )}
                 </div>
-                <span className="text-[10px] text-neutral-400 font-medium">{date ? format(date, 'dd/MM/yyyy') : '01/05/2026'}</span>
+                <div className="flex flex-col -space-y-0.5">
+                  <div className="flex items-center gap-1">
+                     <span className="font-bold text-sm tracking-tight">{pageTitle || 'Usuario'}</span>
+                     <svg width="10" height="10" viewBox="0 0 24 24" fill="#0095F6"><circle cx="12" cy="12" r="11"/><path d="M7 12l3.5 3.5L17 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>
+                  <span className="text-[10px] text-neutral-400 font-medium">{date ? format(date, 'dd/MM/yyyy') : '01/05/2026'}</span>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -1474,6 +1492,40 @@ export function DeviceMockup({
                       />
                     </div>
                   )}
+
+                  {isPackEnabled && selectedTheme === 'classic' && (
+                    <div className="w-full px-5 mt-10 pb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
+                      <div className="text-center mb-8">
+                        <h3 
+                          style={{ fontFamily: getFontFamily(titleFont || 'dancing-script'), color: messageColor }} 
+                          className="text-2xl opacity-80"
+                        >
+                          Para você
+                        </h3>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        {PACK_MODULES.map((mod) => (
+                          <div 
+                            key={mod.id}
+                            className="bg-white rounded-2xl p-1 shadow-lg overflow-hidden border border-black/5 active:scale-95 transition-transform"
+                          >
+                            <div 
+                              className="aspect-[4/3] rounded-t-xl flex items-center justify-center relative overflow-hidden"
+                              style={{ backgroundColor: mod.bgColor }}
+                            >
+                              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)] from-white" />
+                              <mod.icon className="w-8 h-8 relative z-10" style={{ color: mod.iconColor }} />
+                            </div>
+                            <div className="py-2.5 bg-white text-center border-t border-black/5">
+                              <span className="text-[11px] font-black text-neutral-800 uppercase tracking-tight">{mod.label}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="h-20 shrink-0" />
                 </div>
               )}
