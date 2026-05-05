@@ -151,7 +151,7 @@ export function DeviceMockup({
 
   // Animation/Experience States
   const [isIntroActive, setIsIntroActive] = useState(false);
-  const [introPhase, setIntroPhase] = useState<'idle' | 'closing' | 'blackout' | 'logo'>('idle');
+  const [introPhase, setIntroPhase] = useState<'idle' | 'closing' | 'logo' | 'fading'>('idle');
   const [showStories, setShowStories] = useState(false);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [storyProgress, setStoryProgress] = useState(0);
@@ -262,27 +262,61 @@ export function DeviceMockup({
 
   const slugifiedTitle = (pageTitle || '').toLowerCase().replace(/\s+/g, '-').normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
+  // Curtain Bars generation
+  const curtainBars = useMemo(() => {
+    const count = 30;
+    return Array.from({ length: count }).map((_, i) => {
+      const r = Math.floor(26 + (i * (192 / count)));
+      return {
+        color: `rgb(${r}, 0, 0)`,
+        delay: `${i * 0.02}s`
+      };
+    });
+  }, []);
+
+  const handleStartNetflixExperience = useCallback(() => {
+    setIsIntroActive(true);
+    setIntroPhase('closing');
+    
+    // Logo aparece após o fechamento das barras
+    setTimeout(() => {
+      setIntroPhase('logo');
+    }, 1600);
+
+    // Inicia os stories após a animação completa
+    setTimeout(() => {
+      setIsIntroActive(false);
+      setIntroPhase('idle');
+      setShowStories(true);
+      setCurrentStoryIndex(0);
+      setStoryProgress(0);
+    }, 4500);
+  }, []);
+
   return (
     <div className={cn("w-full transition-all duration-500 flex flex-col relative", isFullscreen ? "h-full" : "max-w-[400px] mx-auto")}>
       {musicData && (
         <MusicPlayer musicData={musicData} isAutoPlay={isAudioPlaying} hideUI={selectedTheme !== 'classic'} onStateChange={setIsAudioPlaying} />
       )}
 
-      {/* Intro Animation Layer */}
+      {/* Intro Animation Layer (Eternize Effect) */}
       {isIntroActive && (
-        <div className={cn(
-          "absolute inset-0 z-[1000] bg-black flex items-center justify-center overflow-hidden",
-          introPhase === 'closing' && "intro-closing",
-          introPhase === 'blackout' && "intro-blackout"
-        )}>
-           {/* Painéis da Cortina */}
-           <div className="curtain-panel curtain-left"></div>
-           <div className="curtain-panel curtain-right"></div>
+        <div className="absolute inset-0 z-[1000] bg-black flex items-center justify-center overflow-hidden">
+           <div className={cn("curtain-container", introPhase !== 'idle' && "curtain-active")}>
+             {curtainBars.map((bar, i) => (
+               <div 
+                 key={i} 
+                 className="curtain-bar" 
+                 style={{ backgroundColor: bar.color, transitionDelay: bar.delay }}
+               />
+             ))}
+           </div>
            
-           {/* Logo */}
+           <div className="curtain-overlay"></div>
+           
            <h1 className={cn(
-             "text-[#E50914] text-4xl md:text-6xl font-bebas tracking-[15px] uppercase transition-all duration-1000 relative z-[1200]", 
-             introPhase === 'logo' ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-90 blur-xl"
+             "curtain-logo-text", 
+             introPhase === 'logo' && "curtain-logo-visible"
            )}>
              ETERNIZE
            </h1>
@@ -338,7 +372,7 @@ export function DeviceMockup({
                 <ClassicView {...{uploadedPhotos, photoEffect, showCard, cardColor, titlePosition, pageTitle, titleStyle, message, messageColor, messageFontFamily: getFontFamily(messageFont || 'inter'), date, selectedCountStyle, dateStyle, dateIsBold, dateBoxBgColor, dateBoxBorderColor, timeDiff, totalDays, musicData, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength, isAudioPlaying, onAudioToggle: setIsAudioPlaying, isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'netflix' && (
-                <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: () => { setIsIntroActive(true); setIntroPhase('closing'); setTimeout(() => setIntroPhase('blackout'), 1300); setTimeout(() => setIntroPhase('logo'), 1600); setTimeout(() => { setIsIntroActive(false); setIntroPhase('idle'); setShowStories(true); setCurrentStoryIndex(0); setStoryProgress(0); }, 4500); }, onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList), isPackEnabled, onModuleClick: setPreviewModuleId}} />
+                <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: handleStartNetflixExperience, onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList), isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'spotify' && (
                 <SpotifyView {...{uploadedPhotos, activeHeroIndex, pageTitle, totalDays, timeDiff, date, activeTab, onTabChange: setActiveTab, onPhotoClick: (i) => { setActiveHeroIndex(i); setShowSpotifyFullscreen(true); }, isLiked, onLikeToggle: () => setIsLiked(!isLiked), isAudioPlaying, onAudioToggle: setIsAudioPlaying, dynamicSpotifyColor, spotifyHeaderOpacity, onHeaderScroll: (e) => setSpotifyHeaderOpacity(Math.min(1, e.currentTarget.scrollTop / 100)), onShowFullscreen: () => setShowSpotifyFullscreen(true), onCloseFullscreen: () => setShowSpotifyFullscreen(false), showSpotifyFullscreen, message, musicData}} />
