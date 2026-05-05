@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { LayoutGrid, Check, X, CreditCard, Sparkles, Info, Plus, Image as ImageIcon, Trash2, Calendar, MessageSquare, Type, ChevronLeft, ChevronRight, Heart, Trophy, Star, Compass, RotateCcw, Map as MapIcon, ChevronDown, MapPin, Search } from 'lucide-react';
+import { LayoutGrid, Check, X, CreditCard, Sparkles, Info, Plus, Image as ImageIcon, Trash2, Calendar, MessageSquare, Type, ChevronLeft, ChevronRight, Heart, Trophy, Star, Compass, RotateCcw, Map as MapIcon, ChevronDown, MapPin, Search, Loader2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -71,13 +71,17 @@ export function StepModulesEdit({
   const [editingMemoryId, setEditingMemoryId] = useState<string | null>(null);
   const [editingPointId, setEditingPointId] = useState<string | null>(null);
 
+  // Estados para busca de local
+  const [locationSearch, setLocationSearch] = useState('');
+  const [locationResults, setSearchResults] = useState<any[]>([]);
+  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+
   // Notifica o pai sobre a mudança do submódulo para atualizar a prévia
   useEffect(() => {
     if (onSubModuleChange) {
       if (activeSubModule === 'menu') {
         onSubModuleChange(null);
       } else {
-        // Mapeia os nomes para os IDs usados na prévia
         const mapping: Record<string, string> = {
           'memories': 'memorias',
           'achievements': 'conquistas',
@@ -154,6 +158,31 @@ export function StepModulesEdit({
     onJourneyPointsChange(journeyPoints.map(p => p.id === id ? { ...p, ...updates } : p));
   };
 
+  // Busca de local via Nominatim (OpenStreetMap)
+  const searchLocation = async (query: string) => {
+    if (query.length < 3) return;
+    setIsSearchingLocation(true);
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+      const data = await response.json();
+      setSearchResults(data);
+    } catch (error) {
+      console.error("Erro ao buscar local:", error);
+    } finally {
+      setIsSearchingLocation(false);
+    }
+  };
+
+  const handleLocationSelect = (id: string, result: any) => {
+    updateJourneyPoint(id, {
+      lat: parseFloat(result.lat),
+      lng: parseFloat(result.lon),
+      title: result.display_name.split(',')[0] // Sugere o nome curto do local
+    });
+    setLocationSearch('');
+    setSearchResults([]);
+  };
+
   const MODULE_MENU_ITEMS = [
     { id: 'memories' as SubModule, title: 'Memórias', description: 'Linha do tempo interativa', icon: Heart, color: 'text-red-500', bg: 'bg-red-500/10' },
     { id: 'achievements' as SubModule, title: 'Conquistas', description: 'Níveis e marcos do casal', icon: Trophy, color: 'text-yellow-500', bg: 'bg-yellow-500/10', locked: false },
@@ -194,7 +223,6 @@ export function StepModulesEdit({
 
   return (
     <div className="space-y-8 md:space-y-10 flex flex-col items-center md:items-start w-full max-w-xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Header Centralizado ou à Esquerda */}
       <div className="space-y-3 text-center md:text-left w-full">
         <div className="flex flex-col md:flex-row items-center gap-4">
           <div className="bg-white/5 p-2 rounded-2xl border border-white/10">
@@ -239,7 +267,6 @@ export function StepModulesEdit({
           </div>
         ) : activeSubModule === 'memories' ? (
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
-             {/* Header Memórias */}
              <div className="flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl">
                 <div className="flex items-center gap-3">
                    <div className="bg-red-500/20 p-2 rounded-xl"><Heart className="w-4 h-4 text-red-500" /></div>
@@ -375,7 +402,6 @@ export function StepModulesEdit({
           </div>
         ) : activeSubModule === 'journey' ? (
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
-             {/* Header Jornada */}
              <div className="flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl">
                 <div className="flex items-center gap-3">
                    <div className="bg-green-500/20 p-2 rounded-xl"><MapIcon className="w-4 h-4 text-green-500" /></div>
@@ -434,6 +460,40 @@ export function StepModulesEdit({
 
                     {editingPointId === point.id && (
                       <div className="px-5 pb-6 space-y-5 border-t border-white/5 pt-6 animate-in slide-in-from-top-2">
+                         
+                         {/* Campo de Busca de Local */}
+                         <div className="space-y-2 relative">
+                            <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Search className="w-2.5 h-2.5" /> Pesquisar Localização</Label>
+                            <div className="relative">
+                               <Input 
+                                 value={locationSearch}
+                                 onChange={(e) => {
+                                   setLocationSearch(e.target.value);
+                                   searchLocation(e.target.value);
+                                 }}
+                                 placeholder="Digite a cidade ou lugar..."
+                                 className="bg-white/5 border-primary/20 h-11 rounded-xl text-xs font-bold pl-10 focus:border-primary/50 transition-all"
+                               />
+                               <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary opacity-50" />
+                               {isSearchingLocation && <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-primary animate-spin" />}
+                            </div>
+                            
+                            {locationResults.length > 0 && (
+                              <div className="absolute top-full left-0 right-0 mt-2 bg-[#1a1a1a] border border-white/10 rounded-xl overflow-hidden z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1">
+                                {locationResults.map((res: any, i) => (
+                                  <button 
+                                    key={i}
+                                    onClick={() => handleLocationSelect(point.id, res)}
+                                    className="w-full text-left px-4 py-3 text-[10px] font-bold text-white/60 hover:bg-primary/10 hover:text-white border-b border-white/5 last:border-0 transition-colors flex items-center gap-3"
+                                  >
+                                    <MapPin className="w-3 h-3 text-primary shrink-0" />
+                                    <span className="truncate">{res.display_name}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                         </div>
+
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Type className="w-2.5 h-2.5" /> Nome do Local</Label>
@@ -512,7 +572,7 @@ export function StepModulesEdit({
                                </div>
                                <div className="flex-1 space-y-1">
                                   <p className="text-[10px] font-bold text-white/60">Escolha a melhor foto desse dia.</p>
-                                  <p className="text-[9px] text-white/20 leading-relaxed">Dica: Use coordenadas do Google Maps para precisão total no rastro da jornada.</p>
+                                  <p className="text-[9px] text-white/20 leading-relaxed">Dica: Use a busca automática acima para encontrar o local exato!</p>
                                </div>
                             </div>
                          </div>
@@ -581,7 +641,6 @@ export function StepModulesEdit({
           </div>
         </div>
 
-        {/* Global Toggle at bottom */}
         <div className="pt-6 border-t border-white/5">
            <div className="w-full bg-[#0c0c0c] border border-white/5 rounded-2xl p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
