@@ -113,7 +113,7 @@ export default function CriadorApp() {
   const [locationQuery, setLocationQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   
-  // Pack de Módulos
+  // Pack de Módulos (Order Bump)
   const [isPackEnabled, setIsPackEnabled] = useState<boolean>(true);
 
   useEffect(() => { setMounted(true); }, []);
@@ -268,7 +268,7 @@ export default function CriadorApp() {
     dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor, messageColor, messageFont,
     musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength, isAutoPlay: false,
     sparklesDensity, sparklesSpeed, sparklesColor, smokeIntensity, smokeColor, patternDuration,
-    patternDensity, patternColor
+    patternDensity, patternColor, isPackEnabled
   };
 
   return (
@@ -334,7 +334,7 @@ export default function CriadorApp() {
                    <DialogTitle className="sr-only">Prévia do Presente</DialogTitle>
                    <DialogDescription className="sr-only">Visualização em tela cheia do seu presente personalizado.</DialogDescription>
                    <div className="flex-1 overflow-hidden relative flex flex-col">
-                     <div className="absolute top-6 right-6 z-[250]"><DialogClose className="p-2.5 bg-black/60 hover:bg-black/80 rounded-full text-white transition-all border border-white/20 shadow-2xl backdrop-blur-md"><X className="w-5 h-5" /></DialogClose></div>
+                     <div className="absolute top-6 right-6 z-[250]"><DialogClose className="p-2.5 bg-black/60 hover:bg-black/80 rounded-full text-white transition-all border border-white/20 shadow-2xl backdrop-blur-md"><X className="w-5 h-5" /></X></DialogClose></div>
                      {mounted && <DeviceMockup {...previewProps} isFullscreen />}
                    </div>
                  </DialogContent>
