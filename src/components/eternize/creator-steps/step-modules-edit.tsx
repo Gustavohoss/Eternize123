@@ -82,7 +82,7 @@ export function StepModulesEdit({
   }, [activeSubModule, onSubModuleChange]);
 
   const addMemory = () => {
-    if (memories.length >= 10) return;
+    if (memories.length >= 8) return;
     const newMemory: Memory = {
       id: Math.random().toString(36).substring(2, 9),
       title: 'Nova Memória',
@@ -205,7 +205,7 @@ export function StepModulesEdit({
                    <div className="bg-red-500/20 p-2 rounded-xl"><Heart className="w-4 h-4 text-red-500" /></div>
                    <div>
                       <h4 className="text-xs font-black text-white uppercase tracking-wider">Módulo Memórias</h4>
-                      <p className="text-[9px] font-bold text-white/30 uppercase">{memories.length}/10 momentos</p>
+                      <p className="text-[9px] font-bold text-white/30 uppercase">{memories.length}/8 momentos</p>
                    </div>
                 </div>
                 <Button 
@@ -322,7 +322,7 @@ export function StepModulesEdit({
                   </div>
                 ))}
 
-                {memories.length < 10 && (
+                {memories.length < 8 && (
                   <button 
                     onClick={addMemory}
                     className="w-full h-16 rounded-[2rem] border-2 border-dashed border-white/5 bg-white/[0.02] hover:bg-white/5 hover:border-white/10 transition-all flex items-center justify-center gap-3 text-white/20 hover:text-primary group"
