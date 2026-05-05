@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { RotateCcw, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function RouletteModulePreview() {
@@ -10,6 +9,7 @@ export function RouletteModulePreview() {
   const [showResult, setShowResult] = useState(false);
   const [result, setResult] = useState('');
 
+  // Ordem dos momentos alinhada com as fatias da roleta
   const moments = [
     "O dia que nos conhecemos",
     "Aquele jantar especial",
@@ -25,12 +25,14 @@ export function RouletteModulePreview() {
 
     const extraDegrees = Math.floor(Math.random() * 360);
     const totalSpins = (Math.floor(Math.random() * 5) + 5) * 360;
+    
+    // Rotação acumulativa para giro contínuo
     const newRotation = currentRotation + totalSpins + extraDegrees;
-
     setCurrentRotation(newRotation);
 
     setTimeout(() => {
       const actualDeg = newRotation % 360;
+      // Lógica para identificar a fatia no topo (0 graus)
       const sliceIndex = Math.floor(((360 - actualDeg) % 360) / 60);
       
       setResult(moments[sliceIndex]);
@@ -81,13 +83,14 @@ export function RouletteModulePreview() {
           transform: translateX(-50%) rotate(30deg);
           text-align: center;
           width: 80px;
-          font-size: 10px;
+          font-size: 11px;
           font-weight: 900;
           color: #ffffff;
           text-transform: uppercase;
           line-height: 1.1;
         }
 
+        /* Cores Alternadas e Posições */
         .slice:nth-child(1) { transform: rotate(0deg) skewY(-30deg); }
         .slice:nth-child(1) .slice-content { background-color: #1a0000; transform: skewY(30deg) rotate(30deg); }
         
@@ -116,19 +119,18 @@ export function RouletteModulePreview() {
         </h1>
         <p className="text-white/60 text-sm font-medium mb-12 max-w-[280px]">Qual foi o melhor momento que vivemos juntos?</p>
 
-        <div className="wheel-wrapper relative w-[300px] h-[300px] mb-12">
+        <div className="wheel-wrapper relative w-[320px] h-[320px] mb-12">
           <div 
-            id="wheel"
-            className="w-full h-full rounded-full border-[10px] border-[#1a0000] relative overflow-hidden shadow-[0_0_40px_rgba(255,0,0,0.3)] transition-transform duration-[4000ms] cubic-bezier(0.15, 0, 0.15, 1)"
+            className="w-full h-full rounded-full border-[12px] border-[#1a0000] relative overflow-hidden shadow-[0_0_40px_rgba(255,0,0,0.3)] transition-transform duration-[4000ms] cubic-bezier(0.15, 0, 0.15, 1)"
             style={{ transform: `rotate(${currentRotation}deg)` }}
           >
-            <ul className="w-full h-full relative">
-              <li className="slice"><div className="slice-content"><span>Conheci...</span></div></li>
-              <li className="slice"><div className="slice-content"><span>Viagem</span></div></li>
-              <li className="slice"><div className="slice-content"><span>Beijo</span></div></li>
-              <li className="slice"><div className="slice-content"><span>Morar</span></div></li>
-              <li className="slice"><div className="slice-content"><span>Janta</span></div></li>
-              <li className="slice"><div className="slice-content"><span>Jantar</span></div></li>
+            <ul className="w-full h-full relative list-none">
+              <li className="slice"><div className="slice-content"><span>O dia que...</span></div></li>
+              <li className="slice"><div className="slice-content"><span>Aquele j...</span></div></li>
+              <li className="slice"><div className="slice-content"><span>Nossa pr...</span></div></li>
+              <li className="slice"><div className="slice-content"><span>Quando n...</span></div></li>
+              <li className="slice"><div className="slice-content"><span>Nosso pr...</span></div></li>
+              <li className="slice"><div className="slice-content"><span>Nossa pr...</span></div></li>
             </ul>
           </div>
 
@@ -137,7 +139,7 @@ export function RouletteModulePreview() {
             disabled={isSpinning}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-[#8b0000] border-4 border-[#050505] rounded-full z-20 flex items-center justify-center shadow-[0_0_25px_#ff0000] active:scale-90 transition-transform disabled:opacity-50 disabled:grayscale"
           >
-            <RotateCcw className={cn("w-7 h-7 text-white", isSpinning && "animate-spin")} />
+            <svg viewBox="0 0 24 24" width="32" className={cn(isSpinning && "animate-spin")}><path fill="white" d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/></svg>
           </button>
         </div>
 
@@ -147,7 +149,7 @@ export function RouletteModulePreview() {
       {/* Result Modal */}
       {showResult && (
         <div className="absolute inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-8 animate-in fade-in duration-300">
-           <div className="bg-[#1a0000] p-10 rounded-[2.5rem] border-2 border-red-600 text-center shadow-[0_0_50px_rgba(255,0,0,0.4)] animate-in zoom-in-90 duration-500 max-w-[300px]">
+           <div className="bg-[#1a0000] p-10 rounded-[2.5rem] border-2 border-red-600 text-center shadow-[0_0_50px_rgba(255,0,0,0.4)] animate-in zoom-in-90 duration-500 max-w-[320px]">
               <p className="text-red-200 text-sm font-bold mb-1">O momento sorteado foi:</p>
               <h2 className="text-2xl font-black text-red-500 italic uppercase tracking-tighter mb-8 leading-tight">{result}</h2>
               <button 
