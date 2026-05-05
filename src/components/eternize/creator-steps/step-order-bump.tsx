@@ -17,6 +17,7 @@ interface ModuleItem {
   title: string;
   description: string;
   image: string;
+  color: string;
 }
 
 const MODULES: ModuleItem[] = [
@@ -24,31 +25,36 @@ const MODULES: ModuleItem[] = [
     id: 'memorias',
     title: 'Memórias',
     description: 'Uma linha do tempo interativa dos momentos mais especiais do casal, com fotos e música por memória.',
-    image: 'https://picsum.photos/seed/memories-module/600/800'
+    image: 'https://picsum.photos/seed/memories-module/600/800',
+    color: '#e11d48'
   },
   {
     id: 'conquistas',
     title: 'Conquistas',
     description: 'Desbloqueie marcos exclusivos conforme o tempo passa. Mostre ao mundo o nível do amor de vocês.',
-    image: 'https://picsum.photos/seed/achievements-module/600/800'
+    image: 'https://picsum.photos/seed/achievements-module/600/800',
+    color: '#f97316'
   },
   {
     id: 'curiosidades',
     title: 'Curiosidades',
     description: 'Descubra a fase da lua, a estação do ano e fatos astronômicos do dia em que vocês se conheceram.',
-    image: 'https://picsum.photos/seed/curiosities-module/600/800'
+    image: 'https://picsum.photos/seed/curiosities-module/600/800',
+    color: '#7c3aed'
   },
   {
     id: 'jornada',
     title: 'Jornada no Mapa',
     description: 'Um rastro interativo no mapa mundi conectando os lugares onde vocês criaram as melhores lembranças.',
-    image: 'https://picsum.photos/seed/journey-module/600/800'
+    image: 'https://picsum.photos/seed/journey-module/600/800',
+    color: '#10b981'
   },
   {
     id: 'roleta',
     title: 'Roleta Surpresa',
     description: 'Um jogo interativo para sortear desafios, encontros e momentos divertidos para fazerem juntos.',
-    image: 'https://picsum.photos/seed/roulette-module/600/800'
+    image: 'https://picsum.photos/seed/roulette-module/600/800',
+    color: '#f59e0b'
   }
 ];
 
@@ -61,7 +67,12 @@ interface StepOrderBumpProps {
 }
 
 export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackToggle }: StepOrderBumpProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'center' });
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: true, 
+    align: 'center',
+    skipSnaps: false,
+    duration: 30
+  });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [previewModuleId, setPreviewModuleId] = useState<string | null>(null);
 
@@ -123,68 +134,110 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
         </div>
       </div>
 
-      <div className="relative w-full max-w-[450px] mx-auto md:mx-0">
-        <div className="overflow-visible" ref={emblaRef}>
+      {/* Visual Carousel - Matching StepThemeSelection */}
+      <div className="relative w-full flex flex-col items-center">
+        <div className="w-full overflow-visible" ref={emblaRef}>
           <div className="flex">
-            {MODULES.map((module) => (
-              <div key={module.id} className="flex-[0_0_85%] min-w-0 px-3">
-                <div className="relative aspect-[3/4] bg-[#0c0c0c] border border-white/5 rounded-[2rem] overflow-hidden shadow-2xl group">
-                  <Image 
-                    src={module.image} 
-                    fill 
-                    className="object-cover opacity-60 transition-transform duration-700 group-hover:scale-110" 
-                    alt={module.title} 
-                    data-ai-hint="romantic module"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                  
-                  <div className="absolute bottom-8 left-8 right-8 space-y-4">
-                    <h3 className="text-xl font-black text-white">{module.title}</h3>
-                    <p className="text-[11px] text-white/60 leading-relaxed font-medium">
-                      {module.description}
-                    </p>
-                    <Button 
-                      onClick={() => setPreviewModuleId(module.id)}
-                      variant="outline" 
-                      className="w-full bg-white/5 border-white/10 rounded-xl h-10 text-[10px] font-bold uppercase tracking-wider hover:bg-white/10 flex items-center justify-center gap-2"
-                    >
-                      <ExternalLink className="w-3 h-3" /> Ver módulo
-                    </Button>
+            {MODULES.map((module, i) => {
+              const isSelected = selectedIndex === i;
+              return (
+                <div 
+                  key={module.id} 
+                  className="flex-[0_0_72%] sm:flex-[0_0_100%] min-w-0 px-3 sm:px-10 flex items-center justify-center transition-opacity duration-500"
+                  style={{ 
+                    opacity: isSelected ? 1 : 0.2,
+                    zIndex: isSelected ? 50 : 10
+                  }}
+                >
+                  <div 
+                    className={cn(
+                      "relative bg-[#141414] rounded-[24px] overflow-hidden transition-all duration-500 w-full max-w-[280px] aspect-[3/4] border-2",
+                      isSelected 
+                        ? "scale-100 opacity-100" 
+                        : "scale-85 opacity-50 border-transparent grayscale-[0.3]"
+                    )}
+                    style={isSelected ? { 
+                      borderColor: module.color,
+                      boxShadow: `0 0 40px ${module.color}66, 0 0 80px ${module.color}33`
+                    } : {}}
+                  >
+                    {/* Top Glow Line */}
+                    <div className={cn(
+                      "absolute top-0 left-0 right-0 h-[3px] z-30 transition-opacity duration-500",
+                      isSelected ? "opacity-100" : "opacity-0"
+                    )} 
+                    style={{ background: `linear-gradient(90deg, transparent, ${module.color}, transparent)` }}
+                    />
+
+                    {/* Media Area */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#1f1f1f] to-[#141414] z-10">
+                      <Image 
+                        src={module.image} 
+                        fill 
+                        className="object-cover" 
+                        alt={module.title} 
+                        priority
+                        data-ai-hint="romantic module"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent z-20" />
+                    </div>
+
+                    {/* Card Body Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-5 z-30">
+                      <h3 className="text-white text-lg font-black m-0 font-inter mb-1">{module.title}</h3>
+                      <p className="text-[#b3b3b3] text-[10px] leading-snug mb-4 font-medium line-clamp-2">
+                        {module.description}
+                      </p>
+
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPreviewModuleId(module.id);
+                        }}
+                        className="w-full bg-white/5 border border-white/10 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:bg-white/10 active:scale-95"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        Ver módulo
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
+        {/* Navigation Arrows */}
         <button 
           onClick={scrollPrev}
-          className="absolute left-[-20px] top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 border border-white/10 flex items-center justify-center hover:bg-black/80 transition-all z-10"
+          className="absolute left-[-20px] top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all active:scale-90 z-20"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-5 h-5 text-white" />
         </button>
         <button 
           onClick={scrollNext}
-          className="absolute right-[-20px] top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 border border-white/10 flex items-center justify-center hover:bg-black/80 transition-all z-10"
+          className="absolute right-[-20px] top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all active:scale-90 z-20"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-5 h-5 text-white" />
         </button>
 
-        <div className="flex justify-center gap-1.5 mt-6">
-          {MODULES.map((_, i) => (
+        {/* Pagination Dots */}
+        <div className="flex gap-2.5 mt-8 shrink-0 z-20">
+          {MODULES.map((module, i) => (
             <div 
               key={i} 
               className={cn(
-                "h-1 rounded-full transition-all duration-300",
-                i === selectedIndex ? "w-6 bg-primary" : "w-2 bg-white/10"
+                "h-1.5 rounded-full transition-all duration-500",
+                i === selectedIndex ? "w-7" : "w-1.5 bg-white/10"
               )} 
+              style={i === selectedIndex ? { backgroundColor: module.color } : {}}
             />
           ))}
         </div>
       </div>
 
       <div className="w-full space-y-4">
-        {/* Card de Ativação Estilizado conforme Referência */}
+        {/* Activation Card */}
         <div 
           onClick={() => onPackToggle(!isPackEnabled)}
           className={cn(
@@ -227,7 +280,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
         </div>
       </div>
 
-      {/* Modal de Prévia do Módulo */}
+      {/* Module Preview Modal */}
       <Dialog open={!!previewModuleId} onOpenChange={(open) => !open && setPreviewModuleId(null)}>
         <DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[500] translate-x-0 translate-y-0 rounded-none max-w-none">
           <DialogTitle className="sr-only">Prévia do Módulo</DialogTitle>
