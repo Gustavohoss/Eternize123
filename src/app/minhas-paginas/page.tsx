@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, query, where, or } from 'firebase/firestore';
 import { useFirestore, useUser, useCollection, useAuth, useMemoFirebase } from '@/firebase';
 import { Heart, ExternalLink, Calendar, Loader2, Plus, ArrowLeft, LogOut, Layout, User, Pencil, ShieldAlert, Lock, X, CheckCircle2, Eye, EyeOff, Sparkles, Settings2, LayoutGrid, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -35,21 +35,20 @@ export default function MyPages() {
   const [choiceDialogOpen, setChoiceDialogOpen] = useState(false);
   const [selectedSite, setSelectedSite] = useState<any>(null);
 
-  // Query memoizada para buscar apenas as páginas do usuário logado
+  // Query memoizada buscando por ID ou por E-mail (caso a conta tenha sido criada no checkout)
   const mySitesQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return query(
       collection(firestore, 'published_sites'),
-      where('userId', '==', user.uid)
+      where('status', '==', 'published'),
+      or(
+        where('userId', '==', user.uid),
+        where('customerEmail', '==', user.email)
+      )
     );
-  }, [firestore, user?.uid]);
+  }, [firestore, user?.uid, user?.email]);
 
-  const { data: allSites, isLoading, error } = useCollection(mySitesQuery as any);
-
-  // Filtramos apenas os sites que estão PUBLICADOS para não mostrar rascunhos pendentes de pagamento
-  const sites = React.useMemo(() => {
-    return allSites?.filter((site: any) => site.status === 'published') || [];
-  }, [allSites]);
+  const { data: sites, isLoading, error } = useCollection(mySitesQuery as any);
 
   const handleLogout = () => {
     signOut(auth);
