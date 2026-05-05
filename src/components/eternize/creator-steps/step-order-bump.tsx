@@ -184,16 +184,17 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
       </div>
 
       <div className="w-full space-y-4">
+        {/* Card de Ativação Estilizado conforme Referência */}
         <div 
           onClick={() => onPackToggle(!isPackEnabled)}
           className={cn(
-            "w-full bg-[#0c0c0c] border rounded-3xl p-6 flex items-center justify-between cursor-pointer transition-all duration-300",
-            isPackEnabled ? "border-primary/50 ring-1 ring-primary/20" : "border-white/5"
+            "w-full bg-[#0c0c0c] border rounded-[2rem] p-7 flex items-center justify-between cursor-pointer transition-all duration-300",
+            isPackEnabled ? "border-primary shadow-[0_0_30px_rgba(225,29,72,0.15)] ring-1 ring-primary/20" : "border-white/5"
           )}
         >
           <div className="space-y-1">
-            <h4 className="text-sm font-black text-white uppercase tracking-wider">Adicionar Pack de Módulos</h4>
-            <p className="text-[11px] font-bold text-white/40">
+            <h4 className="text-sm md:text-base font-black text-white uppercase tracking-wider">ADICIONAR PACK DE MÓDULOS</h4>
+            <p className="text-[10px] md:text-[11px] font-bold text-white/40 uppercase tracking-widest">
               Adicionar por apenas <span className="text-white">R$ 7,99</span>
             </p>
           </div>
@@ -206,12 +207,6 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
             Você pode adicionar o Pack de Módulos depois nas configurações da sua página ou em <span className="text-white/60 font-black">Minhas Páginas</span>.
           </p>
         </div>
-      </div>
-
-      <div className="w-full text-center">
-        <p className="text-[10px] font-medium text-white/20 uppercase tracking-[0.2em]">
-          Disponível para adicionar a qualquer momento em Minhas Páginas
-        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 w-full pt-6">
@@ -229,15 +224,24 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
           >
             Ir para Pagamento <CheckCircle2 className="w-4 h-4 transition-transform group-hover:scale-110" />
           </Button>
-          <Button 
-            onClick={() => onFinish()}
-            variant="outline"
-            className="h-10 rounded-xl border-white/10 bg-white/5 text-white/40 font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white"
-          >
-            Finalizar Edição
-          </Button>
         </div>
       </div>
+
+      {/* Modal de Prévia do Módulo */}
+      <Dialog open={!!previewModuleId} onOpenChange={(open) => !open && setPreviewModuleId(null)}>
+        <DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[500] translate-x-0 translate-y-0 rounded-none max-w-none">
+          <DialogTitle className="sr-only">Prévia do Módulo</DialogTitle>
+          <DialogDescription className="sr-only">Visualização detalhada do módulo extra.</DialogDescription>
+          <div className="flex-1 overflow-y-auto no-scrollbar relative">
+             <div className="absolute top-6 right-6 z-[600]">
+                <DialogClose className="p-2.5 bg-black/60 hover:bg-black/80 rounded-full text-white transition-all border border-white/20 shadow-2xl backdrop-blur-md">
+                   <X className="w-5 h-5" />
+                </DialogClose>
+             </div>
+             {renderPreviewContent()}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
