@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { X, Heart, Send } from 'lucide-react';
+import { X, Heart, Send, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface StoriesViewProps {
@@ -17,6 +17,7 @@ interface StoriesViewProps {
   onPrev: () => void;
   onNext: () => void;
   onPauseToggle: (paused: boolean) => void;
+  theme?: string;
 }
 
 export function StoriesView({
@@ -30,11 +31,12 @@ export function StoriesView({
   onClose,
   onPrev,
   onNext,
-  onPauseToggle
+  onPauseToggle,
+  theme = 'instagram'
 }: StoriesViewProps) {
-  // Garantir que temos fotos e que a foto atual não é uma string vazia antes de renderizar o Image do Next.js
   if (photos.length === 0) return null;
 
+  const isNetflix = theme === 'netflix';
   const currentPhoto = photos[currentIndex];
   const profilePhoto = photos[0];
 
@@ -45,28 +47,38 @@ export function StoriesView({
         {photos.map((_, i) => (
           <div key={i} className="flex-1 h-0.5 bg-white/20 rounded-full overflow-hidden">
             <div 
-              className={cn("h-full bg-white transition-all duration-100 ease-linear", i < currentIndex ? "w-full" : i === currentIndex ? "" : "w-0")} 
+              className={cn(
+                "h-full transition-all duration-100 ease-linear", 
+                i < currentIndex ? "w-full" : i === currentIndex ? "" : "w-0",
+                isNetflix ? "bg-[#e50914]" : "bg-white"
+              )} 
               style={i === currentIndex ? { width: `${progress}%` } : {}} 
             />
           </div>
         ))}
       </div>
 
-      {/* Cabeçalho do Story */}
+      {/* Cabeçalho do Story / Player */}
       <div className="absolute top-8 left-0 right-0 z-[620] px-4 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full border border-white/20 overflow-hidden relative bg-neutral-900">
-            {profilePhoto && profilePhoto.length > 0 ? (
-              <Image src={profilePhoto} fill className="object-cover" alt="Profile" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-primary/10">
-                <Heart className="w-3 h-3 text-primary" />
-              </div>
-            )}
-          </div>
+          {!isNetflix && (
+            <div className="w-8 h-8 rounded-full border border-white/20 overflow-hidden relative bg-neutral-900">
+              {profilePhoto && profilePhoto.length > 0 ? (
+                <Image src={profilePhoto} fill className="object-cover" alt="Profile" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                  <Heart className="w-3 h-3 text-primary" />
+                </div>
+              )}
+            </div>
+          )}
           <div className="flex flex-col">
-            <span className="text-white text-xs font-bold leading-tight">{pageTitle || 'Eternize'}</span>
-            <span className="text-white/60 text-[10px] font-medium leading-tight">Juntos há {formattedDays} dias</span>
+            <span className={cn("text-white font-bold leading-tight", isNetflix ? "text-sm uppercase font-bebas tracking-widest" : "text-xs")}>
+              {isNetflix ? `S${currentIndex + 1} : Memória 1` : (pageTitle || 'Eternize')}
+            </span>
+            <span className="text-white/60 text-[10px] font-medium leading-tight">
+              {isNetflix ? 'Eternize Original' : `Juntos há ${formattedDays} dias`}
+            </span>
           </div>
         </div>
         <button onClick={onClose} className="p-1 text-white hover:opacity-70 transition-opacity">
@@ -107,14 +119,26 @@ export function StoriesView({
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
       </div>
 
-      {/* Rodapé do Story */}
-      <div className="absolute bottom-6 left-0 right-0 z-[620] px-4 flex items-center gap-3">
-        <div className="flex-1 bg-transparent border border-white/30 rounded-full h-10 px-4 flex items-center">
-          <span className="text-white/60 text-xs">Enviar mensagem</span>
+      {/* Rodapé do Story (Oculto no Netflix) */}
+      {!isNetflix && (
+        <div className="absolute bottom-6 left-0 right-0 z-[620] px-4 flex items-center gap-3">
+          <div className="flex-1 bg-transparent border border-white/30 rounded-full h-10 px-4 flex items-center">
+            <span className="text-white/60 text-xs">Enviar mensagem</span>
+          </div>
+          <Heart className="w-6 h-6 text-white" />
+          <Send className="w-6 h-6 text-white" />
         </div>
-        <Heart className="w-6 h-6 text-white" />
-        <Send className="w-6 h-6 text-white" />
-      </div>
+      )}
+
+      {/* Indicador de Play no Netflix */}
+      {isNetflix && (
+        <div className="absolute bottom-10 left-0 right-0 z-[620] px-8 flex items-center justify-center pointer-events-none">
+           <div className="flex items-center gap-2 text-white/40">
+              <Play className="w-3 h-3 fill-current" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Reproduzindo</span>
+           </div>
+        </div>
+      )}
     </div>
   );
 }

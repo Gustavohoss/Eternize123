@@ -233,7 +233,7 @@ export function DeviceMockup({
 
   const prevStory = useCallback(() => {
     if (isFading) return;
-    if (currentStoryIndex > 0) triggerFade(() => { setCurrentStoryIndex(prev => - 1); setStoryProgress(0); });
+    if (currentStoryIndex > 0) triggerFade(() => { setCurrentStoryIndex(prev => prev - 1); setStoryProgress(0); });
   }, [currentStoryIndex, triggerFade, isFading]);
 
   useEffect(() => {
@@ -277,7 +277,20 @@ export function DeviceMockup({
 
       {/* Stories Layer */}
       {showStories && (
-        <StoriesView photos={uploadedPhotos} currentIndex={currentStoryIndex} progress={storyProgress} isPaused={isStoryPaused} isFading={isFading} pageTitle={pageTitle} formattedDays={formattedTotalDays} onClose={() => setShowStories(false)} onPrev={prevStory} onNext={nextStory} onPauseToggle={setIsStoryPaused} />
+        <StoriesView 
+          photos={uploadedPhotos} 
+          currentIndex={currentStoryIndex} 
+          progress={storyProgress} 
+          isPaused={isStoryPaused} 
+          isFading={isFading} 
+          pageTitle={pageTitle} 
+          formattedDays={formattedTotalDays} 
+          onClose={() => setShowStories(false)} 
+          onPrev={prevStory} 
+          onNext={nextStory} 
+          onPauseToggle={setIsStoryPaused}
+          theme={selectedTheme}
+        />
       )}
 
       {!isFullscreen && (
