@@ -110,32 +110,10 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
   };
 
   return (
-    <div className="space-y-8 md:space-y-10 flex flex-col items-center md:items-start w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="space-y-3 text-center md:text-left w-full">
-        <div className="flex flex-col md:flex-row items-center gap-4">
-          <div className="bg-white/5 p-2 rounded-2xl border border-white/10">
-            <CreditCard className="w-5 h-5 md:w-6 md:h-6 text-white/80" />
-          </div>
-          <h2 className="text-2xl md:text-4xl font-black tracking-tight">Pack de Módulos</h2>
-        </div>
-        <p className="text-xs md:text-base text-white/40 font-medium max-w-xl">
-          Adicione 5 módulos exclusivos ao presente. Você poderá editar e personalizar cada módulo após a compra.
-        </p>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <div className="bg-[#3d0b17] border border-primary/20 px-3 py-1.5 rounded-full flex items-center gap-2">
-          <Flame className="w-3 h-3 text-primary fill-current" />
-          <span className="text-[9px] font-black uppercase text-primary tracking-widest">Oferta Especial — 70% OFF</span>
-        </div>
-        <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-2">
-          <Zap className="w-3 h-3 text-yellow-500 fill-current" />
-          <span className="text-[9px] font-black uppercase text-white/50 tracking-widest">Só agora</span>
-        </div>
-      </div>
-
-      {/* Visual Carousel - Matching StepThemeSelection */}
-      <div className="relative w-full flex flex-col items-center">
+    <div className="flex flex-col items-center md:items-start w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+      
+      {/* Visual Carousel - Priorizado no topo conforme a imagem */}
+      <div className="relative w-full flex flex-col items-center mb-6">
         <div className="w-full overflow-visible" ref={emblaRef}>
           <div className="flex">
             {MODULES.map((module, i) => {
@@ -210,25 +188,25 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
         {/* Navigation Arrows */}
         <button 
           onClick={scrollPrev}
-          className="absolute left-[-20px] top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all active:scale-90 z-20"
+          className="absolute left-[-10px] md:left-[-20px] top-1/2 -translate-y-1/2 w-9 h-9 md:w-10 md:h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all active:scale-90 z-20"
         >
           <ChevronLeft className="w-5 h-5 text-white" />
         </button>
         <button 
           onClick={scrollNext}
-          className="absolute right-[-20px] top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all active:scale-90 z-20"
+          className="absolute right-[-10px] md:right-[-20px] top-1/2 -translate-y-1/2 w-9 h-9 md:w-10 md:h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all active:scale-90 z-20"
         >
           <ChevronRight className="w-5 h-5 text-white" />
         </button>
 
         {/* Pagination Dots */}
-        <div className="flex gap-2.5 mt-8 shrink-0 z-20">
+        <div className="flex gap-2 mt-6 shrink-0 z-20">
           {MODULES.map((module, i) => (
             <div 
               key={i} 
               className={cn(
                 "h-1.5 rounded-full transition-all duration-500",
-                i === selectedIndex ? "w-7" : "w-1.5 bg-white/10"
+                i === selectedIndex ? "w-6" : "w-1.5 bg-white/10"
               )} 
               style={i === selectedIndex ? { backgroundColor: module.color } : {}}
             />
@@ -237,23 +215,24 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
       </div>
 
       <div className="w-full space-y-4">
-        {/* Activation Card */}
+        {/* Activation Card - Estilo fiel à imagem */}
         <div 
           onClick={() => onPackToggle(!isPackEnabled)}
           className={cn(
-            "w-full bg-[#0c0c0c] border rounded-[2rem] p-7 flex items-center justify-between cursor-pointer transition-all duration-300",
+            "w-full bg-[#0c0c0c] border rounded-[2rem] p-6 md:p-7 flex items-center justify-between cursor-pointer transition-all duration-300",
             isPackEnabled ? "border-primary shadow-[0_0_30px_rgba(225,29,72,0.15)] ring-1 ring-primary/20" : "border-white/5"
           )}
         >
           <div className="space-y-1">
             <h4 className="text-sm md:text-base font-black text-white uppercase tracking-wider">ADICIONAR PACK DE MÓDULOS</h4>
             <p className="text-[10px] md:text-[11px] font-bold text-white/40 uppercase tracking-widest">
-              Adicionar por apenas <span className="text-white">R$ 7,99</span>
+              ADICIONAR POR APENAS <span className="text-white">R$ 7,99</span>
             </p>
           </div>
           <Switch checked={isPackEnabled} onCheckedChange={onPackToggle} />
         </div>
 
+        {/* Info Box */}
         <div className="w-full bg-white/5 border border-white/5 rounded-2xl p-4 flex items-start gap-4">
           <X className="w-4 h-4 text-white/20 mt-0.5 shrink-0" />
           <p className="text-[11px] font-medium text-white/30 leading-tight">
@@ -262,22 +241,21 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 w-full pt-6">
+      {/* Navigation Buttons - Fiel ao print */}
+      <div className="grid grid-cols-2 gap-4 w-full pt-8">
         <Button 
           onClick={onBack} 
           variant="outline" 
-          className="h-14 rounded-2xl border-white/10 bg-white/5 font-black text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-3 group"
+          className="h-14 rounded-2xl border-white/10 bg-[#0c0c0c] font-black text-sm hover:bg-white/5 transition-all flex items-center justify-center gap-3 group"
         >
           <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> Voltar
         </Button>
-        <div className="flex flex-col gap-3">
-          <Button 
-            onClick={onFinish}
-            className="h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-sm transition-all flex items-center justify-center gap-3 shadow-2xl active:scale-95 group disabled:opacity-50 disabled:grayscale"
-          >
-            Ir para Pagamento <CheckCircle2 className="w-4 h-4 transition-transform group-hover:scale-110" />
-          </Button>
-        </div>
+        <Button 
+          onClick={onFinish}
+          className="h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-sm transition-all flex items-center justify-center gap-3 shadow-2xl active:scale-95 group"
+        >
+          Ir para Pagamento <CheckCircle2 className="w-4 h-4 transition-transform group-hover:scale-110" />
+        </Button>
       </div>
 
       {/* Module Preview Modal */}
