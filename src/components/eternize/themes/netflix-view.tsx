@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { ThumbsUp, Heart } from 'lucide-react';
+import { ThumbsUp, Heart, Trophy, Star, MapPin, RotateCcw } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -23,6 +23,8 @@ interface NetflixViewProps {
   onPhotoClick: (index: number) => void;
   isInList: boolean;
   onListToggle: () => void;
+  isPackEnabled?: boolean;
+  onModuleClick?: (id: string) => void;
 }
 
 export function NetflixView({
@@ -40,8 +42,18 @@ export function NetflixView({
   onStartExperience,
   onPhotoClick,
   isInList,
-  onListToggle
+  onListToggle,
+  isPackEnabled,
+  onModuleClick
 }: NetflixViewProps) {
+  const modules = [
+    { id: 'memorias', title: 'Memórias', icon: Heart, color: 'bg-red-600' },
+    { id: 'conquistas', title: 'Conquistas', icon: Trophy, color: 'bg-amber-600' },
+    { id: 'curiosidades', title: 'Curiosidades', icon: Star, color: 'bg-purple-600' },
+    { id: 'jornada', title: 'Jornada', icon: MapPin, color: 'bg-emerald-600' },
+    { id: 'surpresa', title: 'Surpresa', icon: RotateCcw, color: 'bg-orange-600' },
+  ];
+
   return (
     <div className="w-full h-full bg-[#141414] text-white font-inter relative flex flex-col no-scrollbar overflow-y-auto">
       <header className="sticky top-0 z-50 px-4 py-4 flex items-center justify-between bg-gradient-to-b from-black via-black/80 to-transparent">
@@ -119,7 +131,7 @@ export function NetflixView({
         </div>
       </div>
 
-      <div className="px-4 mt-2 pb-20">
+      <div className="px-4 mt-2 pb-6">
         <div className="flex gap-8 border-neutral-800 border-b mb-4">
           <button onClick={() => onTabChange('episodios')} className={cn("pb-3 text-sm font-bold tracking-tight transition-all", activeTab === 'episodios' ? "border-b-[3px] border-[#e50914] text-white" : "text-neutral-500")}>Episódios</button>
           <button onClick={() => onTabChange('detalhes')} className={cn("pb-3 text-sm font-bold tracking-tight transition-all", activeTab === 'detalhes' ? "border-b-[3px] border-[#e50914] text-white" : "text-neutral-500")}>Detalhes</button>
@@ -165,6 +177,34 @@ export function NetflixView({
           </div>
         )}
       </div>
+
+      {isPackEnabled && (
+        <div className="px-4 py-8 border-t border-white/5">
+          <h3 className="text-white text-lg font-bold mb-5 tracking-tight">Veja também</h3>
+          <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-4">
+            {modules.map((mod) => (
+              <div 
+                key={mod.id} 
+                onClick={() => onModuleClick?.(mod.id)}
+                className="flex-shrink-0 w-36 group cursor-pointer"
+              >
+                <div className={cn(
+                  "aspect-[1.5/1] rounded-lg mb-2.5 flex items-center justify-center shadow-lg transition-transform group-hover:scale-105 duration-300",
+                  mod.color
+                )}>
+                  <mod.icon className="w-8 h-8 text-white/90 fill-current" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-[13px] font-bold text-white leading-tight truncate">{mod.title}</p>
+                  <p className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">Eternize</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="h-20 shrink-0" />
     </div>
   );
 }

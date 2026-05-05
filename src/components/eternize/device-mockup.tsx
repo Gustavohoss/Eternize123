@@ -233,7 +233,7 @@ export function DeviceMockup({
 
   const prevStory = useCallback(() => {
     if (isFading) return;
-    if (currentStoryIndex > 0) triggerFade(() => { setCurrentStoryIndex(prev => prev - 1); setStoryProgress(0); });
+    if (currentStoryIndex > 0) triggerFade(() => { setCurrentStoryIndex(prev => - 1); setStoryProgress(0); });
   }, [currentStoryIndex, triggerFade, isFading]);
 
   useEffect(() => {
@@ -311,7 +311,7 @@ export function DeviceMockup({
                 <ClassicView {...{uploadedPhotos, photoEffect, showCard, cardColor, titlePosition, pageTitle, titleStyle, message, messageColor, messageFontFamily: getFontFamily(messageFont || 'inter'), date, selectedCountStyle, dateStyle, dateIsBold, dateBoxBgColor, dateBoxBorderColor, timeDiff, totalDays, musicData, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength, isAudioPlaying, onAudioToggle: setIsAudioPlaying, isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'netflix' && (
-                <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: () => { setIsIntroActive(true); setIntroPhase('closing'); setTimeout(() => setIntroPhase('blackout'), 1500); setTimeout(() => setIntroPhase('logo'), 1600); setTimeout(() => { setIsIntroActive(false); setIntroPhase('idle'); setShowStories(true); setCurrentStoryIndex(0); setStoryProgress(0); }, 4500); }, onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList)}} />
+                <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: () => { setIsIntroActive(true); setIntroPhase('closing'); setTimeout(() => setIntroPhase('blackout'), 1500); setTimeout(() => setIntroPhase('logo'), 1600); setTimeout(() => { setIsIntroActive(false); setIntroPhase('idle'); setShowStories(true); setCurrentStoryIndex(0); setStoryProgress(0); }, 4500); }, onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList), isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'spotify' && (
                 <SpotifyView {...{uploadedPhotos, activeHeroIndex, pageTitle, totalDays, timeDiff, date, activeTab, onTabChange: setActiveTab, onPhotoClick: (i) => { setActiveHeroIndex(i); setShowSpotifyFullscreen(true); }, isLiked, onLikeToggle: () => setIsLiked(!isLiked), isAudioPlaying, onAudioToggle: setIsAudioPlaying, dynamicSpotifyColor, spotifyHeaderOpacity, onHeaderScroll: (e) => setSpotifyHeaderOpacity(Math.min(1, e.currentTarget.scrollTop / 100)), onShowFullscreen: () => setShowSpotifyFullscreen(true), onCloseFullscreen: () => setShowSpotifyFullscreen(false), showSpotifyFullscreen, message, musicData}} />
