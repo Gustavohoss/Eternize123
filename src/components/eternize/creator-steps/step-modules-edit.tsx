@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -88,7 +87,8 @@ export function StepModulesEdit({
           'memories': 'memorias',
           'achievements': 'conquistas',
           'curiosities': 'curiosidades',
-          'journey': 'jornada'
+          'journey': 'jornada',
+          'surprise': 'surpresa'
         };
         onSubModuleChange(mapping[activeSubModule] || activeSubModule);
       }
@@ -160,7 +160,7 @@ export function StepModulesEdit({
     onJourneyPointsChange(journeyPoints.map(p => p.id === id ? { ...p, ...updates } : p));
   };
 
-  // Busca de local usando Nominatim (Exatamente como no script fornecido)
+  // Busca de local usando Nominatim
   const searchLocation = (query: string) => {
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     
@@ -174,7 +174,6 @@ export function StepModulesEdit({
       setIsSearchingLocation(true);
       setHasSearched(true);
       try {
-        // Usa o motor Nominatim que o leaflet-control-geocoder usa por padrão
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&accept-language=pt-BR`
         );
@@ -195,7 +194,6 @@ export function StepModulesEdit({
         setSearchResults(formattedResults);
       } catch (error) {
         console.warn("Erro ao buscar local no Nominatim:", error);
-        // Fallback silencioso para não quebrar a UI
         setSearchResults([]);
       } finally {
         setIsSearchingLocation(false);
@@ -212,7 +210,7 @@ export function StepModulesEdit({
     setLocationSearch('');
     setSearchResults([]);
     setHasSearched(false);
-    setEditingPointId(id); // Mantém aberto
+    setEditingPointId(id);
   };
 
   const MODULE_MENU_ITEMS = [
@@ -221,7 +219,7 @@ export function StepModulesEdit({
     { id: 'curiosities' as SubModule, title: 'Curiosidades', description: 'Fatos sobre o dia do início', icon: Star, color: 'text-purple-500', bg: 'bg-purple-500/10', locked: false },
     { id: 'astral' as SubModule, title: 'Mapa Astral', description: 'Energia do universo', icon: Sparkles, color: 'text-blue-500', bg: 'bg-blue-500/10', locked: true },
     { id: 'journey' as SubModule, title: 'Jornada', description: 'Locais onde estiveram', icon: MapIcon, color: 'text-green-500', bg: 'bg-green-500/10', locked: false },
-    { id: 'surprise' as SubModule, title: 'Surpresa', description: 'Roleta de momentos', icon: RotateCcw, color: 'text-orange-500', bg: 'bg-orange-500/10', locked: true },
+    { id: 'surprise' as SubModule, title: 'Surpresa', description: 'Roleta de momentos', icon: RotateCcw, color: 'text-orange-500', bg: 'bg-orange-500/10', locked: false },
   ];
 
   if (!isPackEnabled) {
@@ -261,7 +259,7 @@ export function StepModulesEdit({
             <LayoutGrid className="w-5 h-5 md:w-6 md:h-6 text-white/80" />
           </div>
           <h2 className="text-2xl md:text-4xl font-black tracking-tight">
-            {activeSubModule === 'menu' ? 'Painel de Módulos' : activeSubModule === 'memories' ? 'Editar Memórias' : activeSubModule === 'journey' ? 'Editar Jornada' : 'Personalizar'}
+            {activeSubModule === 'menu' ? 'Painel de Módulos' : activeSubModule === 'memories' ? 'Editar Memórias' : activeSubModule === 'journey' ? 'Editar Jornada' : activeSubModule === 'surprise' ? 'Roleta Surpresa' : 'Personalizar'}
           </h2>
         </div>
         <p className="text-xs md:text-base text-white/40 font-medium">
@@ -497,7 +495,7 @@ export function StepModulesEdit({
                     {editingPointId === point.id && (
                       <div className="px-5 pb-6 space-y-5 border-t border-white/5 pt-6 animate-in slide-in-from-top-2">
                          
-                         {/* Busca de Local (Inspirada no script de referência) */}
+                         {/* Busca de Local */}
                          <div className="space-y-3 relative">
                             <Label className="text-[10px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5">
                                <Search className="w-3 h-3 text-primary" /> Pesquisar Cidade ou Lugar
@@ -600,29 +598,6 @@ export function StepModulesEdit({
                                </div>
                             </div>
                          </div>
-
-                         <div className="grid grid-cols-2 gap-4 pt-2 opacity-30 hover:opacity-100 transition-opacity">
-                            <div className="space-y-2">
-                               <Label className="text-[8px] font-black uppercase text-white/40 ml-1">Latitude (Ajuste Fino)</Label>
-                               <Input 
-                                 type="number"
-                                 step="any"
-                                 value={point.lat}
-                                 onChange={(e) => updateJourneyPoint(point.id, { lat: parseFloat(e.target.value) || 0 })}
-                                 className="bg-white/5 border-white/5 h-8 rounded-lg text-[10px] font-bold"
-                               />
-                            </div>
-                            <div className="space-y-2">
-                               <Label className="text-[8px] font-black uppercase text-white/40 ml-1">Longitude (Ajuste Fino)</Label>
-                               <Input 
-                                 type="number"
-                                 step="any"
-                                 value={point.lng}
-                                 onChange={(e) => updateJourneyPoint(point.id, { lng: parseFloat(e.target.value) || 0 })}
-                                 className="bg-white/5 border-white/5 h-8 rounded-lg text-[10px] font-bold"
-                               />
-                            </div>
-                         </div>
                       </div>
                     )}
                   </div>
@@ -637,6 +612,40 @@ export function StepModulesEdit({
                     <span className="text-xs font-black uppercase tracking-widest">Adicionar novo local</span>
                   </button>
                 )}
+             </div>
+          </div>
+        ) : activeSubModule === 'surprise' ? (
+          <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
+             <div className="flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl">
+                <div className="flex items-center gap-3">
+                   <div className="bg-orange-500/20 p-2 rounded-xl"><RotateCcw className="w-4 h-4 text-orange-500" /></div>
+                   <div>
+                      <h4 className="text-xs font-black text-white uppercase tracking-wider">Roleta Surpresa</h4>
+                      <p className="text-[9px] font-bold text-white/30 uppercase">Conteúdo Estático</p>
+                   </div>
+                </div>
+                <Button 
+                  onClick={() => setActiveSubModule('menu')}
+                  variant="ghost" 
+                  className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 gap-1"
+                >
+                   <ChevronLeft className="w-3 h-3" /> Voltar ao menu
+                </Button>
+             </div>
+
+             <div className="bg-[#0c0c0c] border border-white/5 rounded-[2rem] p-8 text-center space-y-4">
+                <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(249,115,22,0.1)]">
+                   <RotateCcw className="w-8 h-8 text-orange-500" />
+                </div>
+                <div className="space-y-2">
+                   <h4 className="text-base font-black text-white uppercase tracking-tight italic">Sorteio de Momentos</h4>
+                   <p className="text-xs text-white/40 leading-relaxed font-medium">
+                     A Roleta Surpresa já vem configurada com os momentos mais marcantes que um casal pode viver. Toque na roleta ao lado para ver como ela funciona!
+                   </p>
+                   <p className="text-[10px] text-orange-500 font-bold uppercase tracking-widest pt-4">
+                     Edição customizada disponível em breve.
+                   </p>
+                </div>
              </div>
           </div>
         ) : (activeSubModule === 'achievements' || activeSubModule === 'curiosities') ? (

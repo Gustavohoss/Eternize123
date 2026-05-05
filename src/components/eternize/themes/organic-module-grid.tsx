@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -85,7 +84,7 @@ export function OrganicModuleGrid({ onModuleClick, pageTitle }: OrganicModuleGri
           <div className="organic-icon-area green-bg">🧭</div>
           <div className="organic-label">Jornada</div>
         </div>
-        <div className="organic-card">
+        <div className="organic-card" onClick={() => onModuleClick('surpresa')}>
           <div className="organic-icon-area orange-bg">⟳</div>
           <div className="organic-label">Surpresa</div>
         </div>

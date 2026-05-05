@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
@@ -14,6 +13,7 @@ import { ThemeId } from '@/app/criador/constants';
 import { MemoriesModulePreview } from './memories-module-preview';
 import { AchievementsModulePreview } from './achievements-module-preview';
 import { CuriosidadesModulePreview } from './curiosidades-module-preview';
+import { RouletteModulePreview } from './roulette-module-preview';
 import { Button } from '@/components/ui/button';
 import { type JourneyPoint } from './journey-module-preview';
 
@@ -339,6 +339,7 @@ export function DeviceMockup({
                      {previewModuleId === 'conquistas' && <AchievementsModulePreview />}
                      {previewModuleId === 'curiosidades' && <CuriosidadesModulePreview date={date} />}
                      {previewModuleId === 'jornada' && <JourneyModulePreview points={journeyPoints} />}
+                     {previewModuleId === 'surpresa' && <RouletteModulePreview />}
                   </div>
                </div>
             </div>
