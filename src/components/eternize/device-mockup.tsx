@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
@@ -12,6 +13,7 @@ import { ThemeId } from '@/app/criador/constants';
 import { MemoriesModulePreview } from './memories-module-preview';
 import { AchievementsModulePreview } from './achievements-module-preview';
 import { CuriosidadesModulePreview } from './curiosidades-module-preview';
+import { JourneyModulePreview } from './journey-module-preview';
 import { Button } from '@/components/ui/button';
 
 // Theme-specific view components
@@ -327,6 +329,7 @@ export function DeviceMockup({
                      {previewModuleId === 'memorias' && <MemoriesModulePreview memories={memories} />}
                      {previewModuleId === 'conquistas' && <AchievementsModulePreview />}
                      {previewModuleId === 'curiosidades' && <CuriosidadesModulePreview date={date} />}
+                     {previewModuleId === 'jornada' && <JourneyModulePreview />}
                   </div>
                </div>
             </div>

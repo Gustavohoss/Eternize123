@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -49,7 +50,7 @@ const compressImage = (base64Str: string): Promise<string> => {
   });
 };
 
-type SubModule = 'menu' | 'memories' | 'achievements' | 'curiosities';
+type SubModule = 'menu' | 'memories' | 'achievements' | 'curiosities' | 'astral' | 'journey' | 'surprise';
 
 export function StepModulesEdit({ 
   isPackEnabled, 
@@ -74,7 +75,8 @@ export function StepModulesEdit({
         const mapping: Record<string, string> = {
           'memories': 'memorias',
           'achievements': 'conquistas',
-          'curiosities': 'curiosidades'
+          'curiosities': 'curiosidades',
+          'journey': 'jornada'
         };
         onSubModuleChange(mapping[activeSubModule] || activeSubModule);
       }
@@ -119,7 +121,7 @@ export function StepModulesEdit({
     { id: 'achievements' as SubModule, title: 'Conquistas', description: 'Níveis e marcos do casal', icon: Trophy, color: 'text-yellow-500', bg: 'bg-yellow-500/10', locked: false },
     { id: 'curiosities' as SubModule, title: 'Curiosidades', description: 'Fatos sobre o dia do início', icon: Star, color: 'text-purple-500', bg: 'bg-purple-500/10', locked: false },
     { id: 'astral' as SubModule, title: 'Mapa Astral', description: 'Energia do universo', icon: Sparkles, color: 'text-blue-500', bg: 'bg-blue-500/10', locked: true },
-    { id: 'journey' as SubModule, title: 'Jornada', description: 'Locais onde estiveram', icon: MapIcon, color: 'text-green-500', bg: 'bg-green-500/10', locked: true },
+    { id: 'journey' as SubModule, title: 'Jornada', description: 'Locais onde estiveram', icon: MapIcon, color: 'text-green-500', bg: 'bg-green-500/10', locked: false },
     { id: 'surprise' as SubModule, title: 'Surpresa', description: 'Roleta de momentos', icon: RotateCcw, color: 'text-orange-500', bg: 'bg-orange-500/10', locked: true },
   ];
 
@@ -161,7 +163,7 @@ export function StepModulesEdit({
             <LayoutGrid className="w-5 h-5 md:w-6 md:h-6 text-white/80" />
           </div>
           <h2 className="text-2xl md:text-4xl font-black tracking-tight">
-            {activeSubModule === 'menu' ? 'Painel de Módulos' : activeSubModule === 'memories' ? 'Editar Memórias' : activeSubModule === 'achievements' ? 'Ver Conquistas' : activeSubModule === 'curiosities' ? 'Ver Curiosidades' : 'Personalizar'}
+            {activeSubModule === 'menu' ? 'Painel de Módulos' : activeSubModule === 'memories' ? 'Editar Memórias' : activeSubModule === 'achievements' ? 'Ver Conquistas' : activeSubModule === 'curiosities' ? 'Ver Curiosidades' : activeSubModule === 'journey' ? 'Ver Jornada' : 'Personalizar'}
           </h2>
         </div>
         <p className="text-xs md:text-base text-white/40 font-medium">
@@ -333,16 +335,16 @@ export function StepModulesEdit({
                 )}
              </div>
           </div>
-        ) : (activeSubModule === 'achievements' || activeSubModule === 'curiosities') ? (
+        ) : (activeSubModule === 'achievements' || activeSubModule === 'curiosities' || activeSubModule === 'journey') ? (
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
              <div className="flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl">
                 <div className="flex items-center gap-3">
-                   <div className={cn("p-2 rounded-xl", activeSubModule === 'achievements' ? "bg-yellow-500/20" : "bg-purple-500/20")}>
-                     {activeSubModule === 'achievements' ? <Trophy className="w-4 h-4 text-yellow-500" /> : <Star className="w-4 h-4 text-purple-500" />}
+                   <div className={cn("p-2 rounded-xl", activeSubModule === 'achievements' ? "bg-yellow-500/20" : activeSubModule === 'curiosities' ? "bg-purple-500/20" : "bg-green-500/20")}>
+                     {activeSubModule === 'achievements' ? <Trophy className="w-4 h-4 text-yellow-500" /> : activeSubModule === 'curiosities' ? <Star className="w-4 h-4 text-purple-500" /> : <MapIcon className="w-4 h-4 text-green-500" />}
                    </div>
                    <div>
                       <h4 className="text-xs font-black text-white uppercase tracking-wider">
-                        {activeSubModule === 'achievements' ? 'Módulo Conquistas' : 'Módulo Curiosidades'}
+                        {activeSubModule === 'achievements' ? 'Módulo Conquistas' : activeSubModule === 'curiosities' ? 'Módulo Curiosidades' : 'Módulo Jornada'}
                       </h4>
                       <p className="text-[9px] font-bold text-white/30 uppercase">Configuração Automática</p>
                    </div>
@@ -365,7 +367,9 @@ export function StepModulesEdit({
                    <p className="text-[11px] text-white/40 leading-relaxed font-medium">
                      {activeSubModule === 'achievements' 
                         ? 'As conquistas são calculadas automaticamente com base na data que você definiu no início da página. Não é necessário editar nada!'
-                        : 'As curiosidades astronômicas e climáticas são buscadas automaticamente de acordo com o dia em que vocês se conheceram.'}
+                        : activeSubModule === 'curiosities'
+                        ? 'As curiosidades astronômicas e climáticas são buscadas automaticamente de acordo com o dia em que vocês se conheceram.'
+                        : 'A jornada no mapa mostra os principais lugares que marcaram a história de vocês. Em breve você poderá adicionar locais personalizados!'}
                    </p>
                 </div>
              </div>
