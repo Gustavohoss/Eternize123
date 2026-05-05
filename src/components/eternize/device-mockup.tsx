@@ -13,7 +13,7 @@ import { ThemeId } from '@/app/criador/constants';
 import { MemoriesModulePreview } from './memories-module-preview';
 import { AchievementsModulePreview } from './achievements-module-preview';
 import { CuriosidadesModulePreview } from './curiosidades-module-preview';
-import { JourneyModulePreview } from './journey-module-preview';
+import { JourneyModulePreview, type JourneyPoint } from './journey-module-preview';
 import { Button } from '@/components/ui/button';
 
 // Theme-specific view components
@@ -72,6 +72,7 @@ interface DeviceMockupProps {
   isPackEnabled?: boolean;
   step?: string;
   memories?: any[];
+  journeyPoints?: JourneyPoint[];
   activeModuleId?: string | null;
 }
 
@@ -123,6 +124,7 @@ export function DeviceMockup({
   isFullscreen = false,
   isPackEnabled = false,
   memories = [],
+  journeyPoints = [],
   activeModuleId = null
 }: DeviceMockupProps) {
   
@@ -329,7 +331,7 @@ export function DeviceMockup({
                      {previewModuleId === 'memorias' && <MemoriesModulePreview memories={memories} />}
                      {previewModuleId === 'conquistas' && <AchievementsModulePreview />}
                      {previewModuleId === 'curiosidades' && <CuriosidadesModulePreview date={date} />}
-                     {previewModuleId === 'jornada' && <JourneyModulePreview />}
+                     {previewModuleId === 'jornada' && <JourneyModulePreview points={journeyPoints} />}
                   </div>
                </div>
             </div>

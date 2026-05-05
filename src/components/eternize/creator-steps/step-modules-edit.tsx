@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { LayoutGrid, Check, X, CreditCard, Sparkles, Info, Plus, Image as ImageIcon, Trash2, Calendar, MessageSquare, Type, ChevronLeft, ChevronRight, Heart, Trophy, Star, Compass, RotateCcw, Map as MapIcon, ChevronDown } from 'lucide-react';
+import { LayoutGrid, Check, X, CreditCard, Sparkles, Info, Plus, Image as ImageIcon, Trash2, Calendar, MessageSquare, Type, ChevronLeft, ChevronRight, Heart, Trophy, Star, Compass, RotateCcw, Map as MapIcon, ChevronDown, MapPin, Search } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { type JourneyPoint } from '../journey-module-preview';
 
 interface Memory {
   id: string;
@@ -24,6 +25,8 @@ interface StepModulesEditProps {
   onPackToggle: (enabled: boolean) => void;
   memories: Memory[];
   onMemoriesChange: (memories: Memory[]) => void;
+  journeyPoints?: JourneyPoint[];
+  onJourneyPointsChange?: (points: JourneyPoint[]) => void;
   onBack: () => void;
   onNext: () => void;
   isModulesOnlyMode?: boolean;
@@ -57,6 +60,8 @@ export function StepModulesEdit({
   onPackToggle, 
   memories, 
   onMemoriesChange, 
+  journeyPoints = [],
+  onJourneyPointsChange,
   onBack, 
   onNext,
   isModulesOnlyMode = false,
@@ -64,6 +69,7 @@ export function StepModulesEdit({
 }: StepModulesEditProps) {
   const [activeSubModule, setActiveSubModule] = useState<SubModule>('menu');
   const [editingMemoryId, setEditingMemoryId] = useState<string | null>(null);
+  const [editingPointId, setEditingPointId] = useState<string | null>(null);
 
   // Notifica o pai sobre a mudança do submódulo para atualizar a prévia
   useEffect(() => {
@@ -105,15 +111,47 @@ export function StepModulesEdit({
     onMemoriesChange(memories.map(m => m.id === id ? { ...m, ...updates } : m));
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, id: string, type: 'memory' | 'journey') => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onloadend = async () => {
       const compressed = await compressImage(reader.result as string);
-      updateMemory(id, { photo: compressed });
+      if (type === 'memory') {
+        updateMemory(id, { photo: compressed });
+      } else {
+        updateJourneyPoint(id, { photo: compressed });
+      }
     };
     reader.readAsDataURL(file);
+  };
+
+  // Journey Point Handlers
+  const addJourneyPoint = () => {
+    if (journeyPoints.length >= 8 || !onJourneyPointsChange) return;
+    const newPoint: JourneyPoint = {
+      id: Math.random().toString(36).substring(2, 9),
+      title: 'Novo Local',
+      date: new Date().toLocaleDateString('pt-BR'),
+      description: '',
+      photo: '',
+      lat: -23.5505,
+      lng: -46.6333,
+      rotation: `${(Math.random() * 10 - 5).toFixed(0)}deg`
+    };
+    onJourneyPointsChange([...journeyPoints, newPoint]);
+    setEditingPointId(newPoint.id);
+  };
+
+  const removeJourneyPoint = (id: string) => {
+    if (!onJourneyPointsChange) return;
+    onJourneyPointsChange(journeyPoints.filter(p => p.id !== id));
+    if (editingPointId === id) setEditingPointId(null);
+  };
+
+  const updateJourneyPoint = (id: string, updates: Partial<JourneyPoint>) => {
+    if (!onJourneyPointsChange) return;
+    onJourneyPointsChange(journeyPoints.map(p => p.id === id ? { ...p, ...updates } : p));
   };
 
   const MODULE_MENU_ITEMS = [
@@ -163,7 +201,7 @@ export function StepModulesEdit({
             <LayoutGrid className="w-5 h-5 md:w-6 md:h-6 text-white/80" />
           </div>
           <h2 className="text-2xl md:text-4xl font-black tracking-tight">
-            {activeSubModule === 'menu' ? 'Painel de Módulos' : activeSubModule === 'memories' ? 'Editar Memórias' : activeSubModule === 'achievements' ? 'Ver Conquistas' : activeSubModule === 'curiosities' ? 'Ver Curiosidades' : activeSubModule === 'journey' ? 'Ver Jornada' : 'Personalizar'}
+            {activeSubModule === 'menu' ? 'Painel de Módulos' : activeSubModule === 'memories' ? 'Editar Memórias' : activeSubModule === 'journey' ? 'Editar Jornada' : 'Personalizar'}
           </h2>
         </div>
         <p className="text-xs md:text-base text-white/40 font-medium">
@@ -301,7 +339,7 @@ export function StepModulesEdit({
                                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                          <label className="cursor-pointer bg-white text-black p-1.5 rounded-full scale-90">
                                             <ImageIcon className="w-3 h-3" />
-                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload(e, memory.id)} />
+                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload(e, memory.id, 'memory')} />
                                          </label>
                                       </div>
                                     </>
@@ -309,7 +347,7 @@ export function StepModulesEdit({
                                     <label className="w-full h-full flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-white/5 transition-all">
                                        <Plus className="w-4 h-4 text-white/20" />
                                        <span className="text-[7px] font-black uppercase text-white/20">Subir foto</span>
-                                       <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload(e, memory.id)} />
+                                       <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload(e, memory.id, 'memory')} />
                                     </label>
                                   )}
                                </div>
@@ -335,16 +373,175 @@ export function StepModulesEdit({
                 )}
              </div>
           </div>
-        ) : (activeSubModule === 'achievements' || activeSubModule === 'curiosities' || activeSubModule === 'journey') ? (
+        ) : activeSubModule === 'journey' ? (
+          <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
+             {/* Header Jornada */}
+             <div className="flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl">
+                <div className="flex items-center gap-3">
+                   <div className="bg-green-500/20 p-2 rounded-xl"><MapIcon className="w-4 h-4 text-green-500" /></div>
+                   <div>
+                      <h4 className="text-xs font-black text-white uppercase tracking-wider">Módulo Jornada</h4>
+                      <p className="text-[9px] font-bold text-white/30 uppercase">{journeyPoints.length}/8 locais</p>
+                   </div>
+                </div>
+                <Button 
+                  onClick={() => setActiveSubModule('menu')}
+                  variant="ghost" 
+                  className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 gap-1"
+                >
+                   <ChevronLeft className="w-3 h-3" /> Voltar ao menu
+                </Button>
+             </div>
+
+             <div className="grid grid-cols-1 gap-4">
+                {journeyPoints.map((point, index) => (
+                  <div 
+                    key={point.id}
+                    className={cn(
+                      "bg-[#0c0c0c] border rounded-[2rem] transition-all duration-300 overflow-hidden",
+                      editingPointId === point.id ? "border-primary/40 bg-primary/[0.02]" : "border-white/5 hover:border-white/10"
+                    )}
+                  >
+                    <div 
+                      className="p-5 flex items-center justify-between cursor-pointer"
+                      onClick={() => setEditingPointId(editingPointId === point.id ? null : point.id)}
+                    >
+                      <div className="flex items-center gap-4 min-w-0">
+                         <div className="w-10 h-10 rounded-xl overflow-hidden bg-white/5 border border-white/10 shrink-0 relative">
+                            {point.photo ? (
+                              <Image src={point.photo} fill className="object-cover" alt="" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-4 h-4 text-white/10" /></div>
+                            )}
+                         </div>
+                         <div className="min-w-0">
+                            <h4 className="text-xs font-black text-white truncate uppercase tracking-tight">{point.title || `Local ${index + 1}`}</h4>
+                            <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">{point.date}</p>
+                         </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                         <button 
+                           onClick={(e) => { e.stopPropagation(); removeJourneyPoint(point.id); }}
+                           className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg text-white/20 transition-all"
+                         >
+                           <Trash2 className="w-4 h-4" />
+                         </button>
+                         <div className={cn("transition-transform duration-300 text-white/20", editingPointId === point.id ? "rotate-180" : "rotate-90")}>
+                            <ChevronDown className="w-4 h-4" />
+                         </div>
+                      </div>
+                    </div>
+
+                    {editingPointId === point.id && (
+                      <div className="px-5 pb-6 space-y-5 border-t border-white/5 pt-6 animate-in slide-in-from-top-2">
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                               <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Type className="w-2.5 h-2.5" /> Nome do Local</Label>
+                               <Input 
+                                 value={point.title}
+                                 onChange={(e) => updateJourneyPoint(point.id, { title: e.target.value })}
+                                 placeholder="Ex: Rio de Janeiro"
+                                 className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"
+                               />
+                            </div>
+                            <div className="space-y-2">
+                               <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Calendar className="w-2.5 h-2.5" /> Data</Label>
+                               <Input 
+                                 value={point.date}
+                                 onChange={(e) => updateJourneyPoint(point.id, { date: e.target.value })}
+                                 placeholder="Ex: 20 de Maio, 2023"
+                                 className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"
+                               />
+                            </div>
+                         </div>
+
+                         <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                               <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><MapPin className="w-2.5 h-2.5" /> Latitude</Label>
+                               <Input 
+                                 type="number"
+                                 step="any"
+                                 value={point.lat}
+                                 onChange={(e) => updateJourneyPoint(point.id, { lat: parseFloat(e.target.value) || 0 })}
+                                 className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"
+                               />
+                            </div>
+                            <div className="space-y-2">
+                               <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><MapPin className="w-2.5 h-2.5" /> Longitude</Label>
+                               <Input 
+                                 type="number"
+                                 step="any"
+                                 value={point.lng}
+                                 onChange={(e) => updateJourneyPoint(point.id, { lng: parseFloat(e.target.value) || 0 })}
+                                 className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"
+                               />
+                            </div>
+                         </div>
+
+                         <div className="space-y-2">
+                            <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><MessageSquare className="w-2.5 h-2.5" /> Relato do momento</Label>
+                            <Textarea 
+                              value={point.description}
+                              onChange={(e) => updateJourneyPoint(point.id, { description: e.target.value })}
+                              placeholder="O que aconteceu nesse lugar?"
+                              className="bg-white/5 border-white/5 min-h-[80px] rounded-xl text-xs leading-relaxed"
+                            />
+                         </div>
+
+                         <div className="space-y-3">
+                            <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><ImageIcon className="w-2.5 h-2.5" /> Foto do local</Label>
+                            <div className="flex items-center gap-4">
+                               <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-white/5 border border-white/10 shrink-0 group">
+                                  {point.photo ? (
+                                    <>
+                                      <Image src={point.photo} fill className="object-cover" alt="" />
+                                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                         <label className="cursor-pointer bg-white text-black p-1.5 rounded-full scale-90">
+                                            <ImageIcon className="w-3 h-3" />
+                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload(e, point.id, 'journey')} />
+                                         </label>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <label className="w-full h-full flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-white/5 transition-all">
+                                       <Plus className="w-4 h-4 text-white/20" />
+                                       <span className="text-[7px] font-black uppercase text-white/20">Subir foto</span>
+                                       <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload(e, point.id, 'journey')} />
+                                    </label>
+                                  )}
+                               </div>
+                               <div className="flex-1 space-y-1">
+                                  <p className="text-[10px] font-bold text-white/60">Escolha a melhor foto desse dia.</p>
+                                  <p className="text-[9px] text-white/20 leading-relaxed">Dica: Use coordenadas do Google Maps para precisão total no rastro da jornada.</p>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {journeyPoints.length < 8 && (
+                  <button 
+                    onClick={addJourneyPoint}
+                    className="w-full h-16 rounded-[2rem] border-2 border-dashed border-white/5 bg-white/[0.02] hover:bg-white/5 hover:border-white/10 transition-all flex items-center justify-center gap-3 text-white/20 hover:text-primary group"
+                  >
+                    <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-black uppercase tracking-widest">Adicionar novo local</span>
+                  </button>
+                )}
+             </div>
+          </div>
+        ) : (activeSubModule === 'achievements' || activeSubModule === 'curiosities') ? (
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
              <div className="flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl">
                 <div className="flex items-center gap-3">
-                   <div className={cn("p-2 rounded-xl", activeSubModule === 'achievements' ? "bg-yellow-500/20" : activeSubModule === 'curiosities' ? "bg-purple-500/20" : "bg-green-500/20")}>
-                     {activeSubModule === 'achievements' ? <Trophy className="w-4 h-4 text-yellow-500" /> : activeSubModule === 'curiosities' ? <Star className="w-4 h-4 text-purple-500" /> : <MapIcon className="w-4 h-4 text-green-500" />}
+                   <div className={cn("p-2 rounded-xl", activeSubModule === 'achievements' ? "bg-yellow-500/20" : "bg-purple-500/20")}>
+                     {activeSubModule === 'achievements' ? <Trophy className="w-4 h-4 text-yellow-500" /> : <Star className="w-4 h-4 text-purple-500" />}
                    </div>
                    <div>
                       <h4 className="text-xs font-black text-white uppercase tracking-wider">
-                        {activeSubModule === 'achievements' ? 'Módulo Conquistas' : activeSubModule === 'curiosities' ? 'Módulo Curiosidades' : 'Módulo Jornada'}
+                        {activeSubModule === 'achievements' ? 'Módulo Conquistas' : 'Módulo Curiosidades'}
                       </h4>
                       <p className="text-[9px] font-bold text-white/30 uppercase">Configuração Automática</p>
                    </div>
@@ -367,9 +564,7 @@ export function StepModulesEdit({
                    <p className="text-[11px] text-white/40 leading-relaxed font-medium">
                      {activeSubModule === 'achievements' 
                         ? 'As conquistas são calculadas automaticamente com base na data que você definiu no início da página. Não é necessário editar nada!'
-                        : activeSubModule === 'curiosities'
-                        ? 'As curiosidades astronômicas e climáticas são buscadas automaticamente de acordo com o dia em que vocês se conheceram.'
-                        : 'A jornada no mapa mostra os principais lugares que marcaram a história de vocês. Em breve você poderá adicionar locais personalizados!'}
+                        : 'As curiosidades astronômicas e climáticas são buscadas automaticamente de acordo com o dia em que vocês se conheceram.'}
                    </p>
                 </div>
              </div>

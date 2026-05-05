@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -12,6 +13,7 @@ import { Step, ThemeId, MOCK_CITIES } from '@/app/criador/constants';
 import { getContrastColor } from '@/lib/color-utils';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { type JourneyPoint } from '@/components/eternize/journey-module-preview';
 
 // Step Components
 import { StepCustomizeBackground } from '@/components/eternize/creator-steps/step-customize-background';
@@ -85,6 +87,7 @@ export default function EditSitePage() {
   const [isPackEnabled, setIsPackEnabled] = useState<boolean>(false);
   const [hasPackPurchased, setHasPackPurchased] = useState<boolean>(false);
   const [memories, setMemories] = useState<any[]>([]);
+  const [journeyPoints, setJourneyPoints] = useState<JourneyPoint[]>([]);
   
   const [sparklesDensity, setSparklesDensity] = useState<number>(100);
   const [sparklesSpeed, setSparklesSpeed] = useState<number>(0.5);
@@ -141,6 +144,7 @@ export default function EditSitePage() {
         setMusicData(config.musicData);
         setUploadedPhotos(config.uploadedPhotos || []);
         setMemories(config.memories || []);
+        setJourneyPoints(config.journeyPoints || []);
         
         const packPurchased = siteData.isPackEnabled === true;
         setHasPackPurchased(packPurchased);
@@ -241,7 +245,7 @@ export default function EditSitePage() {
         showCard, titlePosition, titleColor, titleFont, titleIsBold, titleHasNeon, titleNeonStrength,
         dateColor, dateFont, dateIsBold, dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor,
         messageColor, messageFont, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength,
-        isMusicAutoPlay, locationQuery, isPackEnabled, memories
+        isMusicAutoPlay, locationQuery, isPackEnabled, memories, journeyPoints
       };
 
       const jsonContent = JSON.stringify(contentData);
@@ -295,7 +299,7 @@ export default function EditSitePage() {
     dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor, messageColor, messageFont,
     musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength, isAutoPlay: false,
     sparklesDensity, sparklesSpeed, sparklesColor, smokeIntensity, smokeColor, patternDuration,
-    patternDensity, patternColor, isPackEnabled, memories,
+    patternDensity, patternColor, isPackEnabled, memories, journeyPoints,
     activeModuleId: activeModulePreview
   };
 
@@ -350,7 +354,7 @@ export default function EditSitePage() {
             {step === 'message' && <StepMessage {...{selectedTheme, message, onMessageChange: setMessage, messageFont, onMessageFontChange: setMessageFont, messageColor, onMessageColorChange: setMessageColor, onBack: handleBack, onNext: handleNext}} />}
             {step === 'music' && <StepMusic {...{selectedTheme, musicData, onMusicSelect: setMusicData, musicBoxColor, onMusicBoxColorChange: setMusicBoxColor, musicTextColor, onMusicTextColorChange: setMusicTextColor, musicHasNeon, onMusicHasNeonChange: setMusicHasNeon, musicNeonStrength, onMusicNeonStrengthChange: setMusicNeonStrength, isAutoPlay: isMusicAutoPlay, onAutoPlayChange: setIsMusicAutoPlay, onBack: handleBack, onNext: handleNext}} />}
             {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: setLocationQuery, showSuggestions, onShowSuggestionsChange: setShowSuggestions, filteredCities, selectedCountStyle, onCountStyleChange: setSelectedCountStyle, dateFont, onDateFontChange: setDateFont, dateIsBold, onDateIsBoldChange: setDateIsBold, dateHasNeon, onDateHasNeonChange: setDateHasNeon, dateNeonStrength, onDateNeonStrengthChange: setDateNeonStrength, dateColor, onDateColorChange: setDateColor, dateBoxBgColor, onDateBoxBgColorChange: setDateBoxBgColor, dateBoxBorderColor, onDateBoxBorderColorChange: setDateBoxBorderColor, onBack: handleBack, onNext: handleNext}} />}
-            {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} memories={memories} onMemoriesChange={setMemories} onBack={handleBack} onNext={handleSave} isModulesOnlyMode={isModulesOnlyMode} onSubModuleChange={setActiveModulePreview} />}
+            {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} memories={memories} onMemoriesChange={setMemories} journeyPoints={journeyPoints} onJourneyPointsChange={setJourneyPoints} onBack={handleBack} onNext={handleSave} isModulesOnlyMode={isModulesOnlyMode} onSubModuleChange={setActiveModulePreview} />}
 
             <div className="lg:hidden flex flex-col items-center mt-12 w-full gap-4">
                <Dialog>

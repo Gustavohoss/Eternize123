@@ -13,45 +13,57 @@ const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLaye
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 const Polyline = dynamic(() => import('react-leaflet').then(mod => mod.Polyline), { ssr: false });
 
-interface Lugar {
-  coords: [number, number];
-  titulo: string;
-  data: string;
-  desc: string;
-  foto: string;
-  rotacao: string;
+export interface JourneyPoint {
+  id: string;
+  title: string;
+  date: string;
+  description: string;
+  photo: string;
+  lat: number;
+  lng: number;
+  rotation?: string;
 }
 
-const LUGARES_PADRAO: Lugar[] = [
+interface JourneyModulePreviewProps {
+  points?: JourneyPoint[];
+}
+
+const DEFAULT_POINTS: JourneyPoint[] = [
   {
-    coords: [-23.5505, -46.6333],
-    titulo: "São Paulo — onde tudo começou",
-    data: "13/02/2022",
-    desc: "Nossa cidade, nosso lar. Aqui demos nosso primeiro passo juntos naquela tarde de fevereiro.",
-    foto: "https://picsum.photos/seed/sp/600/800",
-    rotacao: "-5deg"
+    id: '1',
+    lat: -23.5505,
+    lng: -46.6333,
+    title: "São Paulo — onde tudo começou",
+    date: "13/02/2022",
+    description: "Nossa cidade, nosso lar. Aqui demos nosso primeiro passo juntos naquela tarde de fevereiro.",
+    photo: "https://picsum.photos/seed/sp/600/800",
+    rotation: "-5deg"
   },
   {
-    coords: [-22.9068, -43.1729],
-    titulo: "Rio de Janeiro — maravilhosa",
-    data: "20/05/2023",
-    desc: "Um final de semana inesquecível vendo o pôr do sol no Arpoador.",
-    foto: "https://picsum.photos/seed/rio/600/800",
-    rotacao: "4deg"
+    id: '2',
+    lat: -22.9068,
+    lng: -43.1729,
+    title: "Rio de Janeiro — maravilhosa",
+    date: "20/05/2023",
+    description: "Um final de semana inesquecível vendo o pôr do sol no Arpoador.",
+    photo: "https://picsum.photos/seed/rio/600/800",
+    rotation: "4deg"
   },
   {
-    coords: [-27.5954, -48.5480],
-    titulo: "Florianópolis — ilha do amor",
-    data: "10/01/2024",
-    desc: "Pés na areia e o barulho do mar. Onde renovamos nossas energias.",
-    foto: "https://picsum.photos/seed/floripa/600/800",
-    rotacao: "-3deg"
+    id: '3',
+    lat: -27.5954,
+    lng: -48.5480,
+    title: "Florianópolis — ilha do amor",
+    date: "10/01/2024",
+    description: "Pés na areia e o barulho do mar. Onde renovamos nossas energias.",
+    photo: "https://picsum.photos/seed/floripa/600/800",
+    rotation: "-3deg"
   }
 ];
 
-export function JourneyModulePreview() {
+export function JourneyModulePreview({ points }: JourneyModulePreviewProps) {
   const [L, setL] = useState<any>(null);
-  const [selectedLugar, setSelectedLugar] = useState<Lugar | null>(null);
+  const [selectedPoint, setSelectedPoint] = useState<JourneyPoint | null>(null);
 
   useEffect(() => {
     import('leaflet').then((leaflet) => {
@@ -59,25 +71,32 @@ export function JourneyModulePreview() {
     });
   }, []);
 
+  const displayPoints = points && points.length > 0 ? points : DEFAULT_POINTS;
+
   if (!L) return (
     <div className="w-full h-full bg-[#0d1117] flex items-center justify-center">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div>
     </div>
   );
 
-  const createCustomIcon = (lugar: Lugar) => {
+  const createCustomIcon = (point: JourneyPoint) => {
     return L.divIcon({
       className: 'custom-marker',
       html: `
-        <div class="marcador-polaroid" style="transform: rotate(${lugar.rotacao})">
-          <img src="${lugar.foto}" alt="Foto">
-          <div class="marcador-legenda">${lugar.titulo}</div>
+        <div class="marcador-polaroid" style="transform: rotate(${point.rotation || '0deg'})">
+          <img src="${point.photo}" alt="Foto">
+          <div class="marcador-legenda">${point.title}</div>
         </div>
       `,
       iconSize: [64, 75],
       iconAnchor: [32, 37]
     });
   };
+
+  const polylineCoords: [number, number][] = displayPoints.map(p => [p.lat, p.lng]);
+  const centerCoords: [number, number] = displayPoints.length > 0 
+    ? [displayPoints[0].lat, displayPoints[0].lng] 
+    : [-23.5505, -46.6333];
 
   return (
     <div className="relative w-full h-full bg-[#0d1117] overflow-hidden text-white font-sans">
@@ -129,7 +148,8 @@ export function JourneyModulePreview() {
 
       {/* Mapa */}
       <MapContainer 
-        center={[-24.5, -46.0]} 
+        key={displayPoints.length} // Force re-render when points change to update center/poly
+        center={centerCoords} 
         zoom={5} 
         style={{ width: '100%', height: '100%' }}
         zoomControl={false}
@@ -137,52 +157,54 @@ export function JourneyModulePreview() {
       >
         <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
         
-        {LUGARES_PADRAO.map((lugar, index) => (
+        {displayPoints.map((point, index) => (
           <Marker 
-            key={index} 
-            position={lugar.coords} 
-            icon={createCustomIcon(lugar)}
+            key={point.id} 
+            position={[point.lat, point.lng]} 
+            icon={createCustomIcon(point)}
             eventHandlers={{
-              click: () => setSelectedLugar(lugar),
+              click: () => setSelectedPoint(point),
             }}
           />
         ))}
 
-        <Polyline 
-          positions={[LUGARES_PADRAO[2].coords, LUGARES_PADRAO[0].coords, LUGARES_PADRAO[1].coords]}
-          color="#34d399"
-          weight={2}
-          opacity={0.5}
-          dashArray="6, 6"
-        />
+        {polylineCoords.length > 1 && (
+          <Polyline 
+            positions={polylineCoords}
+            color="#34d399"
+            weight={2}
+            opacity={0.5}
+            dashArray="6, 6"
+          />
+        )}
       </MapContainer>
 
       {/* Badge de Lugares */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-2 px-5 py-2.5 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-xs shadow-2xl">
         <span className="text-emerald-400 animate-pulse">●</span>
-        <span className="font-bold text-white">{LUGARES_PADRAO.length} lugares</span>
+        <span className="font-bold text-white">{displayPoints.length} lugares</span>
         <span className="text-white/40">· toque para explorar</span>
       </div>
 
       {/* Modal de Detalhes (Stories Style) */}
-      {selectedLugar && (
+      {selectedPoint && (
         <div className="absolute inset-0 z-[2000] bg-black flex flex-col animate-in fade-in duration-300">
           <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-gradient-to-b from-black/70 to-transparent">
             <button 
-              onClick={() => setSelectedLugar(null)}
+              onClick={() => setSelectedPoint(null)}
               className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white"
             >
               <X className="w-4 h-4" />
             </button>
-            <span className="font-semibold text-sm truncate max-w-[200px]">{selectedLugar.titulo}</span>
+            <span className="font-semibold text-sm truncate max-w-[200px]">{selectedPoint.title}</span>
             <div className="w-8" />
           </div>
 
           <div className="flex-1 relative">
-            <img src={selectedLugar.foto} className="w-full h-full object-cover" alt="" />
+            <img src={selectedPoint.photo} className="w-full h-full object-cover" alt="" />
             <div className="absolute bottom-0 left-0 right-0 p-10 pb-16 text-center bg-gradient-to-t from-black/95 via-black/40 to-transparent">
-              <p className="text-xs text-white/60 mb-2 font-mono">{selectedLugar.data}</p>
-              <p className="text-base font-medium leading-relaxed">{selectedLugar.desc}</p>
+              <p className="text-xs text-white/60 mb-2 font-mono">{selectedPoint.date}</p>
+              <p className="text-base font-medium leading-relaxed">{selectedPoint.description}</p>
             </div>
           </div>
         </div>
