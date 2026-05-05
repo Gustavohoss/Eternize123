@@ -137,7 +137,7 @@ export function StepModulesEdit({
     if (journeyPoints.length >= 8 || !onJourneyPointsChange) return;
     const newPoint: JourneyPoint = {
       id: Math.random().toString(36).substring(2, 9),
-      title: 'Novo Local',
+      title: '',
       date: new Date().toLocaleDateString('pt-BR'),
       description: '',
       photo: '',
@@ -160,7 +160,7 @@ export function StepModulesEdit({
     onJourneyPointsChange(journeyPoints.map(p => p.id === id ? { ...p, ...updates } : p));
   };
 
-  // Busca de local com Geocode.maps.co (mais estável para front-end)
+  // Busca de local com Photon API (Komoot) - Muito estável e rápida
   const searchLocation = (query: string) => {
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     
@@ -174,30 +174,47 @@ export function StepModulesEdit({
       setIsSearchingLocation(true);
       setHasSearched(true);
       try {
-        // Usando geocode.maps.co que é mais amigável a CORS direto do navegador
         const response = await fetch(
-          `https://geocode.maps.co/search?q=${encodeURIComponent(query)}&api_key=67b2049e7b250266042435ncae3a968`
+          `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5&lang=pt`
         );
         
-        if (!response.ok) throw new Error('API Rate Limit or Error');
+        if (!response.ok) throw new Error('API Error');
         
         const data = await response.json();
-        setSearchResults(Array.isArray(data) ? data : []);
+        
+        // Formata os resultados do Photon para a nossa UI
+        const formattedResults = (data.features || []).map((f: any) => {
+          const props = f.properties;
+          const labelParts = [
+            props.name,
+            props.city || props.town,
+            props.state,
+            props.country
+          ].filter(Boolean);
+
+          return {
+            display_name: labelParts.join(', '),
+            lat: f.geometry.coordinates[1],
+            lon: f.geometry.coordinates[0],
+            name: props.name || props.city || "Local Desconhecido"
+          };
+        });
+
+        setSearchResults(formattedResults);
       } catch (error) {
         console.warn("Erro ao buscar local:", error);
-        // Fallback simples caso a API chave falhe
         setSearchResults([]);
       } finally {
         setIsSearchingLocation(false);
       }
-    }, 800);
+    }, 600);
   };
 
   const handleLocationSelect = (id: string, result: any) => {
     updateJourneyPoint(id, {
-      lat: parseFloat(result.lat),
-      lng: parseFloat(result.lon),
-      title: result.display_name.split(',')[0] 
+      lat: result.lat,
+      lng: result.lon,
+      title: result.name
     });
     setLocationSearch('');
     setSearchResults([]);
@@ -453,7 +470,7 @@ export function StepModulesEdit({
                       className="p-5 flex items-center justify-between cursor-pointer"
                       onClick={() => {
                         setEditingPointId(editingPointId === point.id ? null : point.id);
-                        setSearchResults([]); // Limpa resultados ao trocar de item
+                        setSearchResults([]);
                         setHasSearched(false);
                       }}
                     >
@@ -486,7 +503,7 @@ export function StepModulesEdit({
                     {editingPointId === point.id && (
                       <div className="px-5 pb-6 space-y-5 border-t border-white/5 pt-6 animate-in slide-in-from-top-2">
                          
-                         {/* Campo de Busca de Local */}
+                         {/* Campo de Busca de Local (Photon API Integration) */}
                          <div className="space-y-2 relative">
                             <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Search className="w-2.5 h-2.5" /> Pesquisar Localização</Label>
                             <div className="relative">
