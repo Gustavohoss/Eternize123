@@ -14,7 +14,7 @@ export function OrganicModuleGrid({ onModuleClick, pageTitle }: OrganicModuleGri
       <style jsx>{`
         .organic-grid {
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
+          grid-template-columns: repeat(6, 1fr);
           gap: 10px;
           width: 100%;
         }
@@ -30,8 +30,14 @@ export function OrganicModuleGrid({ onModuleClick, pageTitle }: OrganicModuleGri
           cursor: pointer;
         }
         .organic-card:active { transform: scale(0.95); }
+        
+        /* Classes para simular 3 itens na primeira linha e 2 na segunda */
+        .item-row-1 { grid-column: span 2; }
+        .item-row-2 { grid-column: span 3; }
+
         .organic-card:nth-child(1), .organic-card:nth-child(4) { transform: rotate(-1.5deg); }
         .organic-card:nth-child(2), .organic-card:nth-child(3), .organic-card:nth-child(5) { transform: rotate(1.5deg); }
+        
         .organic-icon-area {
           height: 70px;
           margin: 4px;
@@ -63,23 +69,26 @@ export function OrganicModuleGrid({ onModuleClick, pageTitle }: OrganicModuleGri
       </div>
       
       <div className="organic-grid">
-        <div className="organic-card" onClick={() => onModuleClick('memorias')}>
+        {/* Fileira 1 (3 itens) */}
+        <div className="organic-card item-row-1" onClick={() => onModuleClick('memorias')}>
           <div className="organic-icon-area pink-bg">♡</div>
           <div className="organic-label">Memórias</div>
         </div>
-        <div className="organic-card" onClick={() => onModuleClick('conquistas')}>
+        <div className="organic-card item-row-1" onClick={() => onModuleClick('conquistas')}>
           <div className="organic-icon-area yellow-bg">🏆</div>
           <div className="organic-label">Conquistas</div>
         </div>
-        <div className="organic-card" onClick={() => onModuleClick('curiosidades')}>
+        <div className="organic-card item-row-1" onClick={() => onModuleClick('curiosidades')}>
           <div className="organic-icon-area purple-bg">✨</div>
           <div className="organic-label">Curiosidades</div>
         </div>
-        <div className="organic-card" onClick={() => onModuleClick('jornada')}>
+
+        {/* Fileira 2 (2 itens) */}
+        <div className="organic-card item-row-2" onClick={() => onModuleClick('jornada')}>
           <div className="organic-icon-area green-bg">🧭</div>
           <div className="organic-label">Jornada</div>
         </div>
-        <div className="organic-card" onClick={() => onModuleClick('surpresa')}>
+        <div className="organic-card item-row-2" onClick={() => onModuleClick('surpresa')}>
           <div className="organic-icon-area orange-bg">⟳</div>
           <div className="organic-label">Surpresa</div>
         </div>
