@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { ThumbsUp, Heart, Trophy, Star, MapPin, RotateCcw } from 'lucide-react';
+import { ThumbsUp, Heart, Trophy, Star, MapPin, RotateCcw, Play } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -140,12 +140,17 @@ export function NetflixView({
         {activeTab === 'episodios' ? (
           <div className="space-y-6">
             {uploadedPhotos.map((photo, i) => (
-              <div key={i} className="flex gap-3 items-center" onClick={() => onPhotoClick(i)}>
-                <div className="w-32 h-[72px] bg-[#2a2a2a] rounded-md relative overflow-hidden">
-                  <Image src={photo} fill className="object-cover" alt={`Ep ${i}`} />
+              <div key={i} className="flex gap-3 items-center group cursor-pointer" onClick={() => onPhotoClick(i)}>
+                <div className="w-32 h-[72px] bg-[#2a2a2a] rounded-md relative overflow-hidden shrink-0">
+                  <Image src={photo} fill className="object-cover group-hover:opacity-70 transition-opacity" alt={`Ep ${i}`} />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+                     <div className="w-8 h-8 rounded-full border border-white flex items-center justify-center">
+                        <Play className="w-3 h-3 text-white fill-white ml-0.5" />
+                     </div>
+                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-white mb-0.5">{(i + 1)}. Memória {(i + 1)}</p>
+                  <p className="text-xs font-bold text-white mb-0.5 group-hover:text-red-500 transition-colors">{(i + 1)}. Memória {(i + 1)}</p>
                   <p className="text-[10px] text-neutral-500 leading-tight">Capítulo especial da nossa história.</p>
                 </div>
               </div>
