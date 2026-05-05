@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Zap, Flame, ExternalLink, X, CreditCard, RotateCcw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Zap, Flame, ExternalLink, X, CreditCard, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
@@ -188,7 +188,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
           onClick={() => onPackToggle(!isPackEnabled)}
           className={cn(
             "w-full bg-[#0c0c0c] border rounded-3xl p-6 flex items-center justify-between cursor-pointer transition-all duration-300",
-            isPackEnabled ? "border-primary/50 ring-1 ring-primary/10" : "border-white/5"
+            isPackEnabled ? "border-primary/50 ring-1 ring-primary/20" : "border-white/5"
           )}
         >
           <div className="space-y-1">
