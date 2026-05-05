@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -12,7 +11,7 @@ interface StepPlansProps {
 }
 
 export function StepPlans({ onBack, onFinish }: StepPlansProps) {
-  const [selectedPlan, setSelectedPlan] = useState<'forever' | '24h'>('forever');
+  const [selectedPlan, setSelectedPlan] = useState<'forever' | '1w'>('forever');
 
   return (
     <div className="space-y-8 md:space-y-10 flex flex-col items-center md:items-start w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -31,24 +30,24 @@ export function StepPlans({ onBack, onFinish }: StepPlansProps) {
 
       {/* Plans Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-        {/* 24 Hours Plan */}
+        {/* 1 Week Plan */}
         <div 
-          onClick={() => setSelectedPlan('24h')}
+          onClick={() => setSelectedPlan('1w')}
           className={cn(
             "relative bg-[#0c0c0c] border rounded-[2rem] p-8 flex flex-col gap-6 transition-all duration-300 cursor-pointer group",
-            selectedPlan === '24h' ? "border-primary/50 ring-1 ring-primary/20" : "border-white/5 hover:border-white/10"
+            selectedPlan === '1w' ? "border-primary/50 ring-1 ring-primary/20" : "border-white/5 hover:border-white/10"
           )}
         >
           <div className="space-y-1">
-            <h3 className="text-xl font-black text-white">24 Horas</h3>
-            <p className="text-xs text-white/30 font-medium">Acesso por 24 horas. Todas as funcionalidades incluídas.</p>
+            <h3 className="text-xl font-black text-white">1 semana</h3>
+            <p className="text-xs text-white/30 font-medium">Acesso por 1 semana. Todas as funcionalidades incluídas.</p>
           </div>
 
           <div className="space-y-1">
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-black text-white">R$ 21,00</span>
             </div>
-            <p className="text-[10px] font-bold text-white/20 uppercase tracking-wider">/por 24 horas</p>
+            <p className="text-[10px] font-bold text-white/20 uppercase tracking-wider">/por 1 semana</p>
           </div>
 
           <div className="space-y-3 pt-2">
@@ -74,10 +73,10 @@ export function StepPlans({ onBack, onFinish }: StepPlansProps) {
             variant="outline" 
             className={cn(
               "mt-4 w-full h-12 rounded-2xl font-black text-xs uppercase tracking-widest transition-all",
-              selectedPlan === '24h' ? "bg-white text-black border-none" : "bg-white/5 border-white/5 text-white/30"
+              selectedPlan === '1w' ? "bg-white text-black border-none" : "bg-white/5 border-white/5 text-white/30"
             )}
           >
-            {selectedPlan === '24h' ? '✓ Selecionado' : 'Selecionar'}
+            {selectedPlan === '1w' ? '✓ Selecionado' : 'Selecionar'}
           </Button>
         </div>
 

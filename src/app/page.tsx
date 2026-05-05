@@ -141,7 +141,7 @@ const REVIEWS_2 = [
   {
     stars: 5,
     text: '"Fiz de aniversário de namoro e mandei o link pelo WhatsApp. Ela ficou chorando de emoção e me ligou na hora. Nunca vi ela assim tão feliz 🥹"',
-    name: 'Felipe & Júlia',
+    name: 'Felipe & Julia',
     time: '2 semanas atrás',
     initials: 'FJ',
     color: 'linear-gradient(135deg,#ffecd2,#fcb69f)'
@@ -202,7 +202,7 @@ const FAQ_ITEMS = [
   {
     id: "06",
     question: "Por quanto tempo minha página ficará disponível?",
-    answer: "No plano de 24 horas, o acesso expira após um dia. No plano 'Para Sempre', sua página fica guardada em nossos servidores por tempo indeterminado, sem cobranças extras ou mensalidades."
+    answer: "No plano de 1 semana, o acesso expira após sete dias. No plano 'Para Sempre', sua página fica guardada em nossos servidores por tempo indeterminado, sem cobranças extras ou mensalidades."
   },
   {
     id: "07",
@@ -1065,16 +1065,16 @@ export default function LandingPage() {
             <div className="bg-[#0c0c0c] border border-white/5 rounded-[2rem] p-7 flex flex-col transition-all duration-500 hover:border-white/10 group">
               <div className="flex justify-between items-start mb-4">
                 <div className="space-y-1">
-                  <h3 className="text-xl font-black italic uppercase tracking-tight">24 Horas</h3>
-                  <p className="text-white/30 text-[11px] font-medium max-w-[180px]">Acesso por 24 horas. Todas as funcionalidades incluídas.</p>
+                  <h3 className="text-xl font-black italic uppercase tracking-tight">1 semana</h3>
+                  <p className="text-white/30 text-[11px] font-medium max-w-[180px]">Acesso por 1 semana. Todas as funcionalidades incluídas.</p>
                 </div>
-                <div className="bg-white/5 border border-white/10 px-2 py-0.5 rounded-lg text-[9px] font-black text-white/40 uppercase">24h</div>
+                <div className="bg-white/5 border border-white/10 px-2 py-0.5 rounded-lg text-[9px] font-black text-white/40 uppercase">1s</div>
               </div>
 
               <div className="mb-6 pt-2">
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-3xl font-black">R$ 21,00</span>
-                  <span className="text-white/20 text-[10px] font-bold">/por 24 horas</span>
+                  <span className="text-white/20 text-[10px] font-bold">/por 1 semana</span>
                 </div>
               </div>
 
