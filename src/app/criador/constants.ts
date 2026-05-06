@@ -30,6 +30,7 @@ export const THEME_OPTIONS = [
     badge: 'Série',
     color: '#e50914',
     image: 'https://picsum.photos/seed/netflix-theme/400/600',
+    videoUrl: 'rfVydSVztXc',
     demoUrl: '/site/funcionando11111111-jfh8'
   },
   { 
