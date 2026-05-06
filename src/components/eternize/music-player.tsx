@@ -256,7 +256,7 @@ export function MusicPlayer({
         </div>
 
         <div className={cn("transition-transform duration-500 opacity-50", isExpanded ? "rotate-180" : "")} style={{ color: musicTextColor }}>
-          <ChevronDown size(20) />
+          <ChevronDown size={20} />
         </div>
       </div>
 
@@ -279,7 +279,7 @@ export function MusicPlayer({
         </div>
 
         <div className="player-controls flex items-center justify-between mt-[15px] px-[5px]">
-          <Volume2 size(18) className="opacity-50" style={{ color: musicTextColor }} />
+          <Volume2 size={18} className="opacity-50" style={{ color: musicTextColor }} />
           <button 
             type="button"
             disabled={!isReady}
@@ -290,9 +290,9 @@ export function MusicPlayer({
             {!isReady ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : isPlaying ? (
-              <Pause size(22) fill="white" />
+              <Pause size={22} fill="white" />
             ) : (
-              <Play size(22) fill="white" className="ml-[3px]" />
+              <Play size={22} fill="white" className="ml-[3px]" />
             )}
           </button>
           <div style={{ width: '18px' }} />
