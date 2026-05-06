@@ -109,14 +109,34 @@ export function SpotifyView({
     <div className="w-full h-full bg-[#121212] text-white font-inter relative flex flex-col no-scrollbar overflow-hidden">
       {showSpotifyFullscreen && renderFullscreen()}
       
-      <div className="absolute top-0 left-0 right-0 z-50 px-6 pt-4 pb-2 flex items-center justify-between transition-colors duration-300 pointer-events-none" style={{ backgroundColor: spotifyHeaderOpacity > 0 ? `rgba(18, 18, 18, ${spotifyHeaderOpacity})` : 'transparent' }}>
-        <svg width="28" height="28" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#1DB954"></circle><path d="M10 26.5 Q20 22 31 24.5" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none"></path><path d="M9 21 Q20 15.5 32 19" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none"></path><path d="M8 15 Q20 8 33 13" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none"></path></svg>
-        <div className="w-8 h-8 rounded-full bg-[#1DB954] flex items-center justify-center text-[10px] font-black text-black">EZ</div>
+      {/* Header Fading - Spotify Style */}
+      <div 
+        className="absolute top-0 left-0 right-0 z-50 px-6 pt-4 pb-2 flex items-center justify-between transition-all duration-300 pointer-events-none" 
+        style={{ 
+          backgroundColor: `rgba(18, 18, 18, ${spotifyHeaderOpacity})`,
+          backdropFilter: spotifyHeaderOpacity > 0.5 ? 'blur(12px)' : 'none'
+        }}
+      >
+        <div className="pointer-events-auto">
+          <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="20" fill="#1DB954"></circle>
+            <path d="M10 26.5 Q20 22 31 24.5" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none"></path>
+            <path d="M9 21 Q20 15.5 32 19" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none"></path>
+            <path d="M8 15 Q20 8 33 13" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none"></path>
+          </svg>
+        </div>
+        <div className="w-8 h-8 rounded-full bg-[#1DB954] flex items-center justify-center text-[10px] font-black text-black pointer-events-auto">EZ</div>
       </div>
       
       <div className="flex-1 overflow-y-auto no-scrollbar relative" onScroll={onHeaderScroll}>
         <section className="relative h-[400px]">
-          <div className="absolute inset-0">{uploadedPhotos.length > 0 ? <Image src={uploadedPhotos[activeHeroIndex] || uploadedPhotos[0]} fill className="object-cover" alt="Hero" priority /> : <div className="w-full h-full bg-gradient-to-br from-[#0d4a2a] to-[#121212]" />}</div>
+          <div className="absolute inset-0">
+            {uploadedPhotos.length > 0 ? (
+              <Image src={uploadedPhotos[activeHeroIndex] || uploadedPhotos[0]} fill className="object-cover" alt="Hero" priority />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-[#0d4a2a] to-[#121212]" />
+            )}
+          </div>
           <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent"></div>
           <div className="absolute bottom-2 left-6 right-6">
             <div className="flex items-center gap-2 mb-1"><div className="bg-[#1DB954] w-5 h-5 rounded-full flex items-center justify-center"><Check className="w-3.5 h-3.5 text-white" strokeWidth={4} /></div><span className="text-white text-[11px] font-bold">Artista verificado</span></div>
@@ -141,7 +161,7 @@ export function SpotifyView({
               <p className="text-[8px] text-neutral-400 uppercase font-bold tracking-wider">Anos juntos</p>
             </div>
             <div className="bg-[#181818] rounded-lg p-3 text-center border border-white/5">
-              <p className="font-black text-xl text-[#1DB954] leading-none mb-1">{totalDays.toLocaleString('pt-BR')}</p>
+              <p className="font-black text-xl text-[#1DB954] Bird leading-none mb-1">{totalDays.toLocaleString('pt-BR')}</p>
               <p className="text-[8px] text-neutral-400 uppercase font-bold tracking-wider">Dias</p>
             </div>
             <div className="bg-[#181818] rounded-lg p-3 text-center border border-white/5">

@@ -301,6 +301,14 @@ export function DeviceMockup({
     }, 4500);
   }, [selectedTheme]);
 
+  // Handler de scroll aprimorado para o Spotify
+  const handleSpotifyScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const scrollTop = e.currentTarget.scrollTop;
+    // Fading começa aos 20px e termina nos 120px
+    const opacity = Math.min(1, Math.max(0, (scrollTop - 20) / 100));
+    setSpotifyHeaderOpacity(opacity);
+  }, []);
+
   return (
     <div className={cn("w-full transition-all duration-500 flex flex-col relative", isFullscreen ? "h-full" : "max-w-[400px] mx-auto")}>
       {musicData && (
@@ -383,7 +391,7 @@ export function DeviceMockup({
                 <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: handleStartNetflixExperience, onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList), isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'spotify' && (
-                <SpotifyView {...{uploadedPhotos, activeHeroIndex, pageTitle, totalDays, timeDiff, date, activeTab, onTabChange: setActiveTab, onPhotoClick: (i) => { setActiveHeroIndex(i); setShowSpotifyFullscreen(true); }, isLiked, onLikeToggle: () => setIsLiked(!isLiked), isAudioPlaying, onAudioToggle: setIsAudioPlaying, dynamicSpotifyColor, spotifyHeaderOpacity, onHeaderScroll: (e) => setSpotifyHeaderOpacity(Math.min(1, e.currentTarget.scrollTop / 100)), onShowFullscreen: () => setShowSpotifyFullscreen(true), onCloseFullscreen: () => setShowSpotifyFullscreen(false), showSpotifyFullscreen, message, musicData, isPackEnabled, onModuleClick: setPreviewModuleId}} />
+                <SpotifyView {...{uploadedPhotos, activeHeroIndex, pageTitle, totalDays, timeDiff, date, activeTab, onTabChange: setActiveTab, onPhotoClick: (i) => { setActiveHeroIndex(i); setShowSpotifyFullscreen(true); }, isLiked, onLikeToggle: () => setIsLiked(!isLiked), isAudioPlaying, onAudioToggle: setIsAudioPlaying, dynamicSpotifyColor, spotifyHeaderOpacity, onHeaderScroll: handleSpotifyScroll, onShowFullscreen: () => setShowSpotifyFullscreen(true), onCloseFullscreen: () => setShowSpotifyFullscreen(false), showSpotifyFullscreen, message, musicData, isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'instagram' && (
                 <InstagramView {...{uploadedPhotos, pageTitle, totalDays, timeDiff, date, message, musicData, isFollowing, onFollowToggle: () => setIsFollowing(!isFollowing), activeTab, onTabChange: setActiveTab, onStartStories: () => { setShowStories(true); setCurrentStoryIndex(0); setStoryProgress(0); }, onPostClick: (i) => { setSelectedPostIndex(i); setShowInstagramPost(true); }, showPostDetail: showInstagramPost, selectedPostIndex, onClosePost: () => setShowInstagramPost(false), likedPosts, onLikePost: (i) => setLikedPosts(prev => ({...prev, [i]: !prev[i]})), savedPosts, onSavePost: (i) => setSavedPosts(prev => ({...prev, [i]: !prev[i]})), isAudioPlaying, onAudioToggle: setIsAudioPlaying, isPackEnabled, onModuleClick: setPreviewModuleId}} />
