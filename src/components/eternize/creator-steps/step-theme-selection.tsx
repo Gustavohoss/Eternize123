@@ -2,10 +2,11 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ExternalLink, X } from 'lucide-react';
 import { THEME_OPTIONS, ThemeId } from '@/app/criador/constants';
 import useEmblaCarousel from 'embla-carousel-react';
 import { cn } from '@/lib/utils';
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 
 interface StepThemeSelectionProps {
   selectedTheme: ThemeId;
@@ -135,16 +136,32 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                         {theme.description}
                       </p>
 
-                      <a 
-                        href={(theme as any).demoUrl || "#"} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="w-full bg-white/5 border border-white/10 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:bg-white/10 active:scale-95"
-                        onClick={(e) => !(theme as any).demoUrl && e.preventDefault()}
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        Ver demo
-                      </a>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button 
+                            className="w-full bg-white/5 border border-white/10 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:bg-white/10 active:scale-95"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            Ver demo
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[500] translate-x-0 translate-y-0 rounded-none max-w-none">
+                          <DialogTitle className="sr-only">Demo {theme.name}</DialogTitle>
+                          <DialogDescription className="sr-only">Visualização ao vivo do tema {theme.name}</DialogDescription>
+                          <div className="flex-1 relative">
+                             <div className="absolute top-6 right-6 z-[600]">
+                                <DialogClose className="p-2.5 bg-black/60 hover:bg-black/80 rounded-full text-white transition-all border border-white/20 shadow-2xl backdrop-blur-md">
+                                   <X className="w-5 h-5" />
+                                </DialogClose>
+                             </div>
+                             <iframe 
+                               src={(theme as any).demoUrl || "#"} 
+                               className="w-full h-full border-none"
+                               title={`Demo ${theme.name}`}
+                             />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
                 </div>

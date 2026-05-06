@@ -31,7 +31,8 @@ import {
   Crown,
   Infinity,
   HelpCircle,
-  Instagram
+  Instagram,
+  X
 } from 'lucide-react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { THEME_OPTIONS } from '@/app/criador/constants';
@@ -42,6 +43,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 
 const STEPS = [
   {
@@ -556,16 +558,32 @@ export default function LandingPage() {
                             {theme.description}
                           </p>
 
-                          <a 
-                            href={(theme as any).demoUrl || "#"} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="w-full bg-white/5 border border-white/10 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:bg-white/10 active:scale-95"
-                            onClick={(e) => !(theme as any).demoUrl && e.preventDefault()}
-                          >
-                            <ExternalLink className="w-3 h-3" />
-                            Ver demo
-                          </a>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <button 
+                                className="w-full bg-white/5 border border-white/10 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:bg-white/10 active:scale-95"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                Ver demo
+                              </button>
+                            </DialogTrigger>
+                            <DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[500] translate-x-0 translate-y-0 rounded-none max-w-none">
+                              <DialogTitle className="sr-only">Demo {theme.name}</DialogTitle>
+                              <DialogDescription className="sr-only">Visualização ao vivo do tema {theme.name}</DialogDescription>
+                              <div className="flex-1 relative">
+                                 <div className="absolute top-6 right-6 z-[600]">
+                                    <DialogClose className="p-2.5 bg-black/60 hover:bg-black/80 rounded-full text-white transition-all border border-white/20 shadow-2xl backdrop-blur-md">
+                                       <X className="w-5 h-5" />
+                                    </DialogClose>
+                                 </div>
+                                 <iframe 
+                                   src={(theme as any).demoUrl || "#"} 
+                                   className="w-full h-full border-none"
+                                   title={`Demo ${theme.name}`}
+                                 />
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                         </div>
                       </div>
                     </div>
@@ -699,7 +717,7 @@ export default function LandingPage() {
             <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-white leading-tight">
               Tudo que sua página precisa
             </h2>
-            <p className="text-white/40 text-sm md:text-lg max-w-xl font-medium leading-relaxed">
+            <p className="text-white/40 text-sm md:text-lg max-xl font-medium leading-relaxed">
               Contador ao vivo, música, temas exclusivos e muito mais — para fazer<br className="hidden md:block" /> alguém chorar de emoção.
             </p>
           </div>
@@ -944,14 +962,29 @@ export default function LandingPage() {
                 <p className="text-[13.5px] text-[#666] leading-relaxed mb-8 max-w-[320px] font-medium">
                   {THEME_OPTIONS[previewThemeIndex].description}
                 </p>
-                <NextLink 
-                  href={(THEME_OPTIONS[previewThemeIndex] as any).demoUrl || "/criador"} 
-                  target={(THEME_OPTIONS[previewThemeIndex] as any).demoUrl ? "_blank" : undefined}
-                >
-                  <button className="bg-primary hover:bg-red-700 text-white px-5 py-3 rounded-lg text-sm font-bold flex items-center gap-2 w-fit transition-all hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] hover:-translate-y-0.5 active:scale-95" style={{ backgroundColor: THEME_OPTIONS[previewThemeIndex].color }}>
-                    <ExternalLink className="w-4 h-4" /> Ver demo ao vivo
-                  </button>
-                </NextLink>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="bg-primary hover:bg-red-700 text-white px-5 py-3 rounded-lg text-sm font-bold flex items-center gap-2 w-fit transition-all hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] hover:-translate-y-0.5 active:scale-95" style={{ backgroundColor: THEME_OPTIONS[previewThemeIndex].color }}>
+                      <ExternalLink className="w-4 h-4" /> Ver demo ao vivo
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[500] translate-x-0 translate-y-0 rounded-none max-w-none">
+                    <DialogTitle className="sr-only">Demo {THEME_OPTIONS[previewThemeIndex].name}</DialogTitle>
+                    <DialogDescription className="sr-only">Visualização ao vivo do tema {THEME_OPTIONS[previewThemeIndex].name}</DialogDescription>
+                    <div className="flex-1 relative">
+                       <div className="absolute top-6 right-6 z-[600]">
+                          <DialogClose className="p-2.5 bg-black/60 hover:bg-black/80 rounded-full text-white transition-all border border-white/20 shadow-2xl backdrop-blur-md">
+                             <X className="w-5 h-5" />
+                          </DialogClose>
+                       </div>
+                       <iframe 
+                         src={(THEME_OPTIONS[previewThemeIndex] as any).demoUrl || "#"} 
+                         className="w-full h-full border-none"
+                         title={`Demo ${THEME_OPTIONS[previewThemeIndex].name}`}
+                       />
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
 
               <div className="aspect-[4/3] rounded-2xl bg-[#0d0005] border border-[#2a0010] overflow-hidden relative flex items-center justify-center shadow-2xl">
