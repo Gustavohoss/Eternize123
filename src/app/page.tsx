@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -441,7 +442,7 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="flex flex-col lg:grid lg:grid-cols-[1fr_420px] items-center justify-center min-h-[calc(100vh-120px)] px-[5%] md:px-[8%] gap-12 lg:gap-20 py-12 lg:py-0">
+      <section className="flex flex-col lg:grid lg:grid-cols-[1fr_420px] items-center justify-center min-h-[calc(100vh-120px)] px-[5%] md:px-[8%] gap-12 lg:gap-32 py-12 lg:py-0">
         <div className="max-w-[550px] text-center lg:text-left flex flex-col items-center lg:items-start animate-in fade-in slide-in-from-left-8 duration-1000">
           <div className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-[11px] border border-primary/20 mb-6 font-bold tracking-wide uppercase italic">
             ✨ Nós te ajudamos a criar em 5 minutos
@@ -480,7 +481,7 @@ export default function LandingPage() {
         {/* Visual Carousel - Identical to creator */}
         <div className="flex flex-col items-center justify-center w-full relative animate-in fade-in slide-in-from-right-8 duration-1000 delay-200 py-10">
           <div className="relative w-full max-w-[400px] flex flex-col items-center">
-            <div className="w-full overflow-visible" ref={emblaRef}>
+            <div className="w-full overflow-hidden" ref={emblaRef}>
               <div className="flex">
                 {THEME_OPTIONS.map((theme, i) => {
                   const isSelected = selectedIndex === i;
@@ -1220,7 +1221,7 @@ export default function LandingPage() {
             </div>
 
             <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white leading-tight">
-              Perguntas Frequentes
+              Perguntas Frquentes
             </h2>
             
             <p className="text-white/40 text-xs md:text-base max-w-sm font-medium leading-relaxed">
