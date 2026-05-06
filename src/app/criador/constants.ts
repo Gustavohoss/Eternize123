@@ -21,7 +21,7 @@ export const THEME_OPTIONS = [
     badge: 'Clássico',
     color: '#e11d48',
     image: 'https://picsum.photos/seed/classic-theme/400/600',
-    videoUrl: 'AnnrA22c2ls',
+    videoUrl: 'H7pUAJdpK4Y',
     demoUrl: '/site/demo-classico?muted=true'
   },
   { 

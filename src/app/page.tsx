@@ -519,8 +519,8 @@ export default function LandingPage() {
                           {videoId ? (
                             <div className="absolute inset-0 pointer-events-none">
                               <iframe
-                                className="w-full h-full scale-[1.5] border-none"
-                                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1`}
+                                className="w-full h-full scale-[1.7] border-none"
+                                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0`}
                                 allow="autoplay; encrypted-media"
                                 tabIndex={-1}
                               />
@@ -990,8 +990,8 @@ export default function LandingPage() {
                  {(THEME_OPTIONS[previewThemeIndex] as any).videoUrl ? (
                    <div className="absolute inset-0 pointer-events-none">
                      <iframe
-                       className="w-full h-full scale-[1.5] border-none opacity-40 group-hover:opacity-60 transition-opacity"
-                       src={`https://www.youtube.com/embed/${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}?autoplay=1&mute=1&loop=1&playlist=${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1`}
+                       className="w-full h-full scale-[1.7] border-none opacity-40 group-hover:opacity-60 transition-opacity"
+                       src={`https://www.youtube.com/embed/${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}?autoplay=1&mute=1&loop=1&playlist=${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0`}
                        allow="autoplay; encrypted-media"
                        tabIndex={-1}
                      />
@@ -1094,8 +1094,8 @@ export default function LandingPage() {
         {/* Row 2 - Scroll Right */}
         <div className="relative w-full overflow-hidden mt-6 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-32 before:bg-gradient-to-r before:from-black before:to-transparent before:z-10 after:absolute after:right-0 after:top-0 after:bottom-0 after:w-32 after:bg-gradient-to-l after:from-black after:to-transparent after:z-10">
           <div className="flex gap-4 w-max animate-scroll-right px-4">
-            {[...REVIEWS_2, ...REVIEWS_2].map((review, i) => (
-              <ReviewCard key={i} review={review} />
+            {[...Array.from({length: 10})].map((_, i) => (
+              <ReviewCard key={i} review={REVIEWS_2[i % REVIEWS_2.length]} />
             ))}
           </div>
         </div>
