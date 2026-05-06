@@ -40,6 +40,7 @@ export const THEME_OPTIONS = [
     badge: 'Música',
     color: '#1db954',
     image: 'https://picsum.photos/seed/spotify-theme/400/600',
+    videoUrl: 'AnnrA22c2ls',
     demoUrl: '/site/demo-spotify?muted=true'
   },
   { 
