@@ -92,11 +92,11 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                     />
 
                     {/* Media Area */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#1f1f1f] to-[#141414] z-10">
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#1f1f1f] to-[#141414] z-10 overflow-hidden">
                       {videoId ? (
                         <div className="absolute inset-0 pointer-events-none">
                           <iframe
-                            className="w-full h-full border-none"
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.25] border-none"
                             src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0`}
                             allow="autoplay; encrypted-media"
                             tabIndex={-1}
