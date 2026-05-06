@@ -129,7 +129,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
                 >
                   <div 
                     className={cn(
-                      "relative bg-[#141414] rounded-[24px] overflow-hidden transition-all duration-500 w-full max-w-[280px] aspect-[3/4.2] border-2",
+                      "relative bg-[#141414] rounded-[24px] overflow-hidden transition-all duration-500 w-full max-w-[280px] aspect-[3/4.8] border-2",
                       isSelected 
                         ? "scale-100 opacity-100" 
                         : "scale-85 opacity-50 border-transparent grayscale-[0.3]"

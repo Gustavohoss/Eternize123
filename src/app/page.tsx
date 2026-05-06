@@ -134,7 +134,7 @@ const REVIEWS_2 = [
   },
   {
     stars: 5,
-    text: '"Nossa página ficou tão linda que até eu fiquei sem acreditar. Meu namorado abriu na frente dos amigos dele e todo mundo quis fazer também! 😍"',
+    text: '"Nossa página ficou tão linda que até eu piquei sem acreditar. Meu namorado abriu na frente dos amigos dele e todo mundo quis fazer também! 😍"',
     name: 'Isabela & Bruno',
     time: '5 dias atrás',
     initials: 'IB',
@@ -498,7 +498,7 @@ export default function LandingPage() {
                     >
                       <div 
                         className={cn(
-                          "relative bg-[#141414] rounded-[24px] overflow-hidden transition-all duration-500 w-full max-w-[280px] aspect-[3/4.2] border-2",
+                          "relative bg-[#141414] rounded-[24px] overflow-hidden transition-all duration-500 w-full max-w-[280px] aspect-[3/4.8] border-2",
                           isSelected 
                             ? "scale-100 opacity-100" 
                             : "scale-85 opacity-50 border-transparent grayscale-[0.3]"
@@ -1112,7 +1112,7 @@ export default function LandingPage() {
               <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/60">Escolha seu plano</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase mb-4">Uma memória que dura para sempre</h2>
-            <p className="text-white/40 text-sm md:text-base max-w-xl mx-auto font-medium leading-relaxed">
+            <p className="text-white/40 text-sm md:text-base max-xl mx-auto font-medium leading-relaxed">
               Pague uma vez e guarde essa história para sempre. Sem mensalidades, sem surpresas.
             </p>
           </div>
@@ -1309,7 +1309,7 @@ export default function LandingPage() {
                         </span>
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent className="pb-8 pl-12 md:pl-14 text-white/40 text-[11px] md:text-[13px] font-medium leading-relaxed max-w-xl">
+                    <AccordionContent className="pb-8 pl-12 md:pl-14 text-white/40 text-[11px] md:text-[13px] font-medium leading-relaxed max-xl">
                       {item.answer}
                     </AccordionContent>
                   </AccordionItem>
