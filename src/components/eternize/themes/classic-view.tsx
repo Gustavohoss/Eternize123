@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -8,7 +9,6 @@ import { EffectCoverflow, Autoplay, EffectCreative } from 'swiper/modules';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { MusicPlayer } from '../music-player';
 import { OrganicModuleGrid } from './organic-module-grid';
 
 // Import Swiper styles
@@ -66,12 +66,6 @@ export function ClassicView({
   timeDiff,
   totalDays,
   musicData,
-  musicBoxColor,
-  musicTextColor,
-  musicHasNeon,
-  musicNeonStrength,
-  isAudioPlaying,
-  onAudioToggle,
   isPackEnabled,
   onModuleClick
 }: ClassicViewProps) {
@@ -174,26 +168,12 @@ export function ClassicView({
           )}
         </div>
       )}
-      
-      {musicData && (
-        <div className="w-full px-1 mt-4">
-          <MusicPlayer 
-            musicData={musicData} 
-            musicBoxColor={musicBoxColor} 
-            musicTextColor={musicTextColor} 
-            musicHasNeon={musicHasNeon} 
-            musicNeonStrength={musicNeonStrength} 
-            isAutoPlay={isAudioPlaying} 
-            onStateChange={onAudioToggle} 
-          />
-        </div>
-      )}
 
       {isPackEnabled && (
         <OrganicModuleGrid onModuleClick={onModuleClick} pageTitle={pageTitle} />
       )}
 
-      <div className="h-20 shrink-0" />
+      <div className="h-32 shrink-0" />
     </div>
   );
 }

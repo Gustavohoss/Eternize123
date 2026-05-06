@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
@@ -312,7 +313,7 @@ export function DeviceMockup({
   return (
     <div className={cn("w-full transition-all duration-500 flex flex-col relative", isFullscreen ? "h-full" : "max-w-[400px] mx-auto")}>
       {musicData && (
-        <MusicPlayer musicData={musicData} isAutoPlay={isAudioPlaying} hideUI={selectedTheme !== 'classic'} onStateChange={setIsAudioPlaying} />
+        <MusicPlayer musicData={musicData} isAutoPlay={isAudioPlaying} hideUI={true} onStateChange={setIsAudioPlaying} />
       )}
 
       {/* Intro Animation Layer (Eternize Effect) - SÓ RENDERIZA SE FOR TEMA NETFLIX */}
@@ -398,6 +399,21 @@ export function DeviceMockup({
               )}
             </div>
           </div>
+
+          {/* Player de Música Fixo para Tema Clássico */}
+          {musicData && selectedTheme === 'classic' && (
+            <div className="absolute bottom-6 left-4 right-4 z-[100] animate-in slide-in-from-bottom-4 duration-500">
+               <MusicPlayer 
+                 musicData={musicData} 
+                 musicBoxColor={musicBoxColor}
+                 musicTextColor={musicTextColor}
+                 musicHasNeon={musicHasNeon}
+                 musicNeonStrength={musicNeonStrength}
+                 isAutoPlay={isAudioPlaying}
+                 onStateChange={setIsAudioPlaying}
+               />
+            </div>
+          )}
 
           {/* Module Overlay (Interno ao Mockup) */}
           {previewModuleId && (
