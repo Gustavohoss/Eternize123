@@ -1,12 +1,12 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import NextImage from 'next/image';
-import { ChevronLeft, ChevronRight, ExternalLink, X, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, X } from 'lucide-react';
 import { THEME_OPTIONS } from '@/app/criador/constants';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 
 export function ThemeCarousel() {
@@ -17,7 +17,6 @@ export function ThemeCarousel() {
 
   const currentTheme = THEME_OPTIONS[currentIndex];
 
-  // Cores dinâmicas para o glow de fundo baseadas no tema
   const getGlowColor = (themeId: string) => {
     switch (themeId) {
       case 'spotify': return 'rgba(30, 215, 96, 0.3)';
@@ -45,7 +44,6 @@ export function ThemeCarousel() {
       />
 
       <div className="relative flex items-center gap-3 w-full">
-        {/* Prev Button */}
         <button 
           onClick={prevStep} 
           className="flex-shrink-0 w-9 h-9 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90"
@@ -53,22 +51,19 @@ export function ThemeCarousel() {
           <ChevronLeft className="w-4 h-4 text-white" />
         </button>
 
-        {/* Carousel Track Area */}
         <div className="relative flex-1 overflow-hidden rounded-2xl h-[480px]">
           <div className="relative w-full h-full flex items-center justify-center">
             {THEME_OPTIONS.map((theme, i) => {
               const offset = i - currentIndex;
               const isActive = i === currentIndex;
-              const isAdjacent = Math.abs(offset) === 1 || (currentIndex === 0 && i === THEME_OPTIONS.length - 1) || (currentIndex === THEME_OPTIONS.length - 1 && i === 0);
               
-              // Ajuste de offset para loop infinito visual
               let displayOffset = offset;
               if (currentIndex === 0 && i === THEME_OPTIONS.length - 1) displayOffset = -1;
               if (currentIndex === THEME_OPTIONS.length - 1 && i === 0) displayOffset = 1;
 
               const opacity = isActive ? 1 : (Math.abs(displayOffset) === 1 ? 0.45 : 0);
               const scale = isActive ? 1 : 0.74;
-              const translateX = displayOffset * 220;
+              const translateX = displayOffset * 255; // Sincronizado com o script (255px)
               const zIndex = isActive ? 10 : 5;
               const blur = isActive ? "none" : "blur(1.5px)";
               const shadow = isActive ? `0 32px 80px -8px ${getGlowColor(theme.id)}` : "none";
@@ -77,6 +72,7 @@ export function ThemeCarousel() {
               return (
                 <motion.div
                   key={theme.id}
+                  initial={false} // Evita o bug de animação ao montar o componente
                   onClick={() => { if(!isActive) setCurrentIndex(i); }}
                   className={cn(
                     "absolute rounded-[24px] overflow-hidden transition-all duration-700",
@@ -99,7 +95,6 @@ export function ThemeCarousel() {
                   }}
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 >
-                  {/* Media Content */}
                   <div className="absolute inset-0 bg-neutral-900 z-0">
                     {videoId ? (
                       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -122,17 +117,14 @@ export function ThemeCarousel() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent z-10" />
                   </div>
 
-                  {/* Top Accent Border */}
                   <div className="absolute top-0 inset-x-0 h-[3px] z-20" style={{ background: getGradient(theme.id) }} />
                   
-                  {/* Progress Bar (Active Only) */}
                   {isActive && (
                     <div className="absolute top-[3px] inset-x-0 h-[2px] bg-white/10 z-20">
                       <div className="h-full bg-white/60 animate-progress" />
                     </div>
                   )}
 
-                  {/* Card Label & Button */}
                   <div className="absolute bottom-4 left-3 right-3 flex items-end justify-between z-20">
                     <span 
                       className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-white text-[10px] font-black uppercase tracking-wider shadow-lg" 
@@ -173,7 +165,6 @@ export function ThemeCarousel() {
           </div>
         </div>
 
-        {/* Next Button */}
         <button 
           onClick={nextStep} 
           className="flex-shrink-0 w-9 h-9 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90"
@@ -182,7 +173,6 @@ export function ThemeCarousel() {
         </button>
       </div>
 
-      {/* Progress Dots */}
       <div className="flex items-center gap-2">
         {THEME_OPTIONS.map((_, i) => (
           <button
@@ -214,4 +204,3 @@ export function ThemeCarousel() {
     </div>
   );
 }
-

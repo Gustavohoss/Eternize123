@@ -1,9 +1,9 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import NextImage from 'next/image';
-import { ChevronLeft, ChevronRight, ExternalLink, X, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, X } from 'lucide-react';
 import { THEME_OPTIONS, ThemeId } from '@/app/criador/constants';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -72,7 +72,6 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
         />
 
         <div className="relative flex items-center gap-3 w-full max-w-[520px]">
-          {/* Navigation Buttons */}
           <button 
             onClick={prevStep} 
             className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90"
@@ -86,14 +85,13 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                 const offset = i - currentIndex;
                 const isActive = i === currentIndex;
                 
-                // Lógica de loop visual simples
                 let displayOffset = offset;
                 if (currentIndex === 0 && i === THEME_OPTIONS.length - 1) displayOffset = -1;
                 if (currentIndex === THEME_OPTIONS.length - 1 && i === 0) displayOffset = 1;
 
                 const opacity = isActive ? 1 : (Math.abs(displayOffset) === 1 ? 0.45 : 0);
                 const scale = isActive ? 1 : 0.74;
-                const translateX = displayOffset * 220;
+                const translateX = displayOffset * 255;
                 const zIndex = isActive ? 10 : 5;
                 const blur = isActive ? "none" : "blur(1.5px)";
                 const shadow = isActive ? `0 32px 80px -8px ${getGlowColor(theme.id)}` : "none";
@@ -102,6 +100,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                 return (
                   <motion.div
                     key={theme.id}
+                    initial={false}
                     onClick={() => { 
                       if(!isActive) {
                         setCurrentIndex(i);
