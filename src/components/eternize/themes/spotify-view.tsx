@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Play, Pause, Heart, MoreHorizontal, Shuffle, RotateCcw, SkipBack, SkipForward, Languages, Share2, Maximize2, Check } from 'lucide-react';
+import { Play, Pause, Heart, MoreHorizontal, Shuffle, RotateCcw, SkipBack, SkipForward, Languages, Share2, Maximize2, Check, Trophy, Star, Sparkles, Compass } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -28,6 +28,8 @@ interface SpotifyViewProps {
   showSpotifyFullscreen: boolean;
   message?: string;
   musicData?: any;
+  isPackEnabled?: boolean;
+  onModuleClick?: (id: string) => void;
 }
 
 export function SpotifyView({
@@ -51,8 +53,19 @@ export function SpotifyView({
   onCloseFullscreen,
   showSpotifyFullscreen,
   message,
-  musicData
+  musicData,
+  isPackEnabled = false,
+  onModuleClick
 }: SpotifyViewProps) {
+  
+  const modules = [
+    { id: 'memorias', title: 'Memórias', icon: Heart, color: '#e11d48', bg: 'rgba(225, 29, 72, 0.1)' },
+    { id: 'conquistas', title: 'Conquistas', icon: Trophy, color: '#eab308', bg: 'rgba(234, 179, 8, 0.1)' },
+    { id: 'curiosidades', title: 'Curiosidades', icon: Sparkles, color: '#a855f7', bg: 'rgba(168, 85, 247, 0.1)' },
+    { id: 'curiosidades', title: 'Mapa Astral', icon: Star, color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' },
+    { id: 'jornada', title: 'Jornada no Mapa', icon: Compass, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
+  ];
+
   const renderFullscreen = () => (
     <div className="absolute inset-0 z-[500] bg-[#121212] flex flex-col animate-in fade-in duration-500 overflow-hidden no-scrollbar">
       <div className="absolute inset-0 z-0 scale-125 brightness-[0.4] blur-[60px] transition-all duration-1000">
@@ -155,6 +168,35 @@ export function SpotifyView({
                   </div>
                 </div>
               )) : null}
+            </div>
+          </section>
+        )}
+
+        {isPackEnabled && (
+          <section className="px-6 py-8 mt-4 border-t border-white/5 pb-32">
+            <h3 className="text-white text-xl font-black mb-6 font-['DM_Sans']">Veja também</h3>
+            <div className="flex gap-5 overflow-x-auto no-scrollbar pb-4 -mx-1 px-1 snap-x snap-mandatory">
+              {modules.map((mod, i) => (
+                <div 
+                  key={i} 
+                  onClick={() => onModuleClick?.(mod.id)}
+                  className="flex flex-col items-center gap-3 shrink-0 cursor-pointer active:scale-95 transition-transform snap-start"
+                >
+                  <div 
+                    className="w-[72px] h-[72px] rounded-full flex items-center justify-center relative overflow-hidden transition-all duration-300"
+                    style={{ 
+                      backgroundColor: mod.bg,
+                      border: `1px solid ${mod.color}33`,
+                      boxShadow: `0 0 20px ${mod.color}22`
+                    }}
+                  >
+                    <mod.icon className="w-8 h-8" style={{ color: mod.color }} />
+                  </div>
+                  <span className="text-[11px] text-white font-bold tracking-tight text-center max-w-[72px] leading-tight">
+                    {mod.title}
+                  </span>
+                </div>
+              ))}
             </div>
           </section>
         )}
