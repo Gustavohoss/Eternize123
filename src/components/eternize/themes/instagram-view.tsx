@@ -33,6 +33,29 @@ interface InstagramViewProps {
   onModuleClick?: (id: string) => void;
 }
 
+// Selo de Verificado Premium (Blue/Purple Gradient + Animation)
+const VerifiedBadge = ({ size = 14 }: { size?: number }) => (
+  <div 
+    className="relative flex items-center justify-center shrink-0" 
+    style={{ width: size, height: size }}
+  >
+    {/* Forma de Estrela Poligonal exata da referência */}
+    <div 
+      className="absolute inset-0 animate-[badge-pulse_2.4s_ease-in-out_infinite]"
+      style={{
+        background: 'linear-gradient(135deg, #7c3aed, #4f46e5, #7c3aed)',
+        clipPath: 'polygon(50% 0%, 61% 15%, 79% 9%, 79% 28%, 96% 35%, 87% 50%, 96% 65%, 79% 72%, 79% 91%, 61% 85%, 50% 100%, 39% 85%, 21% 91%, 21% 72%, 4% 65%, 13% 50%, 4% 35%, 21% 28%, 21% 9%, 39% 15%)'
+      }}
+    />
+    {/* Ícone de Check Interno */}
+    <div className="relative z-10 flex items-center justify-center" style={{ width: size * 0.45, height: size * 0.45 }}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="animate-[check-pop_0.6s_cubic-bezier(0.34,1.56,0.64,1)_both]">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+  </div>
+);
+
 export function InstagramView({
   uploadedPhotos,
   pageTitle,
@@ -79,9 +102,9 @@ export function InstagramView({
                 {uploadedPhotos.length > 0 ? <Image src={uploadedPhotos[0]} fill className="object-cover" alt="Profile" /> : null}
               </div>
               <div className="flex flex-col -space-y-0.5">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <span className="font-bold text-sm tracking-tight">{pageTitle || 'NOSSA HISTÓRIA'}</span>
-                  <div className="bg-[#0095F6] rounded-full p-0.5"><CheckCircle2 className="w-2.5 h-2.5 text-white" /></div>
+                  <VerifiedBadge size={12} />
                 </div>
                 <span className="text-[10px] text-neutral-400 font-medium">{date ? format(date, 'dd/MM/yyyy') : '01/05/2026'}</span>
               </div>
@@ -122,9 +145,9 @@ export function InstagramView({
       <header className="flex items-center justify-between px-4 py-3 sticky top-0 bg-black z-50">
         <div className="flex items-center gap-3">
           <ChevronLeft className="w-6 h-6" />
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <span className="font-bold text-lg tracking-tight truncate max-w-[150px]">{pageTitle || 'NOSSA HISTÓRIA'}</span>
-            <div className="bg-[#0095F6] rounded-full p-0.5"><CheckCircle2 className="w-3 h-3 text-white" /></div>
+            <VerifiedBadge size={14} />
           </div>
         </div>
         <Bell className="w-6 h-6" />

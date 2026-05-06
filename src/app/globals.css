@@ -121,6 +121,17 @@
   animation: fadeOutBars 0.5s forwards;
 }
 
+/* Verificado Premium Animations */
+@keyframes badge-pulse {
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(124, 58, 237, 0.4)); }
+  50% { filter: drop-shadow(0 0 5px rgba(124, 58, 237, 0.8)); }
+}
+
+@keyframes check-pop {
+  0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
 /* Utilitário para esconder scrollbars */
 .no-scrollbar::-webkit-scrollbar {
   display: none !important;
