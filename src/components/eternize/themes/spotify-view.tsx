@@ -155,19 +155,39 @@ export function SpotifyView({
           <section className="px-6 mb-8">
             <h2 className="text-white text-xl font-black mb-4 font-['DM_Sans']">Populares</h2>
             <div className="space-y-1">
-              {uploadedPhotos.length > 0 ? uploadedPhotos.map((photo, i) => (
+              {/* Fotos Reais */}
+              {uploadedPhotos.slice(0, 5).map((photo, i) => (
                 <div key={i} className="flex items-center gap-4 group p-2 -mx-2 rounded-md hover:bg-white/10 transition-colors cursor-pointer" onClick={() => onPhotoClick(i)}>
                   <div className="w-4 flex justify-center items-center">
                     <span className="text-neutral-500 text-sm font-bold group-hover:hidden">{i + 1}</span>
                     <Play className="w-3.5 h-3.5 text-white fill-current hidden group-hover:block" />
                   </div>
-                  <div className="w-10 h-10 bg-neutral-800 rounded shadow-lg relative overflow-hidden shrink-0"><Image src={photo} fill className="object-cover" alt="" /></div>
+                  <div className="w-10 h-10 bg-neutral-800 rounded shadow-lg relative overflow-hidden shrink-0">
+                    <Image src={photo} fill className="object-cover" alt="" />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-white text-sm font-bold truncate font-['DM_Sans'] tracking-tight">Memória {i + 1}</h3>
                     <p className="text-neutral-500 text-[11px] font-bold font-['DM_Sans'] truncate">{pageTitle || 'Eternize'}</p>
                   </div>
                 </div>
-              )) : null}
+              ))}
+
+              {/* Skeletons para completar até 5 itens */}
+              {Array.from({ length: Math.max(0, 5 - uploadedPhotos.length) }).map((_, i) => {
+                const index = uploadedPhotos.length + i + 1;
+                return (
+                  <div key={`skeleton-${index}`} className="flex items-center gap-4 p-2 -mx-2 rounded-md opacity-40">
+                    <div className="w-4 flex justify-center items-center">
+                      <span className="text-neutral-600 text-sm font-bold">{index}</span>
+                    </div>
+                    <div className="w-10 h-10 bg-neutral-800/50 rounded animate-pulse shrink-0" />
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <div className="h-3 bg-neutral-800/50 rounded w-2/3 animate-pulse" />
+                      <div className="h-2 bg-neutral-800/30 rounded w-1/3 animate-pulse" />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </section>
         )}
