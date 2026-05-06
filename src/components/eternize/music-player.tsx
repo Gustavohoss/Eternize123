@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -50,6 +51,7 @@ export function MusicPlayer({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const pendingPlay = useRef(false);
 
+  // Initialize YouTube API and Player
   useEffect(() => {
     const loadYoutubeApi = () => {
       if (window.YT && window.YT.Player) {
@@ -81,25 +83,25 @@ export function MusicPlayer({
           width: '1',
           videoId: musicData?.id || '',
           playerVars: {
-            autoplay: isAutoPlay && !isMutedByParam ? 1 : 0,
+            autoplay: 1, // Start playing immediately (browser permitting)
             controls: 0,
             disablekb: 1,
             fs: 0,
             rel: 0,
             enablejsapi: 1,
             origin: typeof window !== 'undefined' ? window.location.origin : '',
-            mute: 1 
+            mute: 1 // Start muted to satisfy browser policies
           },
           events: {
             onReady: (event: any) => {
               setIsReady(true);
               setDuration(event.target.getDuration());
               
-              if ((pendingPlay.current || isAutoPlay) && !isMutedByParam) {
+              // If autoplay is requested and we aren't explicitly muted by demo param
+              if (isAutoPlay && !isMutedByParam) {
                 event.target.unMute();
                 event.target.setVolume(100);
                 event.target.playVideo();
-                pendingPlay.current = false;
               }
             },
             onStateChange: (event: any) => {
@@ -130,37 +132,26 @@ export function MusicPlayer({
     };
   }, []);
 
+  // Handle prop changes for Play/Pause
   useEffect(() => {
-    if (!playerRef.current) return;
+    if (!playerRef.current || !isReady) return;
 
     if (musicData?.id) {
       const currentPlayerId = typeof playerRef.current.getVideoData === 'function' ? playerRef.current.getVideoData().video_id : null;
       if (currentPlayerId && currentPlayerId !== musicData.id) {
-        if (typeof playerRef.current.loadVideoById === 'function') {
-          playerRef.current.loadVideoById(musicData.id);
-          setCurrentTime(0);
-        }
+        playerRef.current.loadVideoById(musicData.id);
+        setCurrentTime(0);
       }
       
       if (isAutoPlay && !isMutedByParam) {
-        if (isReady) {
-          try {
-            playerRef.current.unMute();
-            playerRef.current.setVolume(100);
-            playerRef.current.playVideo();
-          } catch (e) {
-            console.warn("Retrying play command...");
-          }
-        } else {
-          pendingPlay.current = true;
-        }
+        playerRef.current.unMute();
+        playerRef.current.setVolume(100);
+        playerRef.current.playVideo();
       } else {
-        if (isReady && typeof playerRef.current.pauseVideo === 'function') {
-          playerRef.current.pauseVideo();
-        }
+        playerRef.current.pauseVideo();
       }
     }
-  }, [musicData?.id, isReady, isAutoPlay, isMutedByParam]);
+  }, [isAutoPlay, isReady, musicData?.id, isMutedByParam]);
 
   const startTimer = () => {
     stopTimer();
@@ -184,9 +175,9 @@ export function MusicPlayer({
 
     const state = typeof playerRef.current.getPlayerState === 'function' ? playerRef.current.getPlayerState() : -1;
     if (state === 1) {
-      if (typeof playerRef.current.pauseVideo === 'function') playerRef.current.pauseVideo();
+      playerRef.current.pauseVideo();
     } else {
-      if (typeof playerRef.current.playVideo === 'function') playerRef.current.playVideo();
+      playerRef.current.playVideo();
     }
   };
 
@@ -223,13 +214,13 @@ export function MusicPlayer({
   return (
     <div 
       className={cn(
-        "w-full rounded-[20px] border border-[#1f1f1f] overflow-hidden p-[12px] transition-all duration-500 shadow-2xl relative z-20",
+        "w-full rounded-[20px] border border-white/5 overflow-hidden p-[12px] transition-all duration-500 shadow-2xl relative z-20 backdrop-blur-xl",
         isExpanded ? "pb-[20px]" : ""
       )}
       style={{ backgroundColor: musicBoxColor }}
     >
       <div className="flex items-center justify-between cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-        <div className="w-[48px] h-[48px] bg-[#1a1a1a] rounded-[12px] flex items-center justify-center overflow-hidden shrink-0 relative">
+        <div className="w-[48px] h-[48px] bg-white/5 rounded-[12px] flex items-center justify-center overflow-hidden shrink-0 relative">
           {musicData?.thumb ? (
             <img src={musicData.thumb} className={cn("w-full h-full object-cover", isPlaying && "opacity-80")} alt="" />
           ) : (
@@ -283,7 +274,7 @@ export function MusicPlayer({
           <button 
             type="button"
             disabled={!isReady}
-            className="w-[50px] h-[50px] bg-[#7a1a1a] rounded-full flex items-center justify-center text-white active:scale-95 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.4)] border-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-[50px] h-[50px] bg-primary rounded-full flex items-center justify-center text-white active:scale-95 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.4)] border-none cursor-pointer disabled:opacity-50"
             onClick={togglePlay}
             style={{ boxShadow: neonShadow }}
           >

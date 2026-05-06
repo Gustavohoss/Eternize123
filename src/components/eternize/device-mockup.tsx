@@ -3,7 +3,7 @@
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { Lock, X } from 'lucide-react';
+import { Lock, X, Play, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { intervalToDuration } from 'date-fns';
 import { MusicPlayer } from './music-player';
@@ -140,8 +140,9 @@ export function DeviceMockup({
   const [activeHeroIndex, setActiveHeroIndex] = useState(0);
   const [timeDiff, setTimeDiff] = useState<any>(null);
   const [previewModuleId, setPreviewModuleId] = useState<string | null>(null);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(isAutoPlay);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('grid');
+  const [hasStarted, setHasStarted] = useState(false);
 
   // Sincroniza a abertura do módulo com o comando externo (editor)
   useEffect(() => {
@@ -171,8 +172,12 @@ export function DeviceMockup({
   const [dynamicSpotifyColor, setDynamicSpotifyColor] = useState('#1a0a0a');
   const [spotifyHeaderOpacity, setSpotifyHeaderOpacity] = useState(0);
 
-  // Sync isAudioPlaying with isAutoPlay prop
-  useEffect(() => { setIsAudioPlaying(isAutoPlay); }, [isAutoPlay]);
+  // Sync isAudioPlaying with isAutoPlay prop but ONLY after user interaction
+  useEffect(() => { 
+    if (hasStarted && isAutoPlay) {
+      setIsAudioPlaying(true);
+    }
+  }, [isAutoPlay, hasStarted]);
 
   // Sync Active Tab based on theme
   useEffect(() => {
@@ -310,8 +315,44 @@ export function DeviceMockup({
     setSpotifyHeaderOpacity(opacity);
   }, []);
 
+  // Handler para iniciar a experiência e desbloquear áudio
+  const handleStartExperience = () => {
+    setHasStarted(true);
+    if (isAutoPlay) {
+      setIsAudioPlaying(true);
+    }
+  };
+
   return (
     <div className={cn("w-full transition-all duration-500 flex flex-col relative", isFullscreen ? "h-full" : "max-w-[400px] mx-auto")}>
+      
+      {/* Entrada para Published Site (Resolve Autoplay) */}
+      {isFullscreen && !hasStarted && (
+        <div className="fixed inset-0 z-[2000] bg-black flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
+           <div className="absolute inset-0 bg-hero-glow opacity-30 pointer-events-none" />
+           <div className="relative z-10 space-y-8 max-w-sm">
+              <div className="relative mx-auto w-24 h-24 flex items-center justify-center">
+                 <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping" />
+                 <div className="relative bg-primary/10 border border-primary/20 rounded-full p-6 shadow-[0_0_50px_rgba(225,29,72,0.3)]">
+                    <Heart className="w-10 h-10 text-primary fill-primary animate-pulse" />
+                 </div>
+              </div>
+              
+              <div className="space-y-3">
+                 <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white">PARA VOCÊ<span className="text-primary">.</span></h2>
+                 <p className="text-white/40 text-sm font-medium leading-relaxed">Prepare-se para uma surpresa especial. Ligue o som para uma experiência completa.</p>
+              </div>
+
+              <Button 
+                onClick={handleStartExperience}
+                className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-3"
+              >
+                Abrir Presente <Play className="w-4 h-4 fill-current" />
+              </Button>
+           </div>
+        </div>
+      )}
+
       {musicData && (
         <MusicPlayer musicData={musicData} isAutoPlay={isAudioPlaying} hideUI={true} onStateChange={setIsAudioPlaying} />
       )}
@@ -400,14 +441,14 @@ export function DeviceMockup({
             </div>
           </div>
 
-          {/* Player de Música Fixo para Tema Clássico */}
-          {musicData && selectedTheme === 'classic' && (
+          {/* Player de Música Fixo para todos os temas (Unificado) */}
+          {musicData && (
             <div className="absolute bottom-6 left-4 right-4 z-[100] animate-in slide-in-from-bottom-4 duration-500">
                <MusicPlayer 
                  musicData={musicData} 
-                 musicBoxColor={musicBoxColor}
-                 musicTextColor={musicTextColor}
-                 musicHasNeon={musicHasNeon}
+                 musicBoxColor={selectedTheme === 'classic' ? musicBoxColor : '#0c0c0c/90'}
+                 musicTextColor={selectedTheme === 'classic' ? musicTextColor : '#ffffff'}
+                 musicHasNeon={selectedTheme === 'classic' ? musicHasNeon : false}
                  musicNeonStrength={musicNeonStrength}
                  isAutoPlay={isAudioPlaying}
                  onStateChange={setIsAudioPlaying}

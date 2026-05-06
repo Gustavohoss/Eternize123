@@ -36,12 +36,6 @@ interface ClassicViewProps {
   timeDiff: any;
   totalDays: number;
   musicData?: any;
-  musicBoxColor: string;
-  musicTextColor: string;
-  musicHasNeon: boolean;
-  musicNeonStrength: number;
-  isAudioPlaying: boolean;
-  onAudioToggle: (playing: boolean) => void;
   isPackEnabled: boolean;
   onModuleClick: (id: string) => void;
 }
@@ -65,7 +59,6 @@ export function ClassicView({
   dateBoxBorderColor,
   timeDiff,
   totalDays,
-  musicData,
   isPackEnabled,
   onModuleClick
 }: ClassicViewProps) {
@@ -173,7 +166,7 @@ export function ClassicView({
         <OrganicModuleGrid onModuleClick={onModuleClick} pageTitle={pageTitle} />
       )}
 
-      <div className="h-32 shrink-0" />
+      <div className="h-40 shrink-0" />
     </div>
   );
 }
