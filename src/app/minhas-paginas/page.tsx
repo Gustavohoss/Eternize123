@@ -8,7 +8,7 @@ import { useFirestore, useUser, useCollection, useAuth, useMemoFirebase } from '
 import { Heart, ExternalLink, Calendar, Loader2, Plus, ArrowLeft, LogOut, Layout, User, Pencil, ShieldAlert, Lock, X, CheckCircle2, Eye, EyeOff, Sparkles, Settings2, LayoutGrid, ChevronRight, QrCode, Copy, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { signOut, updatePassword } from 'firebase/auth';
@@ -112,7 +112,7 @@ export default function MyPages() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: "Link copiado!",
+      title: "Link copiado! ❤️",
       description: "O endereço da sua página já está na área de transferência.",
     });
   };
@@ -293,7 +293,7 @@ export default function MyPages() {
             <div className="space-y-2">
               <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter">Compartilhar Amor</DialogTitle>
               <DialogDescription className="text-white/40 text-sm font-medium">
-                Escolha como você quer entregar este presente especial.
+                O QR Code abaixo é exclusivo para este presente e nunca mudará.
               </DialogDescription>
             </div>
 
@@ -331,12 +331,9 @@ export default function MyPages() {
           </div>
 
           <div className="bg-white/5 p-5 flex justify-center border-t border-white/5">
-             <button 
-               onClick={() => setShareDialogOpen(false)} 
-               className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-white transition-colors"
-             >
+             <DialogClose className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-white transition-colors">
                Fechar
-             </button>
+             </DialogClose>
           </div>
         </DialogContent>
       </Dialog>
