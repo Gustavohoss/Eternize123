@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { collection, query, where, or, and } from 'firebase/firestore';
+import { collection, query, where, and } from 'firebase/firestore';
 import { useFirestore, useUser, useCollection, useAuth, useMemoFirebase } from '@/firebase';
 import { Heart, ExternalLink, Calendar, Loader2, Plus, ArrowLeft, LogOut, Layout, User, Pencil, ShieldAlert, Lock, X, CheckCircle2, Eye, EyeOff, Sparkles, Settings2, LayoutGrid, ChevronRight, QrCode, Copy, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -41,20 +41,18 @@ export default function MyPages() {
   const [choiceDialogOpen, setChoiceDialogOpen] = useState(false);
   const [selectedSite, setSelectedSite] = useState<any>(null);
 
-  // Query memoizada buscando por ID ou por E-mail
+  // Query memoizada buscando ESTRITAMENTE por E-mail de Compra (customerEmail)
+  // Isso garante que apenas sites pagos/eternizados apareçam aqui, excluindo testes.
   const mySitesQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
+    if (!firestore || !user?.email) return null;
     return query(
       collection(firestore, 'published_sites'),
       and(
         where('status', '==', 'published'),
-        or(
-          where('userId', '==', user.uid),
-          where('customerEmail', '==', user.email)
-        )
+        where('customerEmail', '==', user.email)
       )
     );
-  }, [firestore, user?.uid, user?.email]);
+  }, [firestore, user?.email]);
 
   const { data: sites, isLoading, error } = useCollection(mySitesQuery as any);
 
