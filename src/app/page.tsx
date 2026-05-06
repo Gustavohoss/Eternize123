@@ -321,7 +321,6 @@ export default function LandingPage() {
       const now = new Date();
       const diff = now.getTime() - start.getTime();
       
-      const totalHours = Math.floor(diff / (1000 * 60 * 60 * 24 * 365)); // Simplified
       const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
       const years = Math.floor(totalDays / 365);
       const months = Math.floor((totalDays % 365) / 30);
@@ -479,7 +478,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Visual Carousel - Identical to creator */}
+        {/* Visual Carousel */}
         <div className="flex flex-col items-center justify-center w-full relative animate-in fade-in slide-in-from-right-8 duration-1000 delay-200 py-10">
           <div className="relative w-full max-w-[400px] flex flex-col items-center">
             <div className="w-full overflow-hidden" ref={emblaRef}>
@@ -1043,7 +1042,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Reviews Section - Infinite Scrolling Tracks */}
+      {/* Reviews Section */}
       <section className="py-16 md:py-24 bg-[#0a0a0a] border-t border-white/5 relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 relative z-10 flex flex-col items-center">
           <div className="inline-flex items-center gap-2 text-white/40 text-[12px] mb-4 relative group">
@@ -1116,15 +1115,6 @@ export default function LandingPage() {
             <p className="text-white/40 text-sm md:text-base max-w-xl mx-auto font-medium leading-relaxed">
               Pague uma vez e guarde essa história para sempre. Sem mensalidades, sem surpresas.
             </p>
-            
-            <div className="flex flex-col items-center gap-2 mt-8">
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <img key={i} src={`https://i.pravatar.cc/100?u=${i + 20}`} className="w-7 h-7 rounded-full border-2 border-black" alt="" />
-                ))}
-              </div>
-              <p className="text-[10px] font-bold text-white/30 uppercase tracking-wider">+70.000 casais já criaram sua página</p>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
@@ -1262,11 +1252,11 @@ export default function LandingPage() {
             </div>
 
             <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white leading-tight">
-              Perguntas Frquentes
+              Perguntas Frequentes
             </h2>
             
             <p className="text-white/40 text-xs md:text-base max-w-sm font-medium leading-relaxed">
-              Tudo o que você precisa saber antes de criar sua página. Se ainda restar alguma dúvida, é só chamar — adoramos ajudar!
+              Tudo o que você precisa saber antes de criar sua página.
             </p>
           </div>
 
@@ -1295,7 +1285,7 @@ export default function LandingPage() {
                   className="w-full h-14 bg-primary text-white rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest flex items-center justify-center gap-3 hover:brightness-110 active:scale-[0.98] transition-all shadow-[0_15px_30px_rgba(225,29,72,0.3)] relative z-10 px-6 text-center"
                 >
                   <Instagram className="w-5 h-5 shrink-0" />
-                  <span className="leading-tight">Ainda tem dúvidas? Fale com a gente aqui</span>
+                  <span className="leading-tight">Fale com a gente no Instagram</span>
                 </a>
               </div>
             </div>

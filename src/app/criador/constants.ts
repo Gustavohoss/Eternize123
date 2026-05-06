@@ -21,7 +21,7 @@ export const THEME_OPTIONS = [
     badge: 'Clássico',
     color: '#e11d48',
     image: 'https://picsum.photos/seed/classic-theme/400/600',
-    demoUrl: '/site/demo-classico'
+    demoUrl: '/site/demo-classico?muted=true'
   },
   { 
     id: 'netflix', 
@@ -31,7 +31,7 @@ export const THEME_OPTIONS = [
     color: '#e50914',
     image: 'https://picsum.photos/seed/netflix-theme/400/600',
     videoUrl: 'rfVydSVztXc',
-    demoUrl: '/site/funcionando11111111-jfh8'
+    demoUrl: '/site/funcionando11111111-jfh8?muted=true'
   },
   { 
     id: 'spotify', 
@@ -40,7 +40,7 @@ export const THEME_OPTIONS = [
     badge: 'Música',
     color: '#1db954',
     image: 'https://picsum.photos/seed/spotify-theme/400/600',
-    demoUrl: '/site/demo-spotify'
+    demoUrl: '/site/demo-spotify?muted=true'
   },
   { 
     id: 'instagram', 
@@ -50,7 +50,7 @@ export const THEME_OPTIONS = [
     color: '#e1306c',
     image: 'https://picsum.photos/seed/insta-theme/400/600',
     videoUrl: 'fYln5Smsn6w',
-    demoUrl: '/site/fernando-e-clara-kwt5'
+    demoUrl: '/site/fernando-e-clara-kwt5?muted=true'
   },
 ];
 

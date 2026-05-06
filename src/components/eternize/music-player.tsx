@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Music2, ChevronDown, Volume2, Play, Pause, Loader2 } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 declare global {
@@ -36,6 +37,9 @@ export function MusicPlayer({
   hideUI = false,
   onStateChange
 }: MusicPlayerProps) {
+  const searchParams = useSearchParams();
+  const isMutedByParam = searchParams.get('muted') === 'true';
+  
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -77,7 +81,7 @@ export function MusicPlayer({
           width: '1',
           videoId: musicData?.id || '',
           playerVars: {
-            autoplay: isAutoPlay ? 1 : 0,
+            autoplay: isAutoPlay && !isMutedByParam ? 1 : 0,
             controls: 0,
             disablekb: 1,
             fs: 0,
@@ -91,7 +95,7 @@ export function MusicPlayer({
               setIsReady(true);
               setDuration(event.target.getDuration());
               
-              if (pendingPlay.current || isAutoPlay) {
+              if ((pendingPlay.current || isAutoPlay) && !isMutedByParam) {
                 event.target.unMute();
                 event.target.setVolume(100);
                 event.target.playVideo();
@@ -138,7 +142,7 @@ export function MusicPlayer({
         }
       }
       
-      if (isAutoPlay) {
+      if (isAutoPlay && !isMutedByParam) {
         if (isReady) {
           try {
             playerRef.current.unMute();
@@ -156,7 +160,7 @@ export function MusicPlayer({
         }
       }
     }
-  }, [musicData?.id, isReady, isAutoPlay]);
+  }, [musicData?.id, isReady, isAutoPlay, isMutedByParam]);
 
   const startTimer = () => {
     stopTimer();
@@ -252,7 +256,7 @@ export function MusicPlayer({
         </div>
 
         <div className={cn("transition-transform duration-500 opacity-50", isExpanded ? "rotate-180" : "")} style={{ color: musicTextColor }}>
-          <ChevronDown size={20} />
+          <ChevronDown size(20) />
         </div>
       </div>
 
@@ -275,7 +279,7 @@ export function MusicPlayer({
         </div>
 
         <div className="player-controls flex items-center justify-between mt-[15px] px-[5px]">
-          <Volume2 size={18} className="opacity-50" style={{ color: musicTextColor }} />
+          <Volume2 size(18) className="opacity-50" style={{ color: musicTextColor }} />
           <button 
             type="button"
             disabled={!isReady}
@@ -286,9 +290,9 @@ export function MusicPlayer({
             {!isReady ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : isPlaying ? (
-              <Pause size={22} fill="white" />
+              <Pause size(22) fill="white" />
             ) : (
-              <Play size={22} fill="white" className="ml-[3px]" />
+              <Play size(22) fill="white" className="ml-[3px]" />
             )}
           </button>
           <div style={{ width: '18px' }} />
