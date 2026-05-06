@@ -127,7 +127,8 @@ export default function EditSitePage() {
     if (siteData) {
       try {
         const config = JSON.parse(siteData.contentJson);
-        setSelectedTheme(config.selectedTheme || 'classic');
+        const theme = config.selectedTheme || 'classic';
+        setSelectedTheme(theme);
         setSelectedBgColor(config.selectedBgColor || '#000000');
         setSelectedEffect(config.selectedEffect || 'none');
         setIsEmojiRainEnabled(config.isEmojiRainEnabled || false);
@@ -181,8 +182,14 @@ export default function EditSitePage() {
         setLocationQuery(config.locationQuery || '');
 
         const startStep = searchParams.get('startStep');
+        const isFixed = theme === 'netflix' || theme === 'spotify' || theme === 'instagram';
+
         if (startStep === 'modules' && packPurchased) {
           setStep('modules');
+        } else if (isFixed) {
+          setStep('data-location');
+        } else {
+          setStep('customize-background');
         }
       } catch (e) {
         console.error("Erro ao processar conteúdo do site", e);
@@ -191,13 +198,13 @@ export default function EditSitePage() {
   }, [siteData, searchParams]);
 
   const stepSequence = useMemo((): Step[] => {
-    const base: Step[] = ['customize-background'];
+    const isFixed = selectedTheme === 'netflix' || selectedTheme === 'spotify' || selectedTheme === 'instagram';
     let steps: Step[] = [];
 
-    if (selectedTheme === 'netflix' || selectedTheme === 'spotify' || selectedTheme === 'instagram') {
-      steps = [...base, 'data-location', 'page-title', 'message', 'photos', 'music'];
+    if (isFixed) {
+      steps = ['data-location', 'page-title', 'message', 'photos', 'music'];
     } else {
-      steps = [...base, 'photos', 'page-title', 'message', 'data-location', 'music'];
+      steps = ['customize-background', 'photos', 'page-title', 'message', 'data-location', 'music'];
     }
 
     if (hasPackPurchased) {
@@ -245,7 +252,7 @@ export default function EditSitePage() {
       await updateDoc(siteRef, {
         name: pageTitle || 'Meu Presente',
         contentJson: jsonContent,
-        isPackEnabled: isPackEnabled, // Sincroniza o campo raiz
+        isPackEnabled: isPackEnabled,
         updatedAt: serverTimestamp(),
       });
 
