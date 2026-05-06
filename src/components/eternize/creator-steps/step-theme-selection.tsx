@@ -79,7 +79,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
 
-          <div className="relative flex-1 overflow-hidden rounded-2xl h-[480px]">
+          <div className="relative flex-1 h-[480px] flex items-center justify-center">
             <div className="relative w-full h-full flex items-center justify-center">
               {THEME_OPTIONS.map((theme, i) => {
                 const offset = i - currentIndex;

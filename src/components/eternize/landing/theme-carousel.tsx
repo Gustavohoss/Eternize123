@@ -51,7 +51,7 @@ export function ThemeCarousel() {
           <ChevronLeft className="w-4 h-4 text-white" />
         </button>
 
-        <div className="relative flex-1 overflow-hidden rounded-2xl h-[480px]">
+        <div className="relative flex-1 h-[480px] flex items-center justify-center">
           <div className="relative w-full h-full flex items-center justify-center">
             {THEME_OPTIONS.map((theme, i) => {
               const offset = i - currentIndex;
@@ -63,7 +63,7 @@ export function ThemeCarousel() {
 
               const opacity = isActive ? 1 : (Math.abs(displayOffset) === 1 ? 0.45 : 0);
               const scale = isActive ? 1 : 0.74;
-              const translateX = displayOffset * 255; // Sincronizado com o script (255px)
+              const translateX = displayOffset * 255;
               const zIndex = isActive ? 10 : 5;
               const blur = isActive ? "none" : "blur(1.5px)";
               const shadow = isActive ? `0 32px 80px -8px ${getGlowColor(theme.id)}` : "none";
@@ -72,8 +72,8 @@ export function ThemeCarousel() {
               return (
                 <motion.div
                   key={theme.id}
-                  initial={false} // Evita o bug de animação ao montar o componente
-                  onClick={() => { if(!isActive) setCurrentIndex(i); }}
+                  initial={false}
+                  onClick={() => { if(!isActive) { setCurrentIndex(i); } }}
                   className={cn(
                     "absolute rounded-[24px] overflow-hidden transition-all duration-700",
                     (isActive || Math.abs(displayOffset) === 1) ? "pointer-events-auto cursor-pointer" : "pointer-events-none"
