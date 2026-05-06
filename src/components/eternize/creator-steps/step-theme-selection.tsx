@@ -96,7 +96,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                       {videoId ? (
                         <div className="absolute inset-0 pointer-events-none">
                           <iframe
-                            className="w-full h-full scale-[1.7] border-none"
+                            className="w-full h-full border-none"
                             src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0`}
                             allow="autoplay; encrypted-media"
                             tabIndex={-1}
