@@ -45,9 +45,6 @@ export default function PublishedSitePage() {
     );
   }
 
-  // Se o site ainda estiver pendente, mostramos uma tela de espera
-  // Como o useDoc é um listener em tempo real, assim que o webhook mudar para 'published',
-  // a página irá carregar o site automaticamente.
   if (siteData.status === 'pending') {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center text-white">
@@ -75,7 +72,7 @@ export default function PublishedSitePage() {
     );
   }
 
-  let config = {};
+  let config: any = {};
   try {
     config = JSON.parse(siteData.contentJson);
   } catch (e) {
@@ -84,12 +81,14 @@ export default function PublishedSitePage() {
 
   const processedConfig = {
     ...config,
-    date: (config as any).date ? new Date((config as any).date) : undefined
+    // Garante que o status do pack seja lido corretamente de ambas as fontes
+    isPackEnabled: config.isPackEnabled === true || siteData.isPackEnabled === true,
+    date: config.date ? new Date(config.date) : undefined
   };
 
   return (
     <div className="fixed inset-0 w-full h-full bg-black overflow-hidden">
-      <DeviceMockup {...(processedConfig as any)} isFullscreen />
+      <DeviceMockup {...processedConfig} isFullscreen />
     </div>
   );
 }

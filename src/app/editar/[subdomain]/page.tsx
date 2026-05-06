@@ -30,7 +30,6 @@ const compressImage = (base64Str: string): Promise<string> => {
     img.src = base64Str;
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      // Aumentado de 800 para 1200 para melhor nitidez
       const MAX_WIDTH = 1200;
       const MAX_HEIGHT = 1200;
       let width = img.width;
@@ -40,7 +39,6 @@ const compressImage = (base64Str: string): Promise<string> => {
       canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx?.drawImage(img, 0, 0, width, height);
-      // Qualidade aumentada de 0.6 para 0.85
       resolve(canvas.toDataURL('image/jpeg', 0.85));
     };
   });
@@ -67,7 +65,6 @@ export default function EditSitePage() {
   const [step, setStep] = useState<Step>('customize-background');
   const [activeModulePreview, setActiveModulePreview] = useState<string | null>(null);
 
-  // Identifica se entrou direto para editar módulos
   const isModulesOnlyMode = useMemo(() => searchParams.get('startStep') === 'modules', [searchParams]);
 
   // States
@@ -126,7 +123,6 @@ export default function EditSitePage() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  // Hydrate states from SiteData
   useEffect(() => {
     if (siteData) {
       try {
@@ -184,7 +180,6 @@ export default function EditSitePage() {
         setIsMusicAutoPlay(config.isMusicAutoPlay || false);
         setLocationQuery(config.locationQuery || '');
 
-        // Handle initial step from query param
         const startStep = searchParams.get('startStep');
         if (startStep === 'modules' && packPurchased) {
           setStep('modules');
@@ -215,16 +210,11 @@ export default function EditSitePage() {
   const currentStepIndex = stepSequence.indexOf(step);
 
   const handleBack = useCallback(() => {
-    // Se for modo dedicado de módulos, volta direto pro dashboard
     if (isModulesOnlyMode && step === 'modules') {
       router.push('/minhas-paginas');
       return;
     }
-
-    if (currentStepIndex <= 0) { 
-      router.push('/minhas-paginas'); 
-      return; 
-    }
+    if (currentStepIndex <= 0) { router.push('/minhas-paginas'); return; }
     setStep(stepSequence[currentStepIndex - 1]);
   }, [currentStepIndex, stepSequence, router, isModulesOnlyMode, step]);
 
@@ -255,6 +245,7 @@ export default function EditSitePage() {
       await updateDoc(siteRef, {
         name: pageTitle || 'Meu Presente',
         contentJson: jsonContent,
+        isPackEnabled: isPackEnabled, // Sincroniza o campo raiz
         updatedAt: serverTimestamp(),
       });
 
@@ -373,7 +364,6 @@ export default function EditSitePage() {
                {mounted && isMobile && <DeviceMockup {...previewProps} />}
             </div>
 
-            {/* Global navigation footer - Hidden in modules step to avoid duplication */}
             {step !== 'modules' && (
               <div className="mt-12 flex flex-col gap-6 max-w-md mx-auto md:mx-0">
                 <div className="flex flex-col gap-4 pt-10 border-t border-white/5">
