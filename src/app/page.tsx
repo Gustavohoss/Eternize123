@@ -484,6 +484,8 @@ export default function LandingPage() {
               <div className="flex">
                 {THEME_OPTIONS.map((theme, i) => {
                   const isSelected = selectedIndex === i;
+                  const videoId = (theme as any).videoUrl;
+
                   return (
                     <div 
                       key={theme.id} 
@@ -513,14 +515,25 @@ export default function LandingPage() {
                         />
 
                         <div className="absolute inset-0 bg-gradient-to-b from-[#1f1f1f] to-[#141414] z-10">
-                          <NextImage 
-                            src={theme.image} 
-                            fill 
-                            className="object-cover" 
-                            alt={theme.name} 
-                            priority
-                            data-ai-hint="theme preview"
-                          />
+                          {videoId ? (
+                            <div className="absolute inset-0 pointer-events-none">
+                              <iframe
+                                className="w-full h-full scale-[1.5] border-none"
+                                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1`}
+                                allow="autoplay; encrypted-media"
+                                tabIndex={-1}
+                              />
+                            </div>
+                          ) : (
+                            <NextImage 
+                              src={theme.image} 
+                              fill 
+                              className="object-cover" 
+                              alt={theme.name} 
+                              priority
+                              data-ai-hint="theme preview"
+                            />
+                          )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent z-20" />
                         </div>
 
@@ -933,12 +946,23 @@ export default function LandingPage() {
               </div>
 
               <div className="aspect-[4/3] rounded-2xl bg-[#0d0005] border border-[#2a0010] overflow-hidden relative flex items-center justify-center shadow-2xl">
-                 <NextImage 
-                   src={THEME_OPTIONS[previewThemeIndex].image} 
-                   fill 
-                   className="object-cover opacity-20 grayscale-[0.5] group-hover:opacity-30 group-hover:scale-105 transition-all duration-700" 
-                   alt="Theme preview" 
-                 />
+                 {(THEME_OPTIONS[previewThemeIndex] as any).videoUrl ? (
+                   <div className="absolute inset-0 pointer-events-none">
+                     <iframe
+                       className="w-full h-full scale-[1.5] border-none opacity-40 group-hover:opacity-60 transition-opacity"
+                       src={`https://www.youtube.com/embed/${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}?autoplay=1&mute=1&loop=1&playlist=${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1`}
+                       allow="autoplay; encrypted-media"
+                       tabIndex={-1}
+                     />
+                   </div>
+                 ) : (
+                   <NextImage 
+                     src={THEME_OPTIONS[previewThemeIndex].image} 
+                     fill 
+                     className="object-cover opacity-20 grayscale-[0.5] group-hover:opacity-30 group-hover:scale-105 transition-all duration-700" 
+                     alt="Theme preview" 
+                   />
+                 )}
                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,_rgba(225,29,72,0.05)_0%,_transparent_70%)]" />
                  <Heart className="w-12 h-12 text-primary opacity-20 group-hover:opacity-40 transition-opacity" />
               </div>

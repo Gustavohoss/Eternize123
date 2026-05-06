@@ -44,7 +44,8 @@ export const THEME_OPTIONS = [
     description: 'Transforme sua história em um perfil social. Feed, biografia e memórias em grade.', 
     badge: 'Social',
     color: '#e1306c',
-    image: 'https://picsum.photos/seed/insta-theme/400/600'
+    image: 'https://picsum.photos/seed/insta-theme/400/600',
+    videoUrl: 'fYln5Smsn6w'
   },
 ];
 
