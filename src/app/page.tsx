@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -557,10 +556,16 @@ export default function LandingPage() {
                             {theme.description}
                           </p>
 
-                          <button className="w-full bg-white/5 border border-white/10 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:bg-white/10 active:scale-95">
+                          <a 
+                            href={(theme as any).demoUrl || "#"} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="w-full bg-white/5 border border-white/10 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:bg-white/10 active:scale-95"
+                            onClick={(e) => !(theme as any).demoUrl && e.preventDefault()}
+                          >
                             <ExternalLink className="w-3 h-3" />
                             Ver demo
-                          </button>
+                          </a>
                         </div>
                       </div>
                     </div>
@@ -939,7 +944,10 @@ export default function LandingPage() {
                 <p className="text-[13.5px] text-[#666] leading-relaxed mb-8 max-w-[320px] font-medium">
                   {THEME_OPTIONS[previewThemeIndex].description}
                 </p>
-                <NextLink href="/criador">
+                <NextLink 
+                  href={(THEME_OPTIONS[previewThemeIndex] as any).demoUrl || "/criador"} 
+                  target={(THEME_OPTIONS[previewThemeIndex] as any).demoUrl ? "_blank" : undefined}
+                >
                   <button className="bg-primary hover:bg-red-700 text-white px-5 py-3 rounded-lg text-sm font-bold flex items-center gap-2 w-fit transition-all hover:shadow-[0_8px_20px_rgba(225,29,72,0.3)] hover:-translate-y-0.5 active:scale-95" style={{ backgroundColor: THEME_OPTIONS[previewThemeIndex].color }}>
                     <ExternalLink className="w-4 h-4" /> Ver demo ao vivo
                   </button>

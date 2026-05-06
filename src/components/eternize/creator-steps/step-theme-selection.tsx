@@ -135,10 +135,16 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                         {theme.description}
                       </p>
 
-                      <button className="w-full bg-white/5 border border-white/10 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:bg-white/10 active:scale-95">
+                      <a 
+                        href={(theme as any).demoUrl || "#"} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="w-full bg-white/5 border border-white/10 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:bg-white/10 active:scale-95"
+                        onClick={(e) => !(theme as any).demoUrl && e.preventDefault()}
+                      >
                         <ExternalLink className="w-3 h-3" />
                         Ver demo
-                      </button>
+                      </a>
                     </div>
                   </div>
                 </div>

@@ -20,7 +20,8 @@ export const THEME_OPTIONS = [
     description: 'O estilo romântico e atemporal. Perfeito para declarações tradicionais.', 
     badge: 'Clássico',
     color: '#e11d48',
-    image: 'https://picsum.photos/seed/classic-theme/400/600'
+    image: 'https://picsum.photos/seed/classic-theme/400/600',
+    demoUrl: '/site/demo-classico'
   },
   { 
     id: 'netflix', 
@@ -28,7 +29,8 @@ export const THEME_OPTIONS = [
     description: 'Estilo cinematográfico inspirado na Netflix. Transforme sua história em uma série épica.', 
     badge: 'Série',
     color: '#e50914',
-    image: 'https://picsum.photos/seed/netflix-theme/400/600'
+    image: 'https://picsum.photos/seed/netflix-theme/400/600',
+    demoUrl: '/site/demo-netflix'
   },
   { 
     id: 'spotify', 
@@ -36,7 +38,8 @@ export const THEME_OPTIONS = [
     description: 'Visual moderno inspirado no Spotify. Perfeito para quem ama música.', 
     badge: 'Música',
     color: '#1db954',
-    image: 'https://picsum.photos/seed/spotify-theme/400/600'
+    image: 'https://picsum.photos/seed/spotify-theme/400/600',
+    demoUrl: '/site/demo-spotify'
   },
   { 
     id: 'instagram', 
@@ -45,7 +48,8 @@ export const THEME_OPTIONS = [
     badge: 'Social',
     color: '#e1306c',
     image: 'https://picsum.photos/seed/insta-theme/400/600',
-    videoUrl: 'fYln5Smsn6w'
+    videoUrl: 'fYln5Smsn6w',
+    demoUrl: '/site/fernando-e-clara-kwt5'
   },
 ];
 
