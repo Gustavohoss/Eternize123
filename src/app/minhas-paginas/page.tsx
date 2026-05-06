@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { collection, query, where, or, and } from 'firebase/firestore';
 import { useFirestore, useUser, useCollection, useAuth, useMemoFirebase } from '@/firebase';
-import { Heart, ExternalLink, Calendar, Loader2, Plus, ArrowLeft, LogOut, Layout, User, Pencil, ShieldAlert, Lock, X, CheckCircle2, Eye, EyeOff, Sparkles, Settings2, LayoutGrid, ChevronRight } from 'lucide-react';
+import { Heart, ExternalLink, Calendar, Loader2, Plus, ArrowLeft, LogOut, Layout, User, Pencil, ShieldAlert, Lock, X, CheckCircle2, Eye, EyeOff, Sparkles, Settings2, LayoutGrid, ChevronRight, QrCode, Copy, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -14,12 +14,14 @@ import { ptBR } from 'date-fns/locale';
 import { signOut, updatePassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 export default function MyPages() {
   const firestore = useFirestore();
   const auth = useAuth();
   const router = useRouter();
   const { user, isUserLoading } = useUser();
+  const { toast } = useToast();
   
   // Password States
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
@@ -31,12 +33,15 @@ export default function MyPages() {
   const [showPass, setShowPass] = useState(false);
   const [showAlert, setShowAlert] = useState(true);
 
+  // Share States
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [selectedSiteForShare, setSelectedSiteForShare] = useState<any>(null);
+
   // Edit Choice States
   const [choiceDialogOpen, setChoiceDialogOpen] = useState(false);
   const [selectedSite, setSelectedSite] = useState<any>(null);
 
-  // Query memoizada buscando por ID ou por E-mail (caso a conta tenha sido criada no checkout)
-  // Corrigido: Envolvendo filtros no topo com and() para evitar InvalidQuery
+  // Query memoizada buscando por ID ou por E-mail
   const mySitesQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return query(
@@ -97,6 +102,19 @@ export default function MyPages() {
   const openEditChoice = (site: any) => {
     setSelectedSite(site);
     setChoiceDialogOpen(true);
+  };
+
+  const openShare = (site: any) => {
+    setSelectedSiteForShare(site);
+    setShareDialogOpen(true);
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Link copiado!",
+      description: "O endereço da sua página já está na área de transferência.",
+    });
   };
 
   if (isUserLoading) {
@@ -215,52 +233,113 @@ export default function MyPages() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {sites.map((site: any) => (
-              <div key={site.id} className="group relative bg-[#0c0c0c] border border-white/5 rounded-3xl p-6 hover:border-primary/30 transition-all duration-500 overflow-hidden">
+              <div key={site.id} className="group relative bg-[#0c0c0c] border border-white/5 rounded-3xl p-6 hover:border-primary/30 transition-all duration-500 overflow-hidden flex flex-col gap-5">
                 <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                   <div className="bg-primary/20 p-2 rounded-lg">
-                      <Heart className="w-3 h-3 text-primary fill-current" />
-                   </div>
+                   <button 
+                     onClick={() => openShare(site)}
+                     className="bg-primary/20 p-2.5 rounded-xl hover:bg-primary/40 transition-all"
+                     title="Compartilhar"
+                   >
+                      <QrCode className="w-4 h-4 text-primary" />
+                   </button>
                 </div>
 
-                <div className="flex flex-col gap-4 relative z-10">
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-black uppercase italic tracking-tight text-white group-hover:text-primary transition-colors truncate pr-8">
-                      {site.name || 'Sem título'}
-                    </h3>
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-white/20 uppercase tracking-wider">
-                      <Calendar className="w-3 h-3" />
-                      {site.createdAt ? format(site.createdAt.toDate(), "dd 'de' MMMM", { locale: ptBR }) : 'Recentemente'}
-                    </div>
+                <div className="space-y-1">
+                  <h3 className="text-xl font-black uppercase italic tracking-tighter text-white group-hover:text-primary transition-colors truncate pr-12">
+                    {site.name || 'Sem título'}
+                  </h3>
+                  <div className="flex items-center gap-2 text-[10px] font-bold text-white/20 uppercase tracking-wider">
+                    <Calendar className="w-3 h-3" />
+                    {site.createdAt ? format(site.createdAt.toDate(), "dd 'de' MMMM", { locale: ptBR }) : 'Recentemente'}
                   </div>
+                </div>
 
-                  <div className="flex flex-col gap-2">
-                    <div className="bg-black/50 border border-white/5 rounded-xl p-3 flex items-center justify-between">
-                      <div className="text-[10px] font-mono text-white/30 truncate max-w-[180px]">
-                        site/{site.id}
-                      </div>
-                      <Link href={`/site/${site.id}`} target="_blank">
-                        <Button size="sm" variant="ghost" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-primary hover:text-primary hover:bg-primary/10 gap-1.5 px-3">
-                          Acessar <ExternalLink className="w-3 h-3" />
-                        </Button>
-                      </Link>
-                    </div>
-                    
-                    <Button 
-                      onClick={() => openEditChoice(site)}
-                      variant="outline" 
-                      className="w-full border-white/5 bg-white/5 h-10 rounded-xl text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-white/10"
-                    >
-                      <Pencil className="w-3 h-3" /> Editar Site
-                    </Button>
+                <div className="bg-black/50 border border-white/5 rounded-2xl p-4 flex items-center justify-between group/link">
+                  <div className="text-[11px] font-mono font-bold text-white/30 truncate max-w-[180px]">
+                    site/{site.id}
                   </div>
+                  <Link href={`/site/${site.id}`} target="_blank">
+                    <button className="flex items-center gap-1.5 text-[10px] font-black uppercase text-primary hover:text-primary/80 transition-colors tracking-widest">
+                      ACESSAR <ExternalLink className="w-3 h-3" />
+                    </button>
+                  </Link>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => openEditChoice(site)}
+                    variant="outline" 
+                    className="flex-1 border-white/5 bg-white/5 h-12 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] gap-2 hover:bg-white/10 active:scale-95 transition-all"
+                  >
+                    <Pencil className="w-3.5 h-3.5" /> Editar Site
+                  </Button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Share Dialog */}
+      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+        <DialogContent className="bg-[#0c0c0c] border border-white/10 text-white rounded-[2.5rem] max-w-[400px] p-0 overflow-hidden outline-none">
+          <div className="p-8 flex flex-col items-center text-center space-y-6">
+            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center">
+              <Share2 className="w-7 h-7 text-primary" />
+            </div>
+            
+            <div className="space-y-2">
+              <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter">Compartilhar Amor</DialogTitle>
+              <DialogDescription className="text-white/40 text-sm font-medium">
+                Escolha como você quer entregar este presente especial.
+              </DialogDescription>
+            </div>
+
+            <div className="w-full bg-white p-6 rounded-3xl flex flex-col items-center gap-4 shadow-[0_0_50px_rgba(255,255,255,0.05)]">
+              <div className="relative w-48 h-48">
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://eternizee.shop/site/${selectedSiteForShare?.id}`)}`} 
+                  alt="QR Code do Site"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <p className="text-black/40 text-[10px] font-black uppercase tracking-widest">Aponte a câmera para testar</p>
+            </div>
+
+            <div className="w-full space-y-3 pt-4">
+              <div className="bg-white/5 border border-white/5 rounded-2xl p-4 flex items-center justify-between">
+                <p className="text-[10px] font-mono text-white/40 truncate max-w-[200px]">
+                  eternizee.shop/site/{selectedSiteForShare?.id}
+                </p>
+                <button 
+                  onClick={() => copyToClipboard(`https://eternizee.shop/site/${selectedSiteForShare?.id}`)}
+                  className="p-2 hover:bg-white/5 rounded-xl transition-all text-primary"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <Button 
+                onClick={() => copyToClipboard(`https://eternizee.shop/site/${selectedSiteForShare?.id}`)}
+                className="w-full h-14 rounded-2xl bg-primary text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-primary/20"
+              >
+                Copiar link da página
+              </Button>
+            </div>
+          </div>
+
+          <div className="bg-white/5 p-5 flex justify-center border-t border-white/5">
+             <button 
+               onClick={() => setShareDialogOpen(false)} 
+               className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-white transition-colors"
+             >
+               Fechar
+             </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Choice Dialog */}
       <Dialog open={choiceDialogOpen} onOpenChange={setChoiceDialogOpen}>
