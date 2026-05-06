@@ -139,6 +139,7 @@ export function NetflixView({
         
         {activeTab === 'episodios' ? (
           <div className="space-y-6">
+            {/* Episódios Reais */}
             {uploadedPhotos.map((photo, i) => (
               <div key={i} className="flex gap-3 items-center group cursor-pointer" onClick={() => onPhotoClick(i)}>
                 <div className="w-32 h-[72px] bg-[#2a2a2a] rounded-md relative overflow-hidden shrink-0">
@@ -155,6 +156,20 @@ export function NetflixView({
                 </div>
               </div>
             ))}
+
+            {/* Esqueletos para completar a lista (até 8 slots) */}
+            {Array.from({ length: Math.max(0, 8 - uploadedPhotos.length) }).map((_, i) => {
+              const index = uploadedPhotos.length + i + 1;
+              return (
+                <div key={`skeleton-${index}`} className="flex gap-3 items-center opacity-30">
+                  <div className="w-32 h-[72px] bg-[#2a2a2a] rounded-md animate-pulse shrink-0" />
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="h-3 bg-[#2a2a2a] rounded-full w-2/3 animate-pulse" />
+                    <div className="h-2 bg-[#2a2a2a] rounded-full w-1/2 animate-pulse" />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="space-y-4 pt-2 animate-in fade-in duration-500">
