@@ -42,12 +42,12 @@ const STEPS = [
 
 export function StepsSection() {
   return (
-    <section className="py-24 md:py-32 flex flex-col items-center px-[5%] border-t border-white/5 bg-[#0a0a0a]">
-      <div className="w-full max-w-[1100px] text-center">
+    <section className="py-24 md:py-32 border-t border-white/5 bg-[#0a0a0a]">
+      <div className="max-w-6xl mx-auto px-6 text-center">
         
         {/* Layout Mobile (Timeline Vertical) */}
-        <div className="flex md:hidden flex-col items-start relative px-6 text-left gap-16">
-          <div className="absolute left-[52px] top-10 bottom-10 w-px bg-white/10 z-0" />
+        <div className="flex md:hidden flex-col items-start relative text-left gap-16">
+          <div className="absolute left-[28px] top-10 bottom-10 w-px bg-white/10 z-0" />
 
           {STEPS.map((step) => (
             <div key={step.id} className="flex gap-8 relative z-10 w-full items-start">
@@ -95,7 +95,7 @@ export function StepsSection() {
 
           <div className="grid grid-cols-4 gap-5 mb-20">
             {STEPS.map((step) => (
-              <div key={step.id} className="bg-[#0d0d0d] border border-white/5 rounded-[20px] p-10 flex flex-col items-center transition-all duration-300 hover:border-white/15 hover:-translate-y-1">
+              <div key={step.id} className="bg-[#0d0d0d] border border-white/5 rounded-[20px] p-8 flex flex-col items-center transition-all duration-300 hover:border-white/15 hover:-translate-y-1">
                 <div className="w-[55px] h-[55px] bg-white/5 border border-white/5 rounded-[14px] flex items-center justify-center mb-6">
                   <step.icon className="w-6 h-6 text-white" />
                 </div>
