@@ -6,7 +6,7 @@ import NextImage from 'next/image';
 import { ChevronLeft, ChevronRight, Play, X } from 'lucide-react';
 import { THEME_OPTIONS, ThemeId } from '@/app/criador/constants';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { motion, PanInfo } from 'framer-motion';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 
 interface StepThemeSelectionProps {
@@ -31,6 +31,15 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
     const prevIdx = (currentIndex - 1 + THEME_OPTIONS.length) % THEME_OPTIONS.length;
     setCurrentIndex(prevIdx);
     onThemeSelect(THEME_OPTIONS[prevIdx].id as ThemeId);
+  };
+
+  const handleDragEnd = (e: any, info: PanInfo) => {
+    const threshold = 50;
+    if (info.offset.x > threshold) {
+      prevStep();
+    } else if (info.offset.x < -threshold) {
+      nextStep();
+    }
   };
 
   const currentTheme = THEME_OPTIONS[currentIndex];
@@ -101,6 +110,9 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                   <motion.div
                     key={theme.id}
                     initial={false}
+                    drag={isActive ? "x" : false}
+                    dragConstraints={{ left: 0, right: 0 }}
+                    onDragEnd={handleDragEnd}
                     onClick={() => { 
                       if(!isActive) {
                         setCurrentIndex(i);
@@ -118,6 +130,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                       boxShadow: shadow,
                       left: "50%",
                       top: "50%",
+                      touchAction: "none"
                     }}
                     animate={{
                       x: `calc(-50% + ${translateX}px)`,

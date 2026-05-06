@@ -6,7 +6,7 @@ import NextImage from 'next/image';
 import { ChevronLeft, ChevronRight, Play, X } from 'lucide-react';
 import { THEME_OPTIONS } from '@/app/criador/constants';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { motion, PanInfo } from 'framer-motion';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 
 export function ThemeCarousel() {
@@ -14,6 +14,15 @@ export function ThemeCarousel() {
 
   const nextStep = () => setCurrentIndex((prev) => (prev + 1) % THEME_OPTIONS.length);
   const prevStep = () => setCurrentIndex((prev) => (prev - 1 + THEME_OPTIONS.length) % THEME_OPTIONS.length);
+
+  const handleDragEnd = (e: any, info: PanInfo) => {
+    const threshold = 50;
+    if (info.offset.x > threshold) {
+      prevStep();
+    } else if (info.offset.x < -threshold) {
+      nextStep();
+    }
+  };
 
   const currentTheme = THEME_OPTIONS[currentIndex];
 
@@ -73,6 +82,9 @@ export function ThemeCarousel() {
                 <motion.div
                   key={theme.id}
                   initial={false}
+                  drag={isActive ? "x" : false}
+                  dragConstraints={{ left: 0, right: 0 }}
+                  onDragEnd={handleDragEnd}
                   onClick={() => { if(!isActive) { setCurrentIndex(i); } }}
                   className={cn(
                     "absolute rounded-[24px] overflow-hidden transition-all duration-700",
@@ -85,6 +97,7 @@ export function ThemeCarousel() {
                     boxShadow: shadow,
                     left: "50%",
                     top: "50%",
+                    touchAction: "none"
                   }}
                   animate={{
                     x: `calc(-50% + ${translateX}px)`,
