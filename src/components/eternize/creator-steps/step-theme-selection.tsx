@@ -49,14 +49,14 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
   }, [currentIndex, isDragging]);
 
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
-    isDragging = true;
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    setIsDragging(true);
+    const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
     setStartX(clientX);
   };
 
   const handleMove = (e: MouseEvent | TouchEvent) => {
     if (!isDragging) return;
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientX = 'touches' in e ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
     let offset = clientX - startX;
     setDragOffset(offset);
   };

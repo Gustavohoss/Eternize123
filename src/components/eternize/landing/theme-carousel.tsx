@@ -36,13 +36,13 @@ export function ThemeCarousel() {
 
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDragging(true);
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
     setStartX(clientX);
   };
 
   const handleMove = (e: MouseEvent | TouchEvent) => {
     if (!isDragging) return;
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientX = 'touches' in e ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
     let offset = clientX - startX;
     setDragOffset(offset);
   };
