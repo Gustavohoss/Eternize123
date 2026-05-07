@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -18,6 +17,7 @@ interface ModuleItem {
   description: string;
   image: string;
   color: string;
+  videoUrl?: string;
 }
 
 const MODULES: ModuleItem[] = [
@@ -26,21 +26,24 @@ const MODULES: ModuleItem[] = [
     title: 'Memórias',
     description: 'Uma linha do tempo interativa dos momentos mais especiais do casal, com fotos e música por memória.',
     image: 'https://picsum.photos/seed/memories-module/600/800',
-    color: '#e11d48'
+    color: '#e11d48',
+    videoUrl: '7vSyi2D3mHE'
   },
   {
     id: 'conquistas',
     title: 'Conquistas',
     description: 'Desbloqueie marcos exclusivos conforme o tempo passa. Mostre ao mundo o nível do amor de vocês.',
     image: 'https://picsum.photos/seed/achievements-module/600/800',
-    color: '#f97316'
+    color: '#f97316',
+    videoUrl: '2wqe8XKxhYg'
   },
   {
     id: 'curiosidades',
     title: 'Curiosidades',
     description: 'Descubra a fase da lua, a estação do ano e fatos astronômicos do dia em que vocês se conheceram.',
     image: 'https://picsum.photos/seed/curiosities-module/600/800',
-    color: '#7c3aed'
+    color: '#7c3aed',
+    videoUrl: 'je6KAaSi1jM'
   },
   {
     id: 'jornada',
@@ -54,7 +57,8 @@ const MODULES: ModuleItem[] = [
     title: 'Roleta Surpresa',
     description: 'Um jogo interativo para sortear desafios, encontros e momentos divertidos para fazerem juntos.',
     image: 'https://picsum.photos/seed/roulette-module/600/800',
-    color: '#f59e0b'
+    color: '#f59e0b',
+    videoUrl: 'vcl1kjXuqR4'
   }
 ];
 
@@ -86,6 +90,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
     setIsDragging(true);
     const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
     setStartX(clientX);
+    if (containerRef.current) containerRef.current.classList.add('dragging');
   };
 
   const handleMove = (e: MouseEvent | TouchEvent) => {
@@ -97,6 +102,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
   const handleEnd = () => {
     if (!isDragging) return;
     setIsDragging(false);
+    if (containerRef.current) containerRef.current.classList.remove('dragging');
 
     if (dragOffset < -100) {
       nextStep();
@@ -125,7 +131,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
     };
-  }, [isDragging, dragOffset]);
+  }, [isDragging]);
 
   const currentModule = MODULES[currentIndex];
 
@@ -142,7 +148,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
     <div className="flex flex-col items-center md:items-start w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
       
       {/* Visual Carousel */}
-      <div className={cn("relative w-full flex flex-col items-center mb-10 mt-6", isDragging && "dragging")} ref={containerRef}>
+      <div className={cn("relative w-full flex flex-col items-center mb-10 mt-6")} ref={containerRef}>
         <div 
           className="absolute w-[400px] h-[400px] rounded-full blur-[120px] -z-10 transition-all duration-700 pointer-events-none" 
           style={{ background: `radial-gradient(${currentModule.color}33 0%, transparent 70%)` }}
@@ -167,6 +173,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
                 const total = MODULES.length;
                 let offset = i - currentIndex;
                 
+                // Lógica de Loop
                 if (offset > total / 2) offset -= total;
                 if (offset < -total / 2) offset += total;
 
@@ -186,8 +193,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
                   <div
                     key={module.id}
                     className={cn(
-                      "absolute rounded-[28px] overflow-hidden select-none pointer-events-none transition-all duration-500",
-                      !isDragging && "card-transition",
+                      "absolute rounded-[28px] overflow-hidden select-none pointer-events-none transition-all duration-500 card-transition",
                       isActive && "pointer-events-auto"
                     )}
                     style={{
@@ -206,13 +212,23 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
                     onClick={() => { if(!isActive && !isDragging) { setCurrentIndex(i); } }}
                   >
                     <div className="absolute inset-0 bg-neutral-900 z-0">
-                      <Image 
-                        src={module.image} 
-                        fill 
-                        className="object-cover" 
-                        alt={module.title} 
-                        priority
-                      />
+                      {module.videoUrl ? (
+                        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                          <iframe
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.3] border-none"
+                            src={`https://www.youtube.com/embed/${module.videoUrl}?autoplay=1&mute=1&loop=1&playlist=${module.videoUrl}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0`}
+                            allow="autoplay; encrypted-media"
+                          />
+                        </div>
+                      ) : (
+                        <Image 
+                          src={module.image} 
+                          fill 
+                          className="object-cover" 
+                          alt={module.title} 
+                          priority
+                        />
+                      )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
                     </div>
 
@@ -264,7 +280,6 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
       </div>
 
       <div className="w-full space-y-6">
-        {/* Activation Card - Estilo fiel à imagem fornecida */}
         <div 
           onClick={() => onPackToggle(!isPackEnabled)}
           className={cn(
