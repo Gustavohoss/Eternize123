@@ -74,7 +74,7 @@ export function HeroSection() {
     <section className="relative overflow-hidden bg-black">
       <div className="max-w-6xl mx-auto flex flex-col lg:grid lg:grid-cols-[1fr_420px] items-center justify-center min-h-[calc(100vh-120px)] px-6 gap-12 lg:gap-16 py-12 lg:py-0">
         
-        {/* Lado Esquerdo: Conteúdo conforme script solicitado */}
+        {/* Lado Esquerdo: Conteúdo */}
         <div className="w-full text-center lg:text-left flex flex-col items-center lg:items-start animate-in fade-in slide-in-from-left-8 duration-1000">
           
           {/* Badge Animado */}
@@ -93,11 +93,11 @@ export function HeroSection() {
             </div>
           </div>
 
-          <h1 className="text-white text-5xl lg:text-6xl font-sans relative z-20 font-bold tracking-tight mb-1">
+          <h1 className="text-white text-5xl lg:text-6xl font-sans pt-3 relative z-20 font-bold tracking-tight mb-1">
             Declare seu amor
           </h1>
           
-          <div className="font-['Pacifico'] text-4xl md:text-5xl text-red-500 font-bold mb-6 -mt-0.5 leading-tight min-h-[60px]">
+          <div className="font-['Great_Vibes'] text-4xl md:text-5xl text-red-500 font-bold mb-6 -mt-0.5 leading-tight min-h-[60px]">
             <span>{typewriterText}</span>
             <span className="animate-pulse">|</span>
           </div>
@@ -154,7 +154,7 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Lado Direito: Carrossel de Temas (Mantido para composição) */}
+        {/* Lado Direito: Carrossel de Temas */}
         <div className="flex flex-col items-center justify-center w-full relative animate-in fade-in slide-in-from-right-8 duration-1000 delay-200 py-10">
           <ThemeCarousel />
         </div>
