@@ -60,22 +60,22 @@ export function ThemeCarousel() {
   };
 
   useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => handleMove(e);
+    const onMouseUp = () => handleEnd();
+    const onTouchMove = (e: TouchEvent) => handleMove(e);
+    const onTouchEnd = () => handleEnd();
+
     if (isDragging) {
-      window.addEventListener('mousemove', handleMove);
-      window.addEventListener('mouseup', handleEnd);
-      window.addEventListener('touchmove', handleMove);
-      window.addEventListener('touchend', handleEnd);
-    } else {
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('mouseup', handleEnd);
-      window.removeEventListener('touchmove', handleMove);
-      window.removeEventListener('touchend', handleEnd);
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+      window.addEventListener('touchmove', onTouchMove);
+      window.addEventListener('touchend', onTouchEnd);
     }
     return () => {
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('mouseup', handleEnd);
-      window.removeEventListener('touchmove', handleMove);
-      window.removeEventListener('touchend', handleEnd);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
     };
   }, [isDragging, dragOffset]);
 
@@ -117,7 +117,7 @@ export function ThemeCarousel() {
         </button>
 
         <div 
-          className="relative flex-1 overflow-hidden rounded-2xl cursor-grab active:cursor-grabbing" 
+          className="relative flex-1 overflow-visible rounded-2xl cursor-grab active:cursor-grabbing" 
           style={{ height: '480px' }}
           onMouseDown={handleStart}
           onTouchStart={handleStart}
@@ -202,7 +202,7 @@ export function ThemeCarousel() {
                       <Dialog>
                         <DialogTrigger asChild>
                           <button className="w-9 h-9 rounded-full flex items-center justify-center bg-white/15 backdrop-blur-sm border border-white/20 hover:bg-white/30 transition-all active:scale-90 pointer-events-auto">
-                            <Play className="w-4 h-4 text-white fill-white" />
+                            <Play className="w-4 h-4 text-white fill-white" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></Play>
                           </button>
                         </DialogTrigger>
                         <DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[500] translate-x-0 translate-y-0 rounded-none max-w-none">
@@ -278,3 +278,4 @@ export function ThemeCarousel() {
     </div>
   );
 }
+

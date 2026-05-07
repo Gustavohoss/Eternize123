@@ -77,22 +77,22 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
   };
 
   useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => handleMove(e);
+    const onMouseUp = () => handleEnd();
+    const onTouchMove = (e: TouchEvent) => handleMove(e);
+    const onTouchEnd = () => handleEnd();
+
     if (isDragging) {
-      window.addEventListener('mousemove', handleMove);
-      window.addEventListener('mouseup', handleEnd);
-      window.addEventListener('touchmove', handleMove);
-      window.addEventListener('touchend', handleEnd);
-    } else {
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('mouseup', handleEnd);
-      window.removeEventListener('touchmove', handleMove);
-      window.removeEventListener('touchend', handleEnd);
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+      window.addEventListener('touchmove', onTouchMove);
+      window.addEventListener('touchend', onTouchEnd);
     }
     return () => {
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('mouseup', handleEnd);
-      window.removeEventListener('touchmove', handleMove);
-      window.removeEventListener('touchend', handleEnd);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
     };
   }, [isDragging, dragOffset]);
 
@@ -142,7 +142,8 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
           </button>
 
           <div 
-            className="relative flex-1 h-[480px] overflow-hidden rounded-2xl cursor-grab active:cursor-grabbing"
+            className="relative flex-1 overflow-visible rounded-2xl cursor-grab active:cursor-grabbing"
+            style={{ height: '480px' }}
             onMouseDown={handleStart}
             onTouchStart={handleStart}
           >
@@ -225,7 +226,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                         <Dialog>
                           <DialogTrigger asChild>
                             <button className="w-10 h-10 rounded-full flex items-center justify-center bg-white/15 backdrop-blur-sm border border-white/20 pointer-events-auto">
-                              <Play className="w-4 h-4 text-white fill-white" />
+                              <Play className="w-4 h-4 text-white fill-white" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></Play>
                             </button>
                           </DialogTrigger>
                           <DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[500] translate-x-0 translate-y-0 rounded-none max-w-none">
