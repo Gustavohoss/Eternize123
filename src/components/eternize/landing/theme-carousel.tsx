@@ -6,7 +6,7 @@ import NextImage from 'next/image';
 import { ChevronLeft, ChevronRight, Play, X } from 'lucide-react';
 import { THEME_OPTIONS } from '@/app/criador/constants';
 import { cn } from '@/lib/utils';
-import { motion, PanInfo } from 'framer-motion';
+import { motion, PanInfo, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 
 export function ThemeCarousel() {
@@ -60,16 +60,18 @@ export function ThemeCarousel() {
           <ChevronLeft className="w-4 h-4 text-white" />
         </button>
 
-        <div className="relative flex-1 h-[480px] flex items-center justify-center">
+        <div className="relative flex-1 h-[480px] flex items-center justify-center overflow-visible">
           <div className="relative w-full h-full flex items-center justify-center">
             {THEME_OPTIONS.map((theme, i) => {
               const offset = i - currentIndex;
               const isActive = i === currentIndex;
               
+              // Lógica de loop infinito para visualização lateral
               let displayOffset = offset;
               if (currentIndex === 0 && i === THEME_OPTIONS.length - 1) displayOffset = -1;
               if (currentIndex === THEME_OPTIONS.length - 1 && i === 0) displayOffset = 1;
 
+              const isVisible = isActive || Math.abs(displayOffset) === 1;
               const opacity = isActive ? 1 : (Math.abs(displayOffset) === 1 ? 0.45 : 0);
               const scale = isActive ? 1 : 0.74;
               const translateX = displayOffset * 255;
@@ -190,7 +192,9 @@ export function ThemeCarousel() {
         {THEME_OPTIONS.map((_, i) => (
           <button
             key={i}
-            onClick={() => setCurrentIndex(i)}
+            onClick={() => {
+              setCurrentIndex(i);
+            }}
             className="rounded-full transition-all duration-300"
             style={{
               height: "8px",
