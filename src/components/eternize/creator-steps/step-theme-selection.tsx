@@ -37,6 +37,17 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
     onThemeSelect(THEME_OPTIONS[prevIdx].id as ThemeId);
   };
 
+  // Lógica de Auto-Advance (4 segundos)
+  useEffect(() => {
+    if (isDragging) return;
+    
+    const timer = setInterval(() => {
+      nextStep();
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [currentIndex, isDragging]);
+
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDragging(true);
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;

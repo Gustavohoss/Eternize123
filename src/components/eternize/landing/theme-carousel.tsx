@@ -23,6 +23,17 @@ export function ThemeCarousel() {
     setCurrentIndex(prev => (prev - 1 + THEME_OPTIONS.length) % THEME_OPTIONS.length);
   };
 
+  // Lógica de Auto-Advance (4 segundos)
+  useEffect(() => {
+    if (isDragging) return;
+    
+    const timer = setInterval(() => {
+      nextStep();
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [currentIndex, isDragging]);
+
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDragging(true);
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
