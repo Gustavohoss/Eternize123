@@ -71,7 +71,6 @@ export function ThemeCarousel() {
               if (currentIndex === 0 && i === THEME_OPTIONS.length - 1) displayOffset = -1;
               if (currentIndex === THEME_OPTIONS.length - 1 && i === 0) displayOffset = 1;
 
-              const isVisible = isActive || Math.abs(displayOffset) === 1;
               const opacity = isActive ? 1 : (Math.abs(displayOffset) === 1 ? 0.45 : 0);
               const scale = isActive ? 1 : 0.74;
               const translateX = displayOffset * 255;
