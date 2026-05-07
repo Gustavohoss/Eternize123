@@ -49,7 +49,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
   }, [currentIndex, isDragging]);
 
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
-    setIsDragging(true);
+    isDragging = true;
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     setStartX(clientX);
   };
@@ -119,7 +119,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
   };
 
   return (
-    <div className={cn("relative z-10 container mx-auto px-4 h-[100dvh] flex flex-col items-center justify-between overflow-hidden py-14 md:py-24", isDragging && "dragging")} ref={containerRef}>
+    <div className={cn("relative z-10 container mx-auto px-4 min-h-screen flex flex-col items-center justify-between py-14 md:py-24", isDragging && "dragging")} ref={containerRef}>
       
       <div className="w-full max-w-4xl flex flex-col shrink-0 mt-4 md:mt-0 relative z-50">
         <div className="space-y-1 text-center">
@@ -288,7 +288,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-6 w-full max-w-[320px] shrink-0 z-20 mb-4 md:mb-0">
+      <div className="flex flex-col items-center gap-6 w-full max-w-[320px] shrink-0 z-20 mb-8 md:mb-0">
         <div className="text-center">
           <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">
             Selecionado: <span className="text-white" style={{ color: currentTheme.color }}>{currentTheme.name}</span>
