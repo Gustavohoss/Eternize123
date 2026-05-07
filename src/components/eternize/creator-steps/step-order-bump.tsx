@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { ChevronLeft, ChevronRight, ExternalLink, X, CheckCircle2, Heart, Trophy, Star, MapPin, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -9,7 +10,14 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } fr
 import { MemoriesModulePreview } from '@/components/eternize/memories-module-preview';
 import { AchievementsModulePreview } from '@/components/eternize/achievements-module-preview';
 import { CuriosidadesModulePreview } from '@/components/eternize/curiosidades-module-preview';
+import { RouletteModulePreview } from '@/components/eternize/roulette-module-preview';
 import { cn } from '@/lib/utils';
+
+// Importação dinâmica do mapa para evitar erros de SSR
+const JourneyModulePreview = dynamic(
+  () => import('@/components/eternize/journey-module-preview').then(mod => mod.JourneyModulePreview),
+  { ssr: false, loading: () => <div className="flex-1 bg-[#0d1117] flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div></div> }
+);
 
 interface ModuleItem {
   id: string;
@@ -140,6 +148,8 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
       case 'memorias': return <MemoriesModulePreview />;
       case 'conquistas': return <AchievementsModulePreview />;
       case 'curiosidades': return <CuriosidadesModulePreview date={date} />;
+      case 'jornada': return <JourneyModulePreview />;
+      case 'roleta': return <RouletteModulePreview />;
       default: return null;
     }
   };
