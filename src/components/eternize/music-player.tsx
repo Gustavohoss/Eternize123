@@ -49,7 +49,6 @@ export function MusicPlayer({
   const playerRef = useRef<any>(null);
   const containerId = useRef(`yt-player-${Math.random().toString(36).substring(2, 11)}`);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const pendingPlay = useRef(false);
 
   // Initialize YouTube API and Player
   useEffect(() => {
@@ -83,29 +82,29 @@ export function MusicPlayer({
           width: '1',
           videoId: musicData?.id || '',
           playerVars: {
-            autoplay: 1, // Start playing immediately (browser permitting)
+            autoplay: isAutoPlay ? 1 : 0,
             controls: 0,
             disablekb: 1,
             fs: 0,
             rel: 0,
             enablejsapi: 1,
             origin: typeof window !== 'undefined' ? window.location.origin : '',
-            mute: 1 // Start muted to satisfy browser policies
+            mute: isAutoPlay ? 1 : 0 // Start muted if autoplay to bypass policy, then unmute on interaction
           },
           events: {
             onReady: (event: any) => {
               setIsReady(true);
               setDuration(event.target.getDuration());
               
-              // If autoplay is requested and we aren't explicitly muted by demo param
               if (isAutoPlay && !isMutedByParam) {
+                // Tenta forçar o play e tirar o mudo
                 event.target.unMute();
                 event.target.setVolume(100);
                 event.target.playVideo();
               }
             },
             onStateChange: (event: any) => {
-              const playing = event.data === 1;
+              const playing = event.data === window.YT.PlayerState.PLAYING;
               setIsPlaying(playing);
               if (playing) {
                 startTimer();
@@ -130,28 +129,22 @@ export function MusicPlayer({
         playerRef.current = null;
       }
     };
-  }, []);
+  }, [musicData?.id]); // Re-init if ID changes
 
   // Handle prop changes for Play/Pause
   useEffect(() => {
     if (!playerRef.current || !isReady) return;
 
     if (musicData?.id) {
-      const currentPlayerId = typeof playerRef.current.getVideoData === 'function' ? playerRef.current.getVideoData().video_id : null;
-      if (currentPlayerId && currentPlayerId !== musicData.id) {
-        playerRef.current.loadVideoById(musicData.id);
-        setCurrentTime(0);
-      }
-      
       if (isAutoPlay && !isMutedByParam) {
         playerRef.current.unMute();
         playerRef.current.setVolume(100);
         playerRef.current.playVideo();
-      } else {
+      } else if (!isAutoPlay) {
         playerRef.current.pauseVideo();
       }
     }
-  }, [isAutoPlay, isReady, musicData?.id, isMutedByParam]);
+  }, [isAutoPlay, isReady, isMutedByParam]);
 
   const startTimer = () => {
     stopTimer();
@@ -173,8 +166,8 @@ export function MusicPlayer({
     if (typeof playerRef.current.unMute === 'function') playerRef.current.unMute();
     if (typeof playerRef.current.setVolume === 'function') playerRef.current.setVolume(100);
 
-    const state = typeof playerRef.current.getPlayerState === 'function' ? playerRef.current.getPlayerState() : -1;
-    if (state === 1) {
+    const state = playerRef.current.getPlayerState();
+    if (state === window.YT.PlayerState.PLAYING) {
       playerRef.current.pauseVideo();
     } else {
       playerRef.current.playVideo();

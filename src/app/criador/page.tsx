@@ -37,7 +37,6 @@ const compressImage = (base64Str: string): Promise<string> => {
     img.src = base64Str;
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      // Aumentado de 800 para 1200 para melhor nitidez
       const MAX_WIDTH = 1200;
       const MAX_HEIGHT = 1200;
       let width = img.width;
@@ -47,7 +46,6 @@ const compressImage = (base64Str: string): Promise<string> => {
       canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx?.drawImage(img, 0, 0, width, height);
-      // Qualidade aumentada de 0.6 para 0.85
       resolve(canvas.toDataURL('image/jpeg', 0.85));
     };
   });
@@ -112,7 +110,7 @@ export default function CriadorApp() {
   const [musicTextColor, setMusicTextColor] = useState<string>('#ffffff');
   const [musicHasNeon, setMusicHasNeon] = useState<boolean>(false);
   const [musicNeonStrength, setMusicNeonStrength] = useState<number>(15);
-  const [isMusicAutoPlay, setIsMusicAutoPlay] = useState<boolean>(false);
+  const [isMusicAutoPlay, setIsMusicAutoPlay] = useState<boolean>(true);
   const [locationQuery, setLocationQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   
@@ -269,7 +267,7 @@ export default function CriadorApp() {
     selectedCountStyle, photoEffect, titleColor, titleFont, titleIsBold, titleHasNeon,
     titleNeonStrength, cardColor, showCard, titlePosition, dateColor, dateFont, dateIsBold,
     dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor, messageColor, messageFont,
-    musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength, isAutoPlay: false,
+    musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength, isAutoPlay: isMusicAutoPlay,
     sparklesDensity, sparklesSpeed, sparklesColor, smokeIntensity, smokeColor, patternDuration,
     patternDensity, patternColor, isPackEnabled
   };
