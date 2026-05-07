@@ -78,7 +78,7 @@ export function HeroSection() {
         <div className="w-full text-center lg:text-left flex flex-col items-center lg:items-start animate-in fade-in slide-in-from-left-8 duration-1000">
           
           {/* Badge Animado */}
-          <div className="relative inline-flex p-px overflow-hidden rounded-full mb-8 mx-0 w-fit">
+          <div className="relative inline-flex p-px overflow-hidden rounded-full mb-6 mx-0 w-fit">
             <div 
               className="absolute inset-0 animate-spin-slow pointer-events-none" 
               style={{ 
@@ -97,12 +97,12 @@ export function HeroSection() {
             Declare seu amor
           </h1>
           
-          <div className="font-['Great_Vibes'] text-4xl md:text-5xl text-red-500 font-bold mb-10 -mt-0.5 leading-tight min-h-[60px]">
+          <div className="font-['Great_Vibes'] text-4xl md:text-5xl text-red-500 font-bold mb-4 -mt-0.5 leading-tight min-h-[60px]">
             <span>{typewriterText}</span>
             <span className="animate-pulse">|</span>
           </div>
           
-          <p className="text-white/80 text-lg md:text-xl mb-12 leading-relaxed max-w-xl font-medium">
+          <p className="text-white/80 text-lg md:text-xl mb-6 leading-relaxed max-w-xl font-medium">
             Crie um presente digital com fotos, música e textos personalizados, para quem você ama e surpreenda a pessoa. Pronto em 5 minutos.
           </p>
 
@@ -119,7 +119,7 @@ export function HeroSection() {
           </Link>
 
           {/* Social Proof e Comentários Dinâmicos */}
-          <div className="flex items-center justify-center lg:justify-start gap-5 mt-14">
+          <div className="flex items-center justify-center lg:justify-start gap-5 mt-8">
             <div className="flex -space-x-3 flex-shrink-0">
               <img className="w-10 h-10 rounded-full border-2 border-neutral-900" src="https://i.pravatar.cc/100?u=a" alt="User 1" />
               <img className="w-10 h-10 rounded-full border-2 border-neutral-900" src="https://i.pravatar.cc/100?u=b" alt="User 2" />
