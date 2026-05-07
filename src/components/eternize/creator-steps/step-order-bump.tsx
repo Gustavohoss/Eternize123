@@ -301,7 +301,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
             <h4 className="text-base md:text-lg font-black text-white uppercase tracking-tight">ADICIONAR PACK DE MÓDULOS</h4>
             <div className="flex items-center gap-2">
                <span className="text-[10px] md:text-[11px] font-bold text-white/40 uppercase tracking-widest">ADICIONAR POR APENAS</span>
-               <span className="text-[11px] md:text-[12px] font-black text-white">R$ 7,99</span>
+               <span className="text-[11px] md:text-[12px] font-black text-white">R$ 11,99</span>
             </div>
           </div>
           <Switch checked={isPackEnabled} onCheckedChange={onPackToggle} className="scale-110" />
