@@ -26,19 +26,15 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
   const containerRef = useRef<HTMLDivElement>(null);
 
   const nextStep = () => {
-    if (currentIndex < THEME_OPTIONS.length - 1) {
-      const nextIdx = currentIndex + 1;
-      setCurrentIndex(nextIdx);
-      onThemeSelect(THEME_OPTIONS[nextIdx].id as ThemeId);
-    }
+    const nextIdx = (currentIndex + 1) % THEME_OPTIONS.length;
+    setCurrentIndex(nextIdx);
+    onThemeSelect(THEME_OPTIONS[nextIdx].id as ThemeId);
   };
 
   const prevStep = () => {
-    if (currentIndex > 0) {
-      const prevIdx = currentIndex - 1;
-      setCurrentIndex(prevIdx);
-      onThemeSelect(THEME_OPTIONS[prevIdx].id as ThemeId);
-    }
+    const prevIdx = (currentIndex - 1 + THEME_OPTIONS.length) % THEME_OPTIONS.length;
+    setCurrentIndex(prevIdx);
+    onThemeSelect(THEME_OPTIONS[prevIdx].id as ThemeId);
   };
 
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
@@ -51,11 +47,6 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
     if (!isDragging) return;
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     let offset = clientX - startX;
-
-    if ((currentIndex === 0 && offset > 0) || (currentIndex === THEME_OPTIONS.length - 1 && offset < 0)) {
-      offset /= 3;
-    }
-
     setDragOffset(offset);
   };
 
@@ -63,12 +54,12 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
     if (!isDragging) return;
     setIsDragging(false);
 
-    if (dragOffset < -100 && currentIndex < THEME_OPTIONS.length - 1) {
-      const nextIdx = currentIndex + 1;
+    if (dragOffset < -100) {
+      const nextIdx = (currentIndex + 1) % THEME_OPTIONS.length;
       setCurrentIndex(nextIdx);
       onThemeSelect(THEME_OPTIONS[nextIdx].id as ThemeId);
-    } else if (dragOffset > 100 && currentIndex > 0) {
-      const prevIdx = currentIndex - 1;
+    } else if (dragOffset > 100) {
+      const prevIdx = (currentIndex - 1 + THEME_OPTIONS.length) % THEME_OPTIONS.length;
       setCurrentIndex(prevIdx);
       onThemeSelect(THEME_OPTIONS[prevIdx].id as ThemeId);
     }
@@ -135,8 +126,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
         <div className="relative flex items-center gap-3 w-full max-w-[520px]">
           <button 
             onClick={prevStep} 
-            disabled={currentIndex === 0}
-            className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90 disabled:opacity-30"
+            className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90"
           >
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
@@ -149,7 +139,13 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
           >
             <div className="relative w-full h-full flex items-center justify-center">
               {THEME_OPTIONS.map((theme, i) => {
-                const offset = i - currentIndex;
+                const total = THEME_OPTIONS.length;
+                let offset = i - currentIndex;
+                
+                // Lógica de Loop: calcula o caminho mais curto
+                if (offset > total / 2) offset -= total;
+                if (offset < -total / 2) offset += total;
+
                 const isActive = i === currentIndex;
                 
                 const translateX = (offset * 255) + dragOffset;
@@ -256,8 +252,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
 
           <button 
             onClick={nextStep} 
-            disabled={currentIndex === THEME_OPTIONS.length - 1}
-            className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90 disabled:opacity-30"
+            className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90"
           >
             <ChevronRight className="w-5 h-5 text-white" />
           </button>

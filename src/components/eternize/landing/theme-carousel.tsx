@@ -16,15 +16,11 @@ export function ThemeCarousel() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const nextStep = () => {
-    if (currentIndex < THEME_OPTIONS.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    }
+    setCurrentIndex(prev => (prev + 1) % THEME_OPTIONS.length);
   };
 
   const prevStep = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
-    }
+    setCurrentIndex(prev => (prev - 1 + THEME_OPTIONS.length) % THEME_OPTIONS.length);
   };
 
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
@@ -37,12 +33,6 @@ export function ThemeCarousel() {
     if (!isDragging) return;
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     let offset = clientX - startX;
-
-    // Efeito elástico nas pontas
-    if ((currentIndex === 0 && offset > 0) || (currentIndex === THEME_OPTIONS.length - 1 && offset < 0)) {
-      offset /= 3;
-    }
-
     setDragOffset(offset);
   };
 
@@ -50,10 +40,10 @@ export function ThemeCarousel() {
     if (!isDragging) return;
     setIsDragging(false);
 
-    if (dragOffset < -100 && currentIndex < THEME_OPTIONS.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    } else if (dragOffset > 100 && currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
+    if (dragOffset < -100) {
+      setCurrentIndex(prev => (prev + 1) % THEME_OPTIONS.length);
+    } else if (dragOffset > 100) {
+      setCurrentIndex(prev => (prev - 1 + THEME_OPTIONS.length) % THEME_OPTIONS.length);
     }
 
     setDragOffset(0);
@@ -110,8 +100,7 @@ export function ThemeCarousel() {
       <div className="relative flex items-center gap-3 w-full">
         <button 
           onClick={prevStep} 
-          disabled={currentIndex === 0}
-          className="flex-shrink-0 w-9 h-9 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="flex-shrink-0 w-9 h-9 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90"
         >
           <ChevronLeft className="w-4 h-4 text-white" />
         </button>
@@ -124,7 +113,13 @@ export function ThemeCarousel() {
         >
           <div className="relative w-full h-full flex items-center justify-center">
             {THEME_OPTIONS.map((theme, i) => {
-              const offset = i - currentIndex;
+              const total = THEME_OPTIONS.length;
+              let offset = i - currentIndex;
+              
+              // Lógica de Loop: calcula o caminho mais curto
+              if (offset > total / 2) offset -= total;
+              if (offset < -total / 2) offset += total;
+
               const isActive = i === currentIndex;
               
               const translateX = (offset * 255) + dragOffset;
@@ -232,8 +227,7 @@ export function ThemeCarousel() {
 
         <button 
           onClick={nextStep} 
-          disabled={currentIndex === THEME_OPTIONS.length - 1}
-          className="flex-shrink-0 w-9 h-9 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="flex-shrink-0 w-9 h-9 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90"
         >
           <ChevronRight className="w-4 h-4 text-white" />
         </button>
@@ -278,4 +272,3 @@ export function ThemeCarousel() {
     </div>
   );
 }
-
