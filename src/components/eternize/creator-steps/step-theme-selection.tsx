@@ -37,17 +37,6 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
     onThemeSelect(THEME_OPTIONS[prevIdx].id as ThemeId);
   };
 
-  // Lógica de Auto-Advance (4 segundos)
-  useEffect(() => {
-    if (isDragging) return;
-    
-    const timer = setInterval(() => {
-      nextStep();
-    }, 4000);
-
-    return () => clearInterval(timer);
-  }, [currentIndex, isDragging]);
-
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDragging(true);
     const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
@@ -153,7 +142,6 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                 const total = THEME_OPTIONS.length;
                 let offset = i - currentIndex;
                 
-                // Lógica de Loop: calcula o caminho mais curto
                 if (offset > total / 2) offset -= total;
                 if (offset < -total / 2) offset += total;
 
@@ -215,12 +203,6 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
 
                     <div className="absolute top-0 inset-x-0 h-[3px] z-20" style={{ background: getGradient(theme.id) }} />
                     
-                    {isActive && (
-                      <div className="absolute top-[3px] inset-x-0 h-[2px] bg-white/10 z-20">
-                        <div className="h-full bg-white/60 animate-progress" />
-                      </div>
-                    )}
-
                     <div className="absolute bottom-4 left-3 right-3 flex items-end justify-between z-20">
                       <span 
                         className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-white text-[10px] font-black uppercase tracking-wider" 
@@ -312,13 +294,6 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
         }
         .dragging .card-transition {
           transition: none !important;
-        }
-        @keyframes carousel-progress {
-          from { width: 0%; }
-          to { width: 100%; }
-        }
-        .animate-progress {
-          animation: carousel-progress 4s linear infinite;
         }
       `}</style>
     </div>
