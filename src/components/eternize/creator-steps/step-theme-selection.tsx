@@ -1,12 +1,11 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import NextImage from 'next/image';
 import { ChevronLeft, ChevronRight, Play, X } from 'lucide-react';
 import { THEME_OPTIONS, ThemeId } from '@/app/criador/constants';
 import { cn } from '@/lib/utils';
-import { motion, PanInfo } from 'framer-motion';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 
 interface StepThemeSelectionProps {
@@ -20,27 +19,82 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
     const idx = THEME_OPTIONS.findIndex(t => t.id === selectedTheme);
     return idx >= 0 ? idx : 0;
   });
+  
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const nextStep = () => {
-    const nextIdx = (currentIndex + 1) % THEME_OPTIONS.length;
-    setCurrentIndex(nextIdx);
-    onThemeSelect(THEME_OPTIONS[nextIdx].id as ThemeId);
+    if (currentIndex < THEME_OPTIONS.length - 1) {
+      const nextIdx = currentIndex + 1;
+      setCurrentIndex(nextIdx);
+      onThemeSelect(THEME_OPTIONS[nextIdx].id as ThemeId);
+    }
   };
 
   const prevStep = () => {
-    const prevIdx = (currentIndex - 1 + THEME_OPTIONS.length) % THEME_OPTIONS.length;
-    setCurrentIndex(prevIdx);
-    onThemeSelect(THEME_OPTIONS[prevIdx].id as ThemeId);
-  };
-
-  const handleDragEnd = (e: any, info: PanInfo) => {
-    const threshold = 50;
-    if (info.offset.x > threshold) {
-      prevStep();
-    } else if (info.offset.x < -threshold) {
-      nextStep();
+    if (currentIndex > 0) {
+      const prevIdx = currentIndex - 1;
+      setCurrentIndex(prevIdx);
+      onThemeSelect(THEME_OPTIONS[prevIdx].id as ThemeId);
     }
   };
+
+  const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDragging(true);
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    setStartX(clientX);
+  };
+
+  const handleMove = (e: MouseEvent | TouchEvent) => {
+    if (!isDragging) return;
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    let offset = clientX - startX;
+
+    if ((currentIndex === 0 && offset > 0) || (currentIndex === THEME_OPTIONS.length - 1 && offset < 0)) {
+      offset /= 3;
+    }
+
+    setDragOffset(offset);
+  };
+
+  const handleEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    if (dragOffset < -100 && currentIndex < THEME_OPTIONS.length - 1) {
+      const nextIdx = currentIndex + 1;
+      setCurrentIndex(nextIdx);
+      onThemeSelect(THEME_OPTIONS[nextIdx].id as ThemeId);
+    } else if (dragOffset > 100 && currentIndex > 0) {
+      const prevIdx = currentIndex - 1;
+      setCurrentIndex(prevIdx);
+      onThemeSelect(THEME_OPTIONS[prevIdx].id as ThemeId);
+    }
+
+    setDragOffset(0);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('mouseup', handleEnd);
+      window.addEventListener('touchmove', handleMove);
+      window.addEventListener('touchend', handleEnd);
+    } else {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleEnd);
+      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('touchend', handleEnd);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleEnd);
+      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('touchend', handleEnd);
+    };
+  }, [isDragging, dragOffset]);
 
   const currentTheme = THEME_OPTIONS[currentIndex];
 
@@ -63,9 +117,8 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
   };
 
   return (
-    <div className="relative z-10 container mx-auto px-4 h-[100dvh] flex flex-col items-center justify-between overflow-hidden py-14 md:py-24">
+    <div className={cn("relative z-10 container mx-auto px-4 h-[100dvh] flex flex-col items-center justify-between overflow-hidden py-14 md:py-24", isDragging && "dragging")} ref={containerRef}>
       
-      {/* Header Compacto */}
       <div className="w-full max-w-4xl flex flex-col shrink-0 mt-4 md:mt-0 relative z-50">
         <div className="space-y-1 text-center">
           <h2 className="text-xl md:text-4xl font-black tracking-tight uppercase italic italic-shadow">Qual tema você quer usar?</h2>
@@ -74,7 +127,6 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
       </div>
 
       <div className="relative w-full flex flex-col items-center flex-1 justify-center my-6">
-        {/* Dynamic Background Glow */}
         <div 
           className="absolute w-[400px] md:w-[600px] h-[400px] md:h-[600px] rounded-full blur-[100px] md:blur-[150px] -z-10 transition-all duration-700 pointer-events-none" 
           style={{ background: `radial-gradient(${getGlowColor(currentTheme.id)} 0%, transparent 70%)` }}
@@ -83,63 +135,60 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
         <div className="relative flex items-center gap-3 w-full max-w-[520px]">
           <button 
             onClick={prevStep} 
-            className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90"
+            disabled={currentIndex === 0}
+            className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90 disabled:opacity-30"
           >
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
 
-          <div className="relative flex-1 h-[480px] flex items-center justify-center overflow-visible">
+          <div 
+            className="relative flex-1 h-[480px] overflow-hidden rounded-2xl cursor-grab active:cursor-grabbing"
+            onMouseDown={handleStart}
+            onTouchStart={handleStart}
+          >
             <div className="relative w-full h-full flex items-center justify-center">
               {THEME_OPTIONS.map((theme, i) => {
                 const offset = i - currentIndex;
                 const isActive = i === currentIndex;
                 
-                let displayOffset = offset;
-                if (currentIndex === 0 && i === THEME_OPTIONS.length - 1) displayOffset = -1;
-                if (currentIndex === THEME_OPTIONS.length - 1 && i === 0) displayOffset = 1;
-
-                const opacity = isActive ? 1 : (Math.abs(displayOffset) === 1 ? 0.45 : 0);
-                const scale = isActive ? 1 : 0.74;
-                const translateX = displayOffset * 255;
+                const translateX = (offset * 255) + dragOffset;
+                const distanceFromCenter = Math.abs(translateX) / 255;
+                
+                let opacity = Math.max(0, 1 - (distanceFromCenter * 0.55));
+                if (isActive) opacity = 1 - (distanceFromCenter * 0.5);
+                
+                const scale = Math.max(0.74, 1 - (distanceFromCenter * 0.26));
                 const zIndex = isActive ? 10 : 5;
-                const blur = isActive ? "none" : "blur(1.5px)";
+                const blur = distanceFromCenter < 0.1 ? "none" : "blur(1.5px)";
                 const shadow = isActive ? `0 32px 80px -8px ${getGlowColor(theme.id)}` : "none";
                 const videoId = (theme as any).videoUrl;
 
                 return (
-                  <motion.div
+                  <div
                     key={theme.id}
-                    initial={false}
-                    drag={isActive ? "x" : false}
-                    dragConstraints={{ left: 0, right: 0 }}
-                    onDragEnd={handleDragEnd}
-                    onClick={() => { 
-                      if(!isActive) {
-                        setCurrentIndex(i);
-                        onThemeSelect(theme.id as ThemeId);
-                      }
-                    }}
                     className={cn(
-                      "absolute rounded-[24px] overflow-hidden transition-all duration-700",
-                      (isActive || Math.abs(displayOffset) === 1) ? "pointer-events-auto cursor-pointer" : "pointer-events-none"
+                      "absolute rounded-[24px] overflow-hidden select-none pointer-events-none transition-all duration-500",
+                      !isDragging && "card-transition",
+                      isActive && "pointer-events-auto"
                     )}
                     style={{
                       width: "255px",
                       height: "453px",
                       zIndex,
+                      opacity,
+                      filter: blur,
                       boxShadow: shadow,
                       left: "50%",
                       top: "50%",
-                      touchAction: "none"
+                      transform: `translateX(calc(-50% + ${translateX}px)) translateY(-50%) scale(${scale})`,
+                      WebkitUserDrag: 'none'
                     }}
-                    animate={{
-                      x: `calc(-50% + ${translateX}px)`,
-                      y: "-50%",
-                      scale,
-                      opacity,
-                      filter: blur
+                    onClick={() => { 
+                      if(!isActive && !isDragging) {
+                        setCurrentIndex(i);
+                        onThemeSelect(theme.id as ThemeId);
+                      }
                     }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   >
                     <div className="absolute inset-0 bg-neutral-900 z-0">
                       {videoId ? (
@@ -148,13 +197,12 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.25] border-none"
                             src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0`}
                             allow="autoplay; encrypted-media"
-                            tabIndex={-1}
                           />
                         </div>
                       ) : (
                         <NextImage src={theme.image} fill className="object-cover" alt={theme.name} priority />
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent z-10" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent z-10" />
                     </div>
 
                     <div className="absolute top-0 inset-x-0 h-[3px] z-20" style={{ background: getGradient(theme.id) }} />
@@ -176,7 +224,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                       {isActive && (
                         <Dialog>
                           <DialogTrigger asChild>
-                            <button className="w-10 h-10 rounded-full flex items-center justify-center bg-white/15 backdrop-blur-sm border border-white/20">
+                            <button className="w-10 h-10 rounded-full flex items-center justify-center bg-white/15 backdrop-blur-sm border border-white/20 pointer-events-auto">
                               <Play className="w-4 h-4 text-white fill-white" />
                             </button>
                           </DialogTrigger>
@@ -199,7 +247,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                         </Dialog>
                       )}
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -207,13 +255,13 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
 
           <button 
             onClick={nextStep} 
-            className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90"
+            disabled={currentIndex === THEME_OPTIONS.length - 1}
+            className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90 disabled:opacity-30"
           >
             <ChevronRight className="w-5 h-5 text-white" />
           </button>
         </div>
 
-        {/* Progress Dots */}
         <div className="flex items-center gap-2 mt-8">
           {THEME_OPTIONS.map((_, i) => (
             <button
@@ -233,7 +281,6 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
         </div>
       </div>
 
-      {/* Footer Button */}
       <div className="flex flex-col items-center gap-6 w-full max-w-[320px] shrink-0 z-20 mb-4 md:mb-0">
         <div className="text-center">
           <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">
@@ -253,6 +300,12 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
       </div>
 
       <style jsx global>{`
+        .card-transition {
+          transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .dragging .card-transition {
+          transition: none !important;
+        }
         @keyframes carousel-progress {
           from { width: 0%; }
           to { width: 100%; }
