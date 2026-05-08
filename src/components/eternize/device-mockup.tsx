@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { Lock, X, Play, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -143,6 +143,7 @@ export function DeviceMockup({
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('grid');
   const [hasStarted, setHasStarted] = useState(false);
+  const audioInitialized = useRef(false);
 
   // Sincroniza a abertura do módulo com o comando externo (editor)
   useEffect(() => {
@@ -174,7 +175,8 @@ export function DeviceMockup({
 
   // Sync isAudioPlaying with isAutoPlay prop but ONLY after user interaction
   useEffect(() => { 
-    if (hasStarted && isAutoPlay) {
+    if (hasStarted && isAutoPlay && !audioInitialized.current) {
+      audioInitialized.current = true;
       setIsAudioPlaying(true);
     }
   }, [isAutoPlay, hasStarted]);
@@ -281,7 +283,6 @@ export function DeviceMockup({
   }, []);
 
   const handleStartNetflixExperience = useCallback(() => {
-    // SÓ ATIVA SE O TEMA FOR NETFLIX
     if (selectedTheme !== 'netflix') {
       setShowStories(true);
       setCurrentStoryIndex(0);
@@ -292,12 +293,10 @@ export function DeviceMockup({
     setIsIntroActive(true);
     setIntroPhase('closing');
     
-    // Logo aparece após o fechamento das barras
     setTimeout(() => {
       setIntroPhase('logo');
     }, 1600);
 
-    // Inicia os stories após a animação completa
     setTimeout(() => {
       setIsIntroActive(false);
       setIntroPhase('idle');
@@ -310,7 +309,6 @@ export function DeviceMockup({
   // Handler de scroll aprimorado para o Spotify
   const handleSpotifyScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const scrollTop = e.currentTarget.scrollTop;
-    // Fading começa aos 20px e termina nos 120px
     const opacity = Math.min(1, Math.max(0, (scrollTop - 20) / 100));
     setSpotifyHeaderOpacity(opacity);
   }, []);
@@ -357,7 +355,7 @@ export function DeviceMockup({
         <MusicPlayer musicData={musicData} isAutoPlay={isAudioPlaying} hideUI={true} onStateChange={setIsAudioPlaying} />
       )}
 
-      {/* Intro Animation Layer (Eternize Effect) - SÓ RENDERIZA SE FOR TEMA NETFLIX */}
+      {/* Intro Animation Layer (Eternize Effect) */}
       {selectedTheme === 'netflix' && isIntroActive && (
         <div className="absolute inset-0 z-[1000] bg-black flex items-center justify-center overflow-hidden">
            <div className={cn("curtain-container", (introPhase === 'closing' || introPhase === 'logo') && "curtain-active")}>
@@ -441,7 +439,7 @@ export function DeviceMockup({
             </div>
           </div>
 
-          {/* Player de Música Fixo para todos os temas (Unificado) */}
+          {/* Player de Música Fixo para todos os temas */}
           {musicData && (
             <div className="absolute bottom-6 left-4 right-4 z-[100] animate-in slide-in-from-bottom-4 duration-500">
                <MusicPlayer 
@@ -456,7 +454,7 @@ export function DeviceMockup({
             </div>
           )}
 
-          {/* Module Overlay (Interno ao Mockup) */}
+          {/* Module Overlay */}
           {previewModuleId && (
             <div className="absolute inset-0 z-[500] bg-black flex flex-col animate-in slide-in-from-bottom-4 duration-500 overflow-hidden">
                <div className="relative h-full flex flex-col">

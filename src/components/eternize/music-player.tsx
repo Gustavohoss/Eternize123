@@ -49,6 +49,7 @@ export function MusicPlayer({
   const playerRef = useRef<any>(null);
   const containerId = useRef(`yt-player-${Math.random().toString(36).substring(2, 11)}`);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastStateIntent = useRef<boolean>(isAutoPlay);
 
   // Initialize YouTube API and Player
   useEffect(() => {
@@ -103,14 +104,26 @@ export function MusicPlayer({
               }
             },
             onStateChange: (event: any) => {
-              const playing = event.data === window.YT.PlayerState.PLAYING;
-              setIsPlaying(playing);
+              const state = event.data;
+              const playing = state === window.YT.PlayerState.PLAYING;
+              
+              // Só atualizamos o isPlaying se estiver realmente tocando ou pausado (não buffering)
+              if (state === window.YT.PlayerState.PLAYING || state === window.YT.PlayerState.PAUSED) {
+                setIsPlaying(playing);
+                
+                // IMPORTANTE: Evita loop de feedback. Só notifica o pai se o estado mudar
+                // e não for um estado de transição (como buffering)
+                if (playing !== lastStateIntent.current) {
+                  lastStateIntent.current = playing;
+                  if (onStateChange) onStateChange(playing);
+                }
+              }
+
               if (playing) {
                 startTimer();
               } else {
                 stopTimer();
               }
-              if (onStateChange) onStateChange(playing);
             }
           }
         });
@@ -130,16 +143,21 @@ export function MusicPlayer({
     };
   }, [musicData?.id]);
 
-  // Handle prop changes for Play/Pause
+  // Handle prop changes for Play/Pause - COM PROTEÇÃO DE ESTADO
   useEffect(() => {
     if (!playerRef.current || !isReady) return;
+    
+    // Se o desejo do pai é o mesmo do que já estamos fazendo, não fazemos nada
+    if (isAutoPlay === lastStateIntent.current) return;
+
+    lastStateIntent.current = isAutoPlay;
 
     if (musicData?.id) {
       if (isAutoPlay && !isMutedByParam) {
         playerRef.current.unMute();
         playerRef.current.setVolume(100);
         playerRef.current.playVideo();
-      } else if (!isAutoPlay) {
+      } else {
         playerRef.current.pauseVideo();
       }
     }
@@ -164,16 +182,22 @@ export function MusicPlayer({
     
     if (!playerRef.current || !isReady) return;
     
-    // Forçar unmute e volume em qualquer interação manual para garantir áudio
+    // Forçar unmute e volume em qualquer interação manual
     if (typeof playerRef.current.unMute === 'function') playerRef.current.unMute();
     if (typeof playerRef.current.setVolume === 'function') playerRef.current.setVolume(100);
 
-    // Usar o estado do React para alternar, o que é mais responsivo que consultar o player
-    if (isPlaying) {
-      playerRef.current.pauseVideo();
-    } else {
+    const newState = !isPlaying;
+    lastStateIntent.current = newState;
+    
+    if (newState) {
       playerRef.current.playVideo();
+    } else {
+      playerRef.current.pauseVideo();
     }
+    
+    // Atualiza interface imediatamente
+    setIsPlaying(newState);
+    if (onStateChange) onStateChange(newState);
   };
 
   const seek = (e: React.MouseEvent<HTMLDivElement>) => {
