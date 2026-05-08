@@ -89,7 +89,7 @@ export function MusicPlayer({
             rel: 0,
             enablejsapi: 1,
             origin: typeof window !== 'undefined' ? window.location.origin : '',
-            mute: isAutoPlay ? 1 : 0 // Start muted if autoplay to bypass policy, then unmute on interaction
+            mute: isAutoPlay ? 1 : 0 
           },
           events: {
             onReady: (event: any) => {
@@ -97,7 +97,6 @@ export function MusicPlayer({
               setDuration(event.target.getDuration());
               
               if (isAutoPlay && !isMutedByParam) {
-                // Tenta forçar o play e tirar o mudo
                 event.target.unMute();
                 event.target.setVolume(100);
                 event.target.playVideo();
@@ -129,7 +128,7 @@ export function MusicPlayer({
         playerRef.current = null;
       }
     };
-  }, [musicData?.id]); // Re-init if ID changes
+  }, [musicData?.id]);
 
   // Handle prop changes for Play/Pause
   useEffect(() => {
@@ -160,14 +159,17 @@ export function MusicPlayer({
   };
 
   const togglePlay = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
+    
     if (!playerRef.current || !isReady) return;
     
+    // Forçar unmute e volume em qualquer interação manual para garantir áudio
     if (typeof playerRef.current.unMute === 'function') playerRef.current.unMute();
     if (typeof playerRef.current.setVolume === 'function') playerRef.current.setVolume(100);
 
-    const state = playerRef.current.getPlayerState();
-    if (state === window.YT.PlayerState.PLAYING) {
+    // Usar o estado do React para alternar, o que é mais responsivo que consultar o player
+    if (isPlaying) {
       playerRef.current.pauseVideo();
     } else {
       playerRef.current.playVideo();
@@ -191,7 +193,7 @@ export function MusicPlayer({
     return `${min}:${sec < 10 ? '0' + sec : sec}`;
   };
 
-  const accentColor = '#7a1a1a';
+  const accentColor = '#e11d48';
   const neonShadow = musicHasNeon 
     ? `0 0 ${musicNeonStrength! / 2}px ${accentColor}, 0 0 ${musicNeonStrength}px ${accentColor}` 
     : 'none';
@@ -251,7 +253,7 @@ export function MusicPlayer({
         <div className="progress-container px-1" onClick={seek}>
           <div className="w-full h-[3px] bg-white/10 relative cursor-pointer rounded-full">
             <div 
-              className="absolute top-0 left-0 h-full bg-[#7a1a1a] transition-all duration-100 rounded-full" 
+              className="absolute top-0 left-0 h-full bg-primary transition-all duration-100 rounded-full" 
               style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}
             />
           </div>
@@ -266,7 +268,6 @@ export function MusicPlayer({
           <Volume2 size={18} className="opacity-50" style={{ color: musicTextColor }} />
           <button 
             type="button"
-            disabled={!isReady}
             className="w-[50px] h-[50px] bg-primary rounded-full flex items-center justify-center text-white active:scale-95 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.4)] border-none cursor-pointer disabled:opacity-50"
             onClick={togglePlay}
             style={{ boxShadow: neonShadow }}
