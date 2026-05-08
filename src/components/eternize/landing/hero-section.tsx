@@ -111,7 +111,7 @@ export function HeroSection() {
               <span className="w-full relative rounded-lg bg-black/20 backdrop-blur-sm px-8 py-6 md:px-14 md:py-8 transition-all duration-200 ease-in group-hover:bg-black/0 flex items-center h-16 justify-center">
                 <span className="flex items-center justify-center gap-3">
                   <Heart className="w-6 h-6 text-white fill-current" />
-                  <span className="tracking-wider font-bold text-xl uppercase italic">Quero criar agora! ❤️</span>
+                  <span className="tracking-wider font-bold text-xl uppercase italic">Quero criar agora!</span>
                   <ChevronRight className="w-5 h-5 ml-2" />
                 </span>
               </span>
