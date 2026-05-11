@@ -173,13 +173,16 @@ export function DeviceMockup({
   const [dynamicSpotifyColor, setDynamicSpotifyColor] = useState('#1a0a0a');
   const [spotifyHeaderOpacity, setSpotifyHeaderOpacity] = useState(0);
 
-  // Sync isAudioPlaying with isAutoPlay prop but ONLY after user interaction
-  useEffect(() => { 
-    if (hasStarted && isAutoPlay && !audioInitialized.current) {
-      audioInitialized.current = true;
+  // Lógica de Autoplay aprimorada: 
+  // No Criador (isFullscreen=false), segue o prop isAutoPlay diretamente pois já há interação.
+  // No Site Publicado (isFullscreen=true), espera o clique em "Abrir Presente".
+  useEffect(() => {
+    if (!isFullscreen) {
+      setIsAudioPlaying(isAutoPlay);
+    } else if (hasStarted && isAutoPlay) {
       setIsAudioPlaying(true);
     }
-  }, [isAutoPlay, hasStarted]);
+  }, [isAutoPlay, hasStarted, isFullscreen]);
 
   // Sync Active Tab based on theme
   useEffect(() => {
@@ -316,9 +319,6 @@ export function DeviceMockup({
   // Handler para iniciar a experiência e desbloquear áudio
   const handleStartExperience = () => {
     setHasStarted(true);
-    if (isAutoPlay) {
-      setIsAudioPlaying(true);
-    }
   };
 
   return (

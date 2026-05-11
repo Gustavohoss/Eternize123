@@ -78,6 +78,8 @@ export function MusicPlayer({
       if (!window.YT || !window.YT.Player || playerRef.current || !document.getElementById(containerId.current)) return;
 
       try {
+        const origin = typeof window !== 'undefined' ? window.location.origin : '';
+        
         playerRef.current = new window.YT.Player(containerId.current, {
           height: '1',
           width: '1',
@@ -89,7 +91,7 @@ export function MusicPlayer({
             fs: 0,
             rel: 0,
             enablejsapi: 1,
-            origin: typeof window !== 'undefined' ? window.location.origin : '',
+            origin: origin,
             mute: isAutoPlay ? 1 : 0 
           },
           events: {
@@ -98,6 +100,7 @@ export function MusicPlayer({
               setDuration(event.target.getDuration());
               
               if (isAutoPlay && !isMutedByParam) {
+                // Tentativa agressiva de iniciar após Ready
                 event.target.unMute();
                 event.target.setVolume(100);
                 event.target.playVideo();
@@ -107,12 +110,9 @@ export function MusicPlayer({
               const state = event.data;
               const playing = state === window.YT.PlayerState.PLAYING;
               
-              // Só atualizamos o isPlaying se estiver realmente tocando ou pausado (não buffering)
               if (state === window.YT.PlayerState.PLAYING || state === window.YT.PlayerState.PAUSED) {
                 setIsPlaying(playing);
                 
-                // IMPORTANTE: Evita loop de feedback. Só notifica o pai se o estado mudar
-                // e não for um estado de transição (como buffering)
                 if (playing !== lastStateIntent.current) {
                   lastStateIntent.current = playing;
                   if (onStateChange) onStateChange(playing);
@@ -143,24 +143,20 @@ export function MusicPlayer({
     };
   }, [musicData?.id]);
 
-  // Handle prop changes for Play/Pause - COM PROTEÇÃO DE ESTADO
+  // Sincronização de comando externo: Força Play/Pause e Unmute
   useEffect(() => {
     if (!playerRef.current || !isReady) return;
     
-    // Se o desejo do pai é o mesmo do que já estamos fazendo, não fazemos nada
-    if (isAutoPlay === lastStateIntent.current) return;
-
-    lastStateIntent.current = isAutoPlay;
-
-    if (musicData?.id) {
-      if (isAutoPlay && !isMutedByParam) {
-        playerRef.current.unMute();
-        playerRef.current.setVolume(100);
-        playerRef.current.playVideo();
-      } else {
-        playerRef.current.pauseVideo();
-      }
+    // Forçar unMute sempre que isAutoPlay for verdadeiro
+    if (isAutoPlay && !isMutedByParam) {
+      playerRef.current.unMute();
+      playerRef.current.setVolume(100);
+      playerRef.current.playVideo();
+    } else if (!isAutoPlay) {
+      playerRef.current.pauseVideo();
     }
+    
+    lastStateIntent.current = isAutoPlay;
   }, [isAutoPlay, isReady, isMutedByParam]);
 
   const startTimer = () => {
@@ -182,7 +178,6 @@ export function MusicPlayer({
     
     if (!playerRef.current || !isReady) return;
     
-    // Forçar unmute e volume em qualquer interação manual
     if (typeof playerRef.current.unMute === 'function') playerRef.current.unMute();
     if (typeof playerRef.current.setVolume === 'function') playerRef.current.setVolume(100);
 
@@ -195,7 +190,6 @@ export function MusicPlayer({
       playerRef.current.pauseVideo();
     }
     
-    // Atualiza interface imediatamente
     setIsPlaying(newState);
     if (onStateChange) onStateChange(newState);
   };
