@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Pencil, Maximize2, X, Loader2, CheckCircle2, Copy, ExternalLink, Heart } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, Maximize2, X, Loader2, CheckCircle2, Copy, ExternalLink, Heart, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DeviceMockup } from '@/components/eternize/device-mockup';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
@@ -12,7 +12,7 @@ import { Step, MOCK_CITIES, ThemeId } from './constants';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useFirestore, useAuth, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { signInAnonymously, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInAnonymously } from 'firebase/auth';
 
 // Step Components
 import { StepThemeSelection } from '@/components/eternize/creator-steps/step-theme-selection';
@@ -128,8 +128,11 @@ export default function CriadorApp() {
 
   useEffect(() => { setMounted(true); }, []);
 
+  // Garante scroll para o topo sempre que o passo mudar
   useEffect(() => {
-    if (mounted) window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (mounted) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }, [step, mounted]);
 
   const stepSequence = useMemo((): Step[] => {
@@ -140,6 +143,27 @@ export default function CriadorApp() {
     return [...base, 'customize-background', 'photos', 'page-title', 'message', 'data-location', 'music', 'plans', 'order-bump', 'subdomain-config'];
   }, [selectedTheme]);
 
+  // Lógica de validação por etapa
+  const isStepValid = useMemo(() => {
+    switch (step) {
+      case 'theme-selection': return !!selectedTheme;
+      case 'gift-type': return !!selectedGiftType;
+      case 'customize-background': return true; // Visual é opcional/padrão
+      case 'photos': return uploadedPhotos.length > 0;
+      case 'page-title': return pageTitle.trim().length >= 2;
+      case 'message': 
+        // Limpa HTML para verificar se há texto real
+        const plainText = message.replace(/<[^>]*>/g, '').trim();
+        return plainText.length >= 3;
+      case 'music': return !!musicData;
+      case 'data-location': return !!date;
+      case 'plans': return !!selectedPlan;
+      case 'order-bump': return true;
+      case 'subdomain-config': return true; // Validação interna no componente
+      default: return true;
+    }
+  }, [step, selectedTheme, selectedGiftType, uploadedPhotos, pageTitle, message, musicData, date, selectedPlan]);
+
   const currentStepIndex = stepSequence.indexOf(step);
 
   const handleBack = () => {
@@ -148,19 +172,19 @@ export default function CriadorApp() {
   };
 
   const handleNext = () => {
-    if (currentStepIndex < stepSequence.length - 1) {
+    if (isStepValid && currentStepIndex < stepSequence.length - 1) {
       setStep(stepSequence[currentStepIndex + 1]);
     }
   };
 
-  const handleFinalize = async (finalSlug: string, isTest = false) => {
+  const handleFinalize = async (finalSlug: string) => {
     if (!firestore || !auth) return;
     setIsSaving(true);
 
     try {
       let currentUserId: string | null = null;
-
       let currentUser = auth.currentUser;
+      
       if (!currentUser) {
         const credential = await signInAnonymously(auth);
         currentUser = credential.user;
@@ -181,16 +205,13 @@ export default function CriadorApp() {
       };
 
       const jsonContent = JSON.stringify(contentData);
-      if (jsonContent.length > 1000000) {
-        throw new Error("O conteúdo da página está muito grande. Tente remover algumas fotos.");
-      }
-
       const publishedRef = doc(firestore, 'published_sites', finalSlug);
+      
       const docData = {
         id: finalSlug,
         userId: currentUserId,
         name: pageTitle || 'Meu Presente',
-        status: isTest ? 'published' : 'pending',
+        status: 'pending',
         subdomainName: finalSlug,
         pageUrl: `https://eternizee.shop/site/${finalSlug}`,
         contentJson: jsonContent,
@@ -201,15 +222,11 @@ export default function CriadorApp() {
 
       await setDoc(publishedRef, docData);
 
-      if (isTest) {
-        window.location.href = `/site/${finalSlug}`;
-      } else {
-        // Lógica de seleção de URL baseada no plano e pack
-        const urls = CHECKOUT_URLS[selectedPlan];
-        const baseUrl = isPackEnabled ? urls.withPack : urls.standard;
-        const checkoutUrlWithMetadata = `${baseUrl}?src=${finalSlug}`;
-        window.location.href = checkoutUrlWithMetadata;
-      }
+      // Redirecionamento baseado no plano e pack
+      const urls = CHECKOUT_URLS[selectedPlan];
+      const baseUrl = isPackEnabled ? urls.withPack : urls.standard;
+      const checkoutUrlWithMetadata = `${baseUrl}?src=${finalSlug}`;
+      window.location.href = checkoutUrlWithMetadata;
 
     } catch (error: any) {
       console.error("Erro ao salvar projeto:", error);
@@ -309,7 +326,7 @@ export default function CriadorApp() {
               {step === 'message' && <StepMessage {...{selectedTheme, message, onMessageChange: setMessage, messageFont, onMessageFontChange: setMessageFont, messageColor, onMessageColorChange: (c) => { setMessageColor(c); setUserHasManuallyChangedMessageColor(true); }, onBack: handleBack, onNext: handleNext}} />}
               {step === 'music' && <StepMusic {...{selectedTheme, musicData, onMusicSelect: setMusicData, musicBoxColor, onMusicBoxColorChange: setMusicBoxColor, musicTextColor, onMusicTextColorChange: setMusicTextColor, musicHasNeon, onMusicHasNeonChange: setMusicHasNeon, musicNeonStrength, onMusicNeonStrengthChange: setMusicNeonStrength, isAutoPlay: isMusicAutoPlay, onAutoPlayChange: setIsMusicAutoPlay, onBack: handleBack, onNext: handleNext}} />}
               {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: setLocationQuery, showSuggestions, onShowSuggestionsChange: setShowSuggestions, filteredCities, selectedCountStyle, onCountStyleChange: setSelectedCountStyle, dateFont, onDateFontChange: setDateFont, dateIsBold, onDateIsBoldChange: setDateIsBold, dateHasNeon, onDateHasNeonChange: setDateHasNeon, dateNeonStrength, onDateNeonStrengthChange: setDateNeonStrength, dateColor, onDateColorChange: (c) => { setDateColor(c); setUserHasManuallyChangedDateColor(true); }, dateBoxBgColor, onDateBoxBgColorChange: setDateBoxBgColor, dateBoxBorderColor, onDateBoxBorderColorChange: setDateBoxBorderColor, onBack: handleBack, onNext: handleNext}} />}
-              {step === 'plans' && <StepPlans selectedPlan={selectedPlan} onPlanChange={setSelectedPlan} onBack={handleBack} onFinish={handleNext} />}
+              {step === 'plans' && <StepPlans selectedPlan={selectedPlan} onPlanChange={setSelectedPlan} onBack: handleBack, onFinish={handleNext} />}
               {step === 'order-bump' && <StepOrderBump onBack={handleBack} onFinish={handleNext} date={date} isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} />}
               {step === 'subdomain-config' && <StepSubdomainConfig onBack={handleBack} onFinish={handleFinalize} initialValue={pageTitle} />}
 
@@ -330,9 +347,24 @@ export default function CriadorApp() {
 
               {step !== 'plans' && step !== 'order-bump' && step !== 'subdomain-config' && (
                 <div className="mt-12 flex flex-col gap-6 max-w-md mx-auto md:mx-0">
-                  <div className="flex flex-col gap-4 pt-10 border-t border-white/5">
+                  {!isStepValid && (
+                    <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                      <AlertCircle className="w-4 h-4 text-primary shrink-0" />
+                      <p className="text-[11px] font-bold text-primary uppercase tracking-tight">Complete os campos obrigatórios para prosseguir.</p>
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-4 pt-6 border-t border-white/5">
                     <Button onClick={handleBack} variant="outline" className="w-full h-14 rounded-2xl border-white/10 bg-white/5 font-black text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2"><ChevronLeft className="w-4 h-4" /> Voltar etapa</Button>
-                    <Button onClick={handleNext} className="w-full h-14 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 bg-primary text-white hover:bg-primary/90 shadow-2xl shadow-primary/20">Próxima etapa <ChevronRight className="w-4 h-4" /></Button>
+                    <Button 
+                      onClick={handleNext} 
+                      disabled={!isStepValid}
+                      className={cn(
+                        "w-full h-14 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 shadow-2xl",
+                        isStepValid ? "bg-primary text-white hover:bg-primary/90 shadow-primary/20" : "bg-white/5 text-white/20 cursor-not-allowed border border-white/5"
+                      )}
+                    >
+                      Próxima etapa <ChevronRight className="w-4 h-4" />
+                    </Button>
                   </div>
                   <div className="flex justify-center md:justify-start"><p className="text-[11px] font-medium text-white/30 italic flex items-center gap-2"><Pencil className="w-3 h-3" /> Você poderá editar isso após a compra</p></div>
                 </div>
@@ -370,3 +402,4 @@ export default function CriadorApp() {
     </div>
   );
 }
+
