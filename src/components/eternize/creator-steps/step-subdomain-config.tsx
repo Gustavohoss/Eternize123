@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Link2, ChevronLeft, ChevronRight, Lock, Info, CheckCircle2, TestTube2 } from 'lucide-react';
+import { Link2, ChevronLeft, Lock, Info, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -105,23 +105,13 @@ export function StepSubdomainConfig({ onBack, onFinish, initialValue }: StepSubd
         >
           <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> Voltar
         </Button>
-        <div className="flex flex-col gap-3">
-          <Button 
-            onClick={() => onFinish(finalSlug)}
-            disabled={!isFormValid}
-            className="h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-sm transition-all flex items-center justify-center gap-3 shadow-2xl active:scale-95 group disabled:opacity-50 disabled:grayscale"
-          >
-            Ir para Pagamento <CheckCircle2 className="w-4 h-4 transition-transform group-hover:scale-110" />
-          </Button>
-          <Button 
-            onClick={() => onFinish(finalSlug, true)}
-            disabled={!isFormValid}
-            variant="outline"
-            className="h-10 rounded-xl border-white/10 bg-white/5 text-white/40 font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white disabled:opacity-30"
-          >
-            <TestTube2 className="w-3.5 h-3.5" /> Simular Teste (Liberar Agora)
-          </Button>
-        </div>
+        <Button 
+          onClick={() => onFinish(finalSlug)}
+          disabled={!isFormValid}
+          className="h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-sm transition-all flex items-center justify-center gap-3 shadow-2xl active:scale-95 group disabled:opacity-50 disabled:grayscale"
+        >
+          Ir para Pagamento <CheckCircle2 className="w-4 h-4 transition-transform group-hover:scale-110" />
+        </Button>
       </div>
     </div>
   );
