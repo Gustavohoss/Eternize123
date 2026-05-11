@@ -1,8 +1,8 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { X, MapPin } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, MapPin, LocateFixed } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
@@ -56,17 +56,21 @@ const DEFAULT_POINTS: JourneyPoint[] = [
   }
 ];
 
-// Componente para controlar o vôo do mapa até o ponto selecionado
-function MapController({ center }: { center: [number, number] }) {
+// Componente para controlar o vôo do mapa de forma inteligente
+function MapController({ center, lastPointId }: { center: [number, number], lastPointId?: string }) {
   const map = useMap();
+  const prevIdRef = useRef<string | undefined>(undefined);
   
   useEffect(() => {
-    if (center && map) {
+    // Só dispara o flyTo se o ID do último ponto mudou (novo ponto ou troca de foco inicial)
+    // Isso evita o bug de "snap back" quando o usuário tenta navegar manualmente
+    if (center && map && lastPointId !== prevIdRef.current) {
       map.flyTo(center, 12, {
         duration: 2
       });
+      prevIdRef.current = lastPointId;
     }
-  }, [center, map]);
+  }, [center, map, lastPointId]);
   
   return null;
 }
@@ -74,6 +78,7 @@ function MapController({ center }: { center: [number, number] }) {
 export function JourneyModulePreview({ points }: JourneyModulePreviewProps) {
   const [selectedPoint, setSelectedPoint] = useState<JourneyPoint | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const mapInstanceRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -82,6 +87,12 @@ export function JourneyModulePreview({ points }: JourneyModulePreviewProps) {
   const displayPoints = points && points.length > 0 ? points : DEFAULT_POINTS;
   const lastPoint = displayPoints[displayPoints.length - 1];
   const centerCoords: [number, number] = lastPoint ? [lastPoint.lat, lastPoint.lng] : [-15.78, -47.92];
+
+  const handleRecenter = () => {
+    if (mapInstanceRef.current && centerCoords) {
+      mapInstanceRef.current.flyTo(centerCoords, 12, { duration: 1.5 });
+    }
+  };
 
   if (!isClient) return (
     <div className="w-full h-full bg-[#0d1117] flex items-center justify-center">
@@ -162,10 +173,11 @@ export function JourneyModulePreview({ points }: JourneyModulePreviewProps) {
         style={{ width: '100%', height: '100%' }}
         zoomControl={false}
         attributionControl={false}
+        ref={(map) => { if (map) mapInstanceRef.current = map; }}
       >
         <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
         
-        <MapController center={centerCoords} />
+        <MapController center={centerCoords} lastPointId={lastPoint?.id} />
 
         {displayPoints.map((point) => (
           <Marker 
@@ -189,11 +201,23 @@ export function JourneyModulePreview({ points }: JourneyModulePreviewProps) {
         )}
       </MapContainer>
 
-      {/* Badge de Lugares */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-2 px-5 py-2.5 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-xs shadow-2xl">
-        <span className="text-emerald-400 animate-pulse">●</span>
-        <span className="font-bold text-white">{displayPoints.length} lugares</span>
-        <span className="text-white/40">· toque para explorar</span>
+      {/* Botões de Ação Inferiores */}
+      <div className="absolute bottom-8 left-0 right-0 z-[1000] flex flex-col items-center gap-4 px-4 pointer-events-none">
+        <div className="flex items-center gap-2 pointer-events-auto">
+           <button 
+             onClick={handleRecenter}
+             className="bg-black/60 backdrop-blur-md border border-white/10 p-3 rounded-full text-white hover:bg-black/80 active:scale-90 transition-all shadow-2xl"
+             title="Recentralizar no último ponto"
+           >
+              <LocateFixed className="w-5 h-5 text-emerald-400" />
+           </button>
+           
+           <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-xs shadow-2xl">
+            <span className="text-emerald-400 animate-pulse">●</span>
+            <span className="font-bold text-white">{displayPoints.length} lugares</span>
+            <span className="text-white/40">· explore o mapa</span>
+          </div>
+        </div>
       </div>
 
       {/* Modal de Detalhes (Stories Style) */}
