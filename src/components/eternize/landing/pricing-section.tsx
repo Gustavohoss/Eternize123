@@ -124,25 +124,25 @@ export function PricingSection() {
             <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-primary/40 group-hover:bg-primary/5 transition-all">
               <ShieldCheck className="w-6 h-6 text-white/40 group-hover:text-primary" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/60">Pagamento seguro</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/60 text-center">Pagamento seguro</span>
           </div>
           <div className="flex flex-col items-center gap-4 group">
             <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-primary/40 group-hover:bg-primary/5 transition-all">
               <CreditCard className="w-6 h-6 text-white/40 group-hover:text-primary" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/60">Cartão ou Pix</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/60 text-center">Cartão ou Pix</span>
           </div>
           <div className="flex flex-col items-center gap-4 group">
             <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-primary/40 group-hover:bg-primary/5 transition-all">
               <Users className="w-6 h-6 text-white/40 group-hover:text-primary" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/60">+75.000 casais</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/60 text-center">+75.000 casais</span>
           </div>
           <div className="flex flex-col items-center gap-4 group">
             <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-primary/40 group-hover:bg-primary/5 transition-all">
               <Headphones className="w-6 h-6 text-white/40 group-hover:text-primary" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/60">Suporte 24 horas</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/60 text-center">Suporte 24 horas</span>
           </div>
         </div>
       </div>
