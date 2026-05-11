@@ -344,7 +344,7 @@ export function DeviceMockup({
                 onClick={handleStartExperience}
                 className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-3"
               >
-                Abrir Presente <Play className="w-4 h-4 fill-current" />
+                Dar o Play ❤️ <Play className="w-4 h-4 fill-current" />
               </Button>
            </div>
         </div>
