@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -35,7 +36,7 @@ const MODULES: ModuleItem[] = [
     description: 'Uma linha do tempo interativa dos momentos mais especiais do casal, com fotos e música por memória.',
     image: 'https://picsum.photos/seed/memories-module/600/800',
     color: '#e11d48',
-    videoUrl: '7vSyi2D3mHE'
+    videoUrl: '0rJ7Muz78eQ'
   },
   {
     id: 'conquistas',
@@ -43,7 +44,7 @@ const MODULES: ModuleItem[] = [
     description: 'Desbloqueie marcos exclusivos conforme o tempo passa. Mostre ao mundo o nível do amor de vocês.',
     image: 'https://picsum.photos/seed/achievements-module/600/800',
     color: '#f97316',
-    videoUrl: '2wqe8XKxhYg'
+    videoUrl: 'ecCOldZHSlc'
   },
   {
     id: 'curiosidades',
@@ -51,14 +52,15 @@ const MODULES: ModuleItem[] = [
     description: 'Descubra a fase da lua, a estação do ano e fatos astronômicos do dia em que vocês se conheceram.',
     image: 'https://picsum.photos/seed/curiosities-module/600/800',
     color: '#7c3aed',
-    videoUrl: 'je6KAaSi1jM'
+    videoUrl: 'D2ZOGUFp25I'
   },
   {
     id: 'jornada',
     title: 'Jornada no Mapa',
     description: 'Um rastro interativo no mapa mundi conectando os lugares onde vocês criaram as melhores lembranças.',
     image: 'https://picsum.photos/seed/journey-module/600/800',
-    color: '#10b981'
+    color: '#10b981',
+    videoUrl: 'JRAr-Txiyb0'
   },
   {
     id: 'roleta',
@@ -66,7 +68,7 @@ const MODULES: ModuleItem[] = [
     description: 'Um jogo interativo para sortear desafios, encontros e momentos divertidos para fazerem juntos.',
     image: 'https://picsum.photos/seed/roulette-module/600/800',
     color: '#f59e0b',
-    videoUrl: 'vcl1kjXuqR4'
+    videoUrl: 'l6tXdAXzkPI'
   }
 ];
 
