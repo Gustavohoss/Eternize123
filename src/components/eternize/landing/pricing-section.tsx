@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -36,7 +35,7 @@ export function PricingSection() {
 
             <div className="mb-8 pt-2 border-t border-white/5">
               <div className="flex items-baseline gap-1.5 pt-6">
-                <span className="text-4xl font-black">R$ 21,00</span>
+                <span className="text-4xl font-black">R$ 19,90</span>
                 <span className="text-white/20 text-[10px] font-bold uppercase tracking-widest">/por 1 semana</span>
               </div>
             </div>
@@ -84,7 +83,7 @@ export function PricingSection() {
 
             <div className="mb-8 pt-2 border-t border-white/5">
               <div className="flex items-baseline gap-1.5 pt-6">
-                <span className="text-4xl font-black text-white">R$ 29,77</span>
+                <span className="text-4xl font-black text-white">R$ 27,00</span>
                 <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest">/uma vez</span>
               </div>
             </div>

@@ -45,7 +45,7 @@ export function StepPlans({ onBack, onFinish }: StepPlansProps) {
 
           <div className="space-y-1">
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-white">R$ 21,00</span>
+              <span className="text-2xl font-black text-white">R$ 19,90</span>
             </div>
             <p className="text-[10px] font-bold text-white/20 uppercase tracking-wider">/por 1 semana</p>
           </div>
@@ -99,7 +99,7 @@ export function StepPlans({ onBack, onFinish }: StepPlansProps) {
 
           <div className="space-y-1">
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-white">R$ 29,77</span>
+              <span className="text-2xl font-black text-white">R$ 27,00</span>
             </div>
             <p className="text-[10px] font-bold text-white/20 uppercase tracking-wider">∞ /uma vez</p>
           </div>
