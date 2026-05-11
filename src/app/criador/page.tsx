@@ -27,9 +27,17 @@ import { StepPlans } from '@/components/eternize/creator-steps/step-plans';
 import { StepOrderBump } from '@/components/eternize/creator-steps/step-order-bump';
 import { StepSubdomainConfig } from '@/components/eternize/creator-steps/step-subdomain-config';
 
-// LINKS DO CHECKOUT NA PERFECTPAY (DOMÍNIO PERSONALIZADO / TRANSPARENTE)
-const PERFECTPAY_CHECKOUT_URL = "https://go.eternizeee.shop/PPU38CQBEQN";
-const PERFECTPAY_ORDERBUMP_URL = "https://go.eternizeee.shop/PPU38CQBF2L";
+// MAPEAMENTO DE LINKS DO CHECKOUT NA PERFECTPAY
+const CHECKOUT_URLS = {
+  '1w': {
+    standard: "https://go.eternizeee.shop/PPU38CQBEQN",
+    withPack: "https://go.eternizeee.shop/PPU38CQBQ8L"
+  },
+  'forever': {
+    standard: "https://go.eternizeee.shop/PPU38CQBF2L",
+    withPack: "https://go.eternizeee.shop/PPU38CQBQ8M"
+  }
+};
 
 const compressImage = (base64Str: string): Promise<string> => {
   return new Promise((resolve) => {
@@ -114,7 +122,8 @@ export default function CriadorApp() {
   const [locationQuery, setLocationQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   
-  // Pack de Módulos (Order Bump)
+  // Plano e Módulos
+  const [selectedPlan, setSelectedPlan] = useState<'forever' | '1w'>('forever');
   const [isPackEnabled, setIsPackEnabled] = useState<boolean>(false);
 
   useEffect(() => { setMounted(true); }, []);
@@ -168,7 +177,7 @@ export default function CriadorApp() {
         showCard, titlePosition, titleColor, titleFont, titleIsBold, titleHasNeon, titleNeonStrength,
         dateColor, dateFont, dateIsBold, dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor,
         messageColor, messageFont, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength,
-        isMusicAutoPlay, locationQuery, isPackEnabled
+        isMusicAutoPlay, locationQuery, isPackEnabled, selectedPlan
       };
 
       const jsonContent = JSON.stringify(contentData);
@@ -195,7 +204,9 @@ export default function CriadorApp() {
       if (isTest) {
         window.location.href = `/site/${finalSlug}`;
       } else {
-        const baseUrl = isPackEnabled ? PERFECTPAY_ORDERBUMP_URL : PERFECTPAY_CHECKOUT_URL;
+        // Lógica de seleção de URL baseada no plano e pack
+        const urls = CHECKOUT_URLS[selectedPlan];
+        const baseUrl = isPackEnabled ? urls.withPack : urls.standard;
         const checkoutUrlWithMetadata = `${baseUrl}?src=${finalSlug}`;
         window.location.href = checkoutUrlWithMetadata;
       }
@@ -298,7 +309,7 @@ export default function CriadorApp() {
               {step === 'message' && <StepMessage {...{selectedTheme, message, onMessageChange: setMessage, messageFont, onMessageFontChange: setMessageFont, messageColor, onMessageColorChange: (c) => { setMessageColor(c); setUserHasManuallyChangedMessageColor(true); }, onBack: handleBack, onNext: handleNext}} />}
               {step === 'music' && <StepMusic {...{selectedTheme, musicData, onMusicSelect: setMusicData, musicBoxColor, onMusicBoxColorChange: setMusicBoxColor, musicTextColor, onMusicTextColorChange: setMusicTextColor, musicHasNeon, onMusicHasNeonChange: setMusicHasNeon, musicNeonStrength, onMusicNeonStrengthChange: setMusicNeonStrength, isAutoPlay: isMusicAutoPlay, onAutoPlayChange: setIsMusicAutoPlay, onBack: handleBack, onNext: handleNext}} />}
               {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: setLocationQuery, showSuggestions, onShowSuggestionsChange: setShowSuggestions, filteredCities, selectedCountStyle, onCountStyleChange: setSelectedCountStyle, dateFont, onDateFontChange: setDateFont, dateIsBold, onDateIsBoldChange: setDateIsBold, dateHasNeon, onDateHasNeonChange: setDateHasNeon, dateNeonStrength, onDateNeonStrengthChange: setDateNeonStrength, dateColor, onDateColorChange: (c) => { setDateColor(c); setUserHasManuallyChangedDateColor(true); }, dateBoxBgColor, onDateBoxBgColorChange: setDateBoxBgColor, dateBoxBorderColor, onDateBoxBorderColorChange: setDateBoxBorderColor, onBack: handleBack, onNext: handleNext}} />}
-              {step === 'plans' && <StepPlans onBack={handleBack} onFinish={handleNext} />}
+              {step === 'plans' && <StepPlans selectedPlan={selectedPlan} onPlanChange={setSelectedPlan} onBack={handleBack} onFinish={handleNext} />}
               {step === 'order-bump' && <StepOrderBump onBack={handleBack} onFinish={handleNext} date={date} isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} />}
               {step === 'subdomain-config' && <StepSubdomainConfig onBack={handleBack} onFinish={handleFinalize} initialValue={pageTitle} />}
 

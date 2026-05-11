@@ -1,18 +1,19 @@
+
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Mail, Check, Crown, Lock, Infinity, Zap, HelpCircle, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface StepPlansProps {
+  selectedPlan: 'forever' | '1w';
+  onPlanChange: (plan: 'forever' | '1w') => void;
   onBack: () => void;
   onFinish: () => void;
 }
 
-export function StepPlans({ onBack, onFinish }: StepPlansProps) {
-  const [selectedPlan, setSelectedPlan] = useState<'forever' | '1w'>('forever');
-
+export function StepPlans({ selectedPlan, onPlanChange, onBack, onFinish }: StepPlansProps) {
   return (
     <div className="space-y-8 md:space-y-10 flex flex-col items-center md:items-start w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
@@ -32,7 +33,7 @@ export function StepPlans({ onBack, onFinish }: StepPlansProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
         {/* 1 Week Plan */}
         <div 
-          onClick={() => setSelectedPlan('1w')}
+          onClick={() => onPlanChange('1w')}
           className={cn(
             "relative bg-[#0c0c0c] border rounded-[2rem] p-8 flex flex-col gap-6 transition-all duration-300 cursor-pointer group",
             selectedPlan === '1w' ? "border-primary/50 ring-1 ring-primary/20" : "border-white/5 hover:border-white/10"
@@ -82,7 +83,7 @@ export function StepPlans({ onBack, onFinish }: StepPlansProps) {
 
         {/* Forever Plan */}
         <div 
-          onClick={() => setSelectedPlan('forever')}
+          onClick={() => onPlanChange('forever')}
           className={cn(
             "relative bg-[#0c0c0c] border rounded-[2rem] p-8 flex flex-col gap-6 transition-all duration-300 cursor-pointer group shadow-[0_0_40px_rgba(225,29,72,0.1)]",
             selectedPlan === 'forever' ? "border-primary ring-2 ring-primary/20 scale-[1.02]" : "border-white/5 hover:border-white/10"
