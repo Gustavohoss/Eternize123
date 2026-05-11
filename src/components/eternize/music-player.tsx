@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { Music2, ChevronDown, Volume2, Play, Pause, Loader2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -28,7 +28,13 @@ interface MusicPlayerProps {
   onStateChange?: (isPlaying: boolean) => void;
 }
 
-export function MusicPlayer({ 
+export interface MusicPlayerRef {
+  play: () => void;
+  pause: () => void;
+  toggle: () => void;
+}
+
+export const MusicPlayer = forwardRef<MusicPlayerRef, MusicPlayerProps>(({ 
   musicData,
   musicBoxColor = '#0e0e0e',
   musicTextColor = '#ffffff',
@@ -37,7 +43,7 @@ export function MusicPlayer({
   isAutoPlay = false,
   hideUI = false,
   onStateChange
-}: MusicPlayerProps) {
+}, ref) => {
   const searchParams = useSearchParams();
   const isMutedByParam = searchParams.get('muted') === 'true';
   
@@ -50,7 +56,36 @@ export function MusicPlayer({
   const containerId = useRef(`yt-player-${Math.random().toString(36).substring(2, 11)}`);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize YouTube API and Player
+  // Expor métodos para o pai (DeviceMockup)
+  useImperativeHandle(ref, () => ({
+    play: () => {
+      if (playerRef.current && isReady) {
+        if (!isMutedByParam) {
+          playerRef.current.unMute();
+          playerRef.current.setVolume(100);
+        }
+        playerRef.current.playVideo();
+      }
+    },
+    pause: () => {
+      if (playerRef.current && isReady) {
+        playerRef.current.pauseVideo();
+      }
+    },
+    toggle: () => {
+      const state = playerRef.current?.getPlayerState();
+      if (state === 1) {
+        playerRef.current.pauseVideo();
+      } else {
+        if (!isMutedByParam) {
+          playerRef.current.unMute();
+          playerRef.current.setVolume(100);
+        }
+        playerRef.current.playVideo();
+      }
+    }
+  }));
+
   useEffect(() => {
     const loadYoutubeApi = () => {
       if (window.YT && window.YT.Player) {
@@ -109,15 +144,11 @@ export function MusicPlayer({
               
               if (state === window.YT.PlayerState.PLAYING) {
                 setIsPlaying(true);
-                // Unmute agressivo ao começar a tocar
-                if (!isMutedByParam) {
-                  event.target.unMute();
-                  event.target.setVolume(100);
-                }
+                if (onStateChange) onStateChange(true);
                 startTimer();
               } else if (state === window.YT.PlayerState.PAUSED || state === window.YT.PlayerState.ENDED) {
-                // Só atualizamos o estado se não for buffering (que o youtube às vezes reporta como pausa momentânea)
                 setIsPlaying(false);
+                if (onStateChange) onStateChange(false);
                 stopTimer();
               }
             }
@@ -139,11 +170,9 @@ export function MusicPlayer({
     };
   }, [musicData?.id]);
 
-  // Sincronização de comando externo (Play/Pause)
   useEffect(() => {
     if (!playerRef.current || !isReady) return;
     
-    // Verificamos o estado atual do player para evitar loops infinitos de comandos
     const playerState = typeof playerRef.current.getPlayerState === 'function' ? playerRef.current.getPlayerState() : -1;
     const isActuallyPlaying = playerState === window.YT.PlayerState.PLAYING || playerState === window.YT.PlayerState.BUFFERING;
 
@@ -183,10 +212,8 @@ export function MusicPlayer({
         playerRef.current.setVolume(100);
       }
       playerRef.current.playVideo();
-      if (onStateChange) onStateChange(true);
     } else {
       playerRef.current.pauseVideo();
-      if (onStateChange) onStateChange(false);
     }
   };
 
@@ -303,4 +330,6 @@ export function MusicPlayer({
       </div>
     </div>
   );
-}
+});
+
+MusicPlayer.displayName = 'MusicPlayer';

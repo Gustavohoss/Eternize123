@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import { Lock, X, Play, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { intervalToDuration } from 'date-fns';
-import { MusicPlayer } from './music-player';
+import { MusicPlayer, type MusicPlayerRef } from './music-player';
 import { SparklesCore } from '@/components/ui/sparkles';
 import { SmokeBackground } from '@/components/ui/spooky-smoke-animation';
 import { FallingPattern } from '@/components/ui/falling-pattern';
@@ -143,6 +143,9 @@ export function DeviceMockup({
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('grid');
   const [hasStarted, setHasStarted] = useState(false);
+
+  // Refs
+  const musicPlayerRef = useRef<MusicPlayerRef>(null);
 
   // Sincroniza a abertura do módulo com o comando externo (editor)
   useEffect(() => {
@@ -314,7 +317,15 @@ export function DeviceMockup({
   // Inicia a experiência e libera áudio
   const handleStartExperience = () => {
     setHasStarted(true);
-    setIsAudioPlaying(true); // Sempre força o play no clique do botão de início
+    setIsAudioPlaying(true);
+    
+    // CHAMADA IMPERATIVA: Força o play no player através do Ref
+    // Isso é um gesto de usuário garantido para o navegador
+    setTimeout(() => {
+      if (musicPlayerRef.current) {
+        musicPlayerRef.current.play();
+      }
+    }, 100);
   };
 
   return (
@@ -424,6 +435,7 @@ export function DeviceMockup({
           {musicData && (
             <div className="absolute bottom-6 left-4 right-4 z-[100] animate-in slide-in-from-bottom-4 duration-500">
                <MusicPlayer 
+                 ref={musicPlayerRef}
                  musicData={musicData} 
                  musicBoxColor={selectedTheme === 'classic' ? musicBoxColor : '#0c0c0c/90'}
                  musicTextColor={selectedTheme === 'classic' ? musicTextColor : '#ffffff'}
