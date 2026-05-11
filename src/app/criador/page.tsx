@@ -326,7 +326,7 @@ export default function CriadorApp() {
               {step === 'message' && <StepMessage {...{selectedTheme, message, onMessageChange: setMessage, messageFont, onMessageFontChange: setMessageFont, messageColor, onMessageColorChange: (c) => { setMessageColor(c); setUserHasManuallyChangedMessageColor(true); }, onBack: handleBack, onNext: handleNext}} />}
               {step === 'music' && <StepMusic {...{selectedTheme, musicData, onMusicSelect: setMusicData, musicBoxColor, onMusicBoxColorChange: setMusicBoxColor, musicTextColor, onMusicTextColorChange: setMusicTextColor, musicHasNeon, onMusicHasNeonChange: setMusicHasNeon, musicNeonStrength, onMusicNeonStrengthChange: setMusicNeonStrength, isAutoPlay: isMusicAutoPlay, onAutoPlayChange: setIsMusicAutoPlay, onBack: handleBack, onNext: handleNext}} />}
               {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: setLocationQuery, showSuggestions, onShowSuggestionsChange: setShowSuggestions, filteredCities, selectedCountStyle, onCountStyleChange: setSelectedCountStyle, dateFont, onDateFontChange: setDateFont, dateIsBold, onDateIsBoldChange: setDateIsBold, dateHasNeon, onDateHasNeonChange: setDateHasNeon, dateNeonStrength, onDateNeonStrengthChange: setDateNeonStrength, dateColor, onDateColorChange: (c) => { setDateColor(c); setUserHasManuallyChangedDateColor(true); }, dateBoxBgColor, onDateBoxBgColorChange: setDateBoxBgColor, dateBoxBorderColor, onDateBoxBorderColorChange: setDateBoxBorderColor, onBack: handleBack, onNext: handleNext}} />}
-              {step === 'plans' && <StepPlans selectedPlan={selectedPlan} onPlanChange={setSelectedPlan} onBack: handleBack, onFinish={handleNext} />}
+              {step === 'plans' && <StepPlans selectedPlan={selectedPlan} onPlanChange={setSelectedPlan} onBack={handleBack} onFinish={handleNext} />}
               {step === 'order-bump' && <StepOrderBump onBack={handleBack} onFinish={handleNext} date={date} isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} />}
               {step === 'subdomain-config' && <StepSubdomainConfig onBack={handleBack} onFinish={handleFinalize} initialValue={pageTitle} />}
 
@@ -402,4 +402,3 @@ export default function CriadorApp() {
     </div>
   );
 }
-
