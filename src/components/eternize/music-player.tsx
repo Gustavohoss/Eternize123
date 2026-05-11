@@ -91,7 +91,7 @@ export function MusicPlayer({
             rel: 0,
             enablejsapi: 1,
             origin: origin,
-            mute: isAutoPlay ? 1 : 0 // Começa mudo para permitir autoplay, depois unmute via JS
+            mute: isAutoPlay ? 1 : 0 
           },
           events: {
             onReady: (event: any) => {
@@ -106,20 +106,18 @@ export function MusicPlayer({
             },
             onStateChange: (event: any) => {
               const state = event.data;
-              const playing = state === window.YT.PlayerState.PLAYING;
               
               if (state === window.YT.PlayerState.PLAYING) {
                 setIsPlaying(true);
-                if (onStateChange) onStateChange(true);
-                startTimer();
-                // Reforça o unmute quando começa a tocar de fato
+                // Unmute agressivo ao começar a tocar
                 if (!isMutedByParam) {
                   event.target.unMute();
                   event.target.setVolume(100);
                 }
+                startTimer();
               } else if (state === window.YT.PlayerState.PAUSED || state === window.YT.PlayerState.ENDED) {
+                // Só atualizamos o estado se não for buffering (que o youtube às vezes reporta como pausa momentânea)
                 setIsPlaying(false);
-                if (onStateChange) onStateChange(false);
                 stopTimer();
               }
             }
@@ -145,13 +143,17 @@ export function MusicPlayer({
   useEffect(() => {
     if (!playerRef.current || !isReady) return;
     
-    if (isAutoPlay) {
+    // Verificamos o estado atual do player para evitar loops infinitos de comandos
+    const playerState = typeof playerRef.current.getPlayerState === 'function' ? playerRef.current.getPlayerState() : -1;
+    const isActuallyPlaying = playerState === window.YT.PlayerState.PLAYING || playerState === window.YT.PlayerState.BUFFERING;
+
+    if (isAutoPlay && !isActuallyPlaying) {
       if (!isMutedByParam) {
         playerRef.current.unMute();
         playerRef.current.setVolume(100);
       }
       playerRef.current.playVideo();
-    } else {
+    } else if (!isAutoPlay && isActuallyPlaying) {
       playerRef.current.pauseVideo();
     }
   }, [isAutoPlay, isReady, isMutedByParam]);
@@ -181,8 +183,10 @@ export function MusicPlayer({
         playerRef.current.setVolume(100);
       }
       playerRef.current.playVideo();
+      if (onStateChange) onStateChange(true);
     } else {
       playerRef.current.pauseVideo();
+      if (onStateChange) onStateChange(false);
     }
   };
 

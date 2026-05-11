@@ -172,16 +172,12 @@ export function DeviceMockup({
   const [dynamicSpotifyColor, setDynamicSpotifyColor] = useState('#1a0a0a');
   const [spotifyHeaderOpacity, setSpotifyHeaderOpacity] = useState(0);
 
-  // Lógica de Autoplay aprimorada: 
-  // No Criador (isFullscreen=false), segue o prop isAutoPlay diretamente.
-  // No Site Publicado (isFullscreen=true), espera o clique em "Abrir Presente".
+  // Inicializa o estado de áudio baseado no config se estiver no editor
   useEffect(() => {
     if (!isFullscreen) {
       setIsAudioPlaying(isAutoPlay || false);
-    } else if (hasStarted && isAutoPlay) {
-      setIsAudioPlaying(true);
     }
-  }, [isAutoPlay, hasStarted, isFullscreen]);
+  }, [isAutoPlay, isFullscreen]);
 
   // Sync Active Tab based on theme
   useEffect(() => {
@@ -318,6 +314,7 @@ export function DeviceMockup({
   // Inicia a experiência e libera áudio
   const handleStartExperience = () => {
     setHasStarted(true);
+    setIsAudioPlaying(true); // Sempre força o play no clique do botão de início
   };
 
   return (
