@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -13,7 +14,6 @@ interface InstagramViewProps {
   timeDiff: any;
   date?: Date;
   message?: string;
-  musicData?: any;
   isFollowing: boolean;
   onFollowToggle: () => void;
   activeTab: string;
@@ -33,21 +33,9 @@ interface InstagramViewProps {
   onModuleClick?: (id: string) => void;
 }
 
-// Selo de Verificado Premium (Vibrante Blue Gradient + Animation)
 const VerifiedBadge = ({ size = 18 }: { size?: number }) => (
-  <div 
-    className="relative flex items-center justify-center shrink-0" 
-    style={{ width: size, height: size }}
-  >
-    {/* Forma de Estrela Poligonal exata da referência com tom mais AZUL */}
-    <div 
-      className="absolute inset-0 animate-[badge-pulse_2.4s_ease-in-out_infinite]"
-      style={{
-        background: 'linear-gradient(135deg, #0095F6, #1d4ed8, #0095F6)',
-        clipPath: 'polygon(50% 0%, 61% 15%, 79% 9%, 79% 28%, 96% 35%, 87% 50%, 96% 65%, 79% 72%, 79% 91%, 61% 85%, 50% 100%, 39% 85%, 21% 91%, 21% 72%, 4% 65%, 13% 50%, 4% 35%, 21% 28%, 21% 9%, 39% 15%)'
-      }}
-    />
-    {/* Ícone de Check Interno */}
+  <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
+    <div className="absolute inset-0 animate-[badge-pulse_2.4s_ease-in-out_infinite]" style={{ background: 'linear-gradient(135deg, #0095F6, #1d4ed8, #0095F6)', clipPath: 'polygon(50% 0%, 61% 15%, 79% 9%, 79% 28%, 96% 35%, 87% 50%, 96% 65%, 79% 72%, 79% 91%, 61% 85%, 50% 100%, 39% 85%, 21% 91%, 21% 72%, 4% 65%, 13% 50%, 4% 35%, 21% 28%, 21% 9%, 39% 15%)' }} />
     <div className="relative z-10 flex items-center justify-center" style={{ width: size * 0.45, height: size * 0.45 }}>
       <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className="animate-[check-pop_0.6s_cubic-bezier(0.34,1.56,0.64,1)_both]">
         <polyline points="20 6 9 17 4 12"/>
@@ -63,7 +51,6 @@ export function InstagramView({
   timeDiff,
   date,
   message,
-  musicData,
   isFollowing,
   onFollowToggle,
   activeTab,
@@ -153,7 +140,7 @@ export function InstagramView({
         <Bell className="w-6 h-6" />
       </header>
       
-      <div className="flex-1 overflow-y-auto no-scrollbar pb-20">
+      <div className="flex-1 overflow-y-auto no-scrollbar pb-32">
         <section className="px-4 pt-2 pb-4">
           <div className="flex items-center gap-6 mb-4">
             <div className="p-[2.5px] rounded-full ig-gradient cursor-pointer active:scale-95 transition-transform" onClick={onStartStories}>
@@ -182,19 +169,11 @@ export function InstagramView({
             <button className="px-2 bg-neutral-800 rounded-lg transition active:scale-95 text-white"><UserPlus className="w-4.5 h-4.5" /></button>
           </div>
 
-          {/* Highlights Section - Módulos extras */}
           <div className="flex gap-5 overflow-x-auto no-scrollbar mb-4 py-2 px-1">
              {isPackEnabled ? (
                modules.map((mod) => (
-                 <div 
-                   key={mod.id} 
-                   onClick={() => onModuleClick?.(mod.id)}
-                   className="flex flex-col items-center gap-2 shrink-0 cursor-pointer active:scale-95 transition-transform"
-                 >
-                    <div className={cn(
-                      "w-[68px] h-[68px] rounded-full border bg-black flex items-center justify-center transition-all",
-                      mod.borderColor
-                    )}>
+                 <div key={mod.id} onClick={() => onModuleClick?.(mod.id)} className="flex flex-col items-center gap-2 shrink-0 cursor-pointer active:scale-95 transition-transform">
+                    <div className={cn("w-[68px] h-[68px] rounded-full border bg-black flex items-center justify-center transition-all", mod.borderColor)}>
                        <mod.icon className={cn("w-7 h-7", mod.color)} />
                     </div>
                     <span className="text-[11px] text-white font-bold tracking-tight">{mod.title}</span>
@@ -203,17 +182,13 @@ export function InstagramView({
              ) : (
                <>
                  <div className="flex flex-col items-center gap-2 shrink-0 cursor-pointer group">
-                    <div className="w-[68px] h-[68px] rounded-full border border-neutral-800 flex items-center justify-center bg-black group-active:scale-95 transition-transform">
-                       <Plus className="w-7 h-7 text-white" />
-                    </div>
+                    <div className="w-[68px] h-[68px] rounded-full border border-neutral-800 flex items-center justify-center bg-black group-active:scale-95 transition-transform"><Plus className="w-7 h-7 text-white" /></div>
                     <span className="text-[11px] text-white font-medium">Novo</span>
                  </div>
                  {uploadedPhotos.slice(1, 4).map((photo, i) => (
                     <div key={i} className="flex flex-col items-center gap-2 shrink-0 active:scale-95 transition-transform">
                        <div className="w-[68px] h-[68px] rounded-full border border-neutral-800 overflow-hidden relative p-[2px] bg-black">
-                          <div className="w-full h-full rounded-full overflow-hidden relative">
-                             <Image src={photo} fill className="object-cover" alt="" />
-                          </div>
+                          <div className="w-full h-full rounded-full overflow-hidden relative"><Image src={photo} fill className="object-cover" alt="" /></div>
                        </div>
                        <span className="text-[11px] text-white font-medium truncate max-w-[64px]">Destaque {i+1}</span>
                     </div>
@@ -236,28 +211,6 @@ export function InstagramView({
           )) : null}
         </div>
       </div>
-
-      {musicData && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] bg-neutral-900/90 backdrop-blur-xl border border-neutral-800 rounded-2xl p-3 shadow-2xl z-[100] animate-in slide-in-from-bottom-4 duration-500">
-          <div className="flex items-center gap-3">
-            <div className="p-[1px] rounded-lg ig-gradient shrink-0">
-              <div className="w-10 h-10 rounded-lg overflow-hidden relative bg-black">
-                <Image src={uploadedPhotos[0] || musicData.thumb} fill className="object-cover" alt="" />
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold truncate text-white">{musicData.title}</p>
-              <p className="text-[10px] text-neutral-400 truncate">{pageTitle || 'NOSSA HISTÓRIA'}</p>
-            </div>
-            <button onClick={() => onAudioToggle(!isAudioPlaying)} className="text-white">
-              {isAudioPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
-            </button>
-          </div>
-          <div className="mt-2 h-0.5 bg-neutral-800 rounded-full overflow-hidden">
-            <div className="h-full ig-gradient" style={{ width: isAudioPlaying ? '45%' : '0%', transition: 'width 0.5s ease' }}></div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

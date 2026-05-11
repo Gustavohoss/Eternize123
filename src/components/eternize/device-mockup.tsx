@@ -143,7 +143,6 @@ export function DeviceMockup({
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('grid');
   const [hasStarted, setHasStarted] = useState(false);
-  const audioInitialized = useRef(false);
 
   // Sincroniza a abertura do módulo com o comando externo (editor)
   useEffect(() => {
@@ -174,11 +173,11 @@ export function DeviceMockup({
   const [spotifyHeaderOpacity, setSpotifyHeaderOpacity] = useState(0);
 
   // Lógica de Autoplay aprimorada: 
-  // No Criador (isFullscreen=false), segue o prop isAutoPlay diretamente pois já há interação.
+  // No Criador (isFullscreen=false), segue o prop isAutoPlay diretamente.
   // No Site Publicado (isFullscreen=true), espera o clique em "Abrir Presente".
   useEffect(() => {
     if (!isFullscreen) {
-      setIsAudioPlaying(isAutoPlay);
+      setIsAudioPlaying(isAutoPlay || false);
     } else if (hasStarted && isAutoPlay) {
       setIsAudioPlaying(true);
     }
@@ -309,14 +308,14 @@ export function DeviceMockup({
     }, 4500);
   }, [selectedTheme]);
 
-  // Handler de scroll aprimorado para o Spotify
+  // Handler de scroll para o Spotify
   const handleSpotifyScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const scrollTop = e.currentTarget.scrollTop;
     const opacity = Math.min(1, Math.max(0, (scrollTop - 20) / 100));
     setSpotifyHeaderOpacity(opacity);
   }, []);
 
-  // Handler para iniciar a experiência e desbloquear áudio
+  // Inicia a experiência e libera áudio
   const handleStartExperience = () => {
     setHasStarted(true);
   };
@@ -324,7 +323,7 @@ export function DeviceMockup({
   return (
     <div className={cn("w-full transition-all duration-500 flex flex-col relative", isFullscreen ? "h-full" : "max-w-[400px] mx-auto")}>
       
-      {/* Entrada para Published Site (Resolve Autoplay) */}
+      {/* Gatilho de interação para o site publicado */}
       {isFullscreen && !hasStarted && (
         <div className="fixed inset-0 z-[2000] bg-black flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
            <div className="absolute inset-0 bg-hero-glow opacity-30 pointer-events-none" />
@@ -351,31 +350,16 @@ export function DeviceMockup({
         </div>
       )}
 
-      {musicData && (
-        <MusicPlayer musicData={musicData} isAutoPlay={isAudioPlaying} hideUI={true} onStateChange={setIsAudioPlaying} />
-      )}
-
-      {/* Intro Animation Layer (Eternize Effect) */}
+      {/* Intro Layer Netflix */}
       {selectedTheme === 'netflix' && isIntroActive && (
         <div className="absolute inset-0 z-[1000] bg-black flex items-center justify-center overflow-hidden">
            <div className={cn("curtain-container", (introPhase === 'closing' || introPhase === 'logo') && "curtain-active")}>
              {curtainBars.map((bar, i) => (
-               <div 
-                 key={i} 
-                 className="curtain-bar" 
-                 style={{ backgroundColor: bar.color, transitionDelay: bar.delay }}
-               />
+               <div key={i} className="curtain-bar" style={{ backgroundColor: bar.color, transitionDelay: bar.delay }} />
              ))}
            </div>
-           
            <div className="curtain-overlay"></div>
-           
-           <h1 className={cn(
-             "curtain-logo-text", 
-             introPhase === 'logo' && "curtain-logo-visible"
-           )}>
-             ETERNIZE
-           </h1>
+           <h1 className={cn("curtain-logo-text", introPhase === 'logo' && "curtain-logo-visible")}>ETERNIZE</h1>
         </div>
       )}
 
@@ -425,21 +409,21 @@ export function DeviceMockup({
           <div className="absolute inset-0 flex flex-col items-center overflow-y-auto no-scrollbar z-20">
             <div className={cn("w-full flex flex-col items-center min-h-full", isFullscreen && "max-w-[480px]")}>
               {selectedTheme === 'classic' && (
-                <ClassicView {...{uploadedPhotos, photoEffect, showCard, cardColor, titlePosition, pageTitle, titleStyle, message, messageColor, messageFontFamily: getFontFamily(messageFont || 'inter'), date, selectedCountStyle, dateStyle, dateIsBold, dateBoxBgColor, dateBoxBorderColor, timeDiff, totalDays, musicData, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength, isAudioPlaying, onAudioToggle: setIsAudioPlaying, isPackEnabled, onModuleClick: setPreviewModuleId}} />
+                <ClassicView {...{uploadedPhotos, photoEffect, showCard, cardColor, titlePosition, pageTitle, titleStyle, message, messageColor, messageFontFamily: getFontFamily(messageFont || 'inter'), date, selectedCountStyle, dateStyle, dateIsBold, dateBoxBgColor, dateBoxBorderColor, timeDiff, totalDays, isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'netflix' && (
                 <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: handleStartNetflixExperience, onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList), isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'spotify' && (
-                <SpotifyView {...{uploadedPhotos, activeHeroIndex, pageTitle, totalDays, timeDiff, date, activeTab, onTabChange: setActiveTab, onPhotoClick: (i) => { setActiveHeroIndex(i); setShowSpotifyFullscreen(true); }, isLiked, onLikeToggle: () => setIsLiked(!isLiked), isAudioPlaying, onAudioToggle: setIsAudioPlaying, dynamicSpotifyColor, spotifyHeaderOpacity, onHeaderScroll: handleSpotifyScroll, onShowFullscreen: () => setShowSpotifyFullscreen(true), onCloseFullscreen: () => setShowSpotifyFullscreen(false), showSpotifyFullscreen, message, musicData, isPackEnabled, onModuleClick: setPreviewModuleId}} />
+                <SpotifyView {...{uploadedPhotos, activeHeroIndex, pageTitle, totalDays, timeDiff, date, activeTab, onTabChange: setActiveTab, onPhotoClick: (i) => { setActiveHeroIndex(i); setShowSpotifyFullscreen(true); }, isLiked, onLikeToggle: () => setIsLiked(!isLiked), isAudioPlaying, onAudioToggle: setIsAudioPlaying, dynamicSpotifyColor, spotifyHeaderOpacity, onHeaderScroll: handleSpotifyScroll, onShowFullscreen: () => setShowSpotifyFullscreen(true), onCloseFullscreen: () => setShowSpotifyFullscreen(false), showSpotifyFullscreen, message, isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'instagram' && (
-                <InstagramView {...{uploadedPhotos, pageTitle, totalDays, timeDiff, date, message, musicData, isFollowing, onFollowToggle: () => setIsFollowing(!isFollowing), activeTab, onTabChange: setActiveTab, onStartStories: () => { setShowStories(true); setCurrentStoryIndex(0); setStoryProgress(0); }, onPostClick: (i) => { setSelectedPostIndex(i); setShowInstagramPost(true); }, showPostDetail: showInstagramPost, selectedPostIndex, onClosePost: () => setShowInstagramPost(false), likedPosts, onLikePost: (i) => setLikedPosts(prev => ({...prev, [i]: !prev[i]})), savedPosts, onSavePost: (i) => setSavedPosts(prev => ({...prev, [i]: !prev[i]})), isAudioPlaying, onAudioToggle: setIsAudioPlaying, isPackEnabled, onModuleClick: setPreviewModuleId}} />
+                <InstagramView {...{uploadedPhotos, pageTitle, totalDays, timeDiff, date, message, isFollowing, onFollowToggle: () => setIsFollowing(!isFollowing), activeTab, onTabChange: setActiveTab, onStartStories: () => { setShowStories(true); setCurrentStoryIndex(0); setStoryProgress(0); }, onPostClick: (i) => { setSelectedPostIndex(i); setShowInstagramPost(true); }, showPostDetail: showInstagramPost, selectedPostIndex, onClosePost: () => setShowInstagramPost(false), likedPosts, onLikePost: (i) => setLikedPosts(prev => ({...prev, [i]: !prev[i]})), savedPosts, onSavePost: (i) => setSavedPosts(prev => ({...prev, [i]: !prev[i]})), isAudioPlaying, onAudioToggle: setIsAudioPlaying, isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
             </div>
           </div>
 
-          {/* Player de Música Fixo para todos os temas */}
+          {/* ÚNICO PLAYER DE ÁUDIO - INSTÂNCIA MESTRA */}
           {musicData && (
             <div className="absolute bottom-6 left-4 right-4 z-[100] animate-in slide-in-from-bottom-4 duration-500">
                <MusicPlayer 
@@ -459,12 +443,7 @@ export function DeviceMockup({
             <div className="absolute inset-0 z-[500] bg-black flex flex-col animate-in slide-in-from-bottom-4 duration-500 overflow-hidden">
                <div className="relative h-full flex flex-col">
                   <div className="absolute top-6 right-6 z-[550]">
-                    <Button 
-                      onClick={() => setPreviewModuleId(null)}
-                      className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/10 hover:bg-black/80 flex items-center justify-center text-white shadow-2xl transition-all active:scale-95"
-                    >
-                      <X className="w-5 h-5" />
-                    </Button>
+                    <Button onClick={() => setPreviewModuleId(null)} className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/10 hover:bg-black/80 flex items-center justify-center text-white shadow-2xl transition-all active:scale-95"><X className="w-5 h-5" /></Button>
                   </div>
                   <div className="flex-1 overflow-y-auto no-scrollbar custom-scroll">
                      {previewModuleId === 'memorias' && <MemoriesModulePreview memories={memories} />}

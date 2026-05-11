@@ -49,7 +49,6 @@ export function MusicPlayer({
   const playerRef = useRef<any>(null);
   const containerId = useRef(`yt-player-${Math.random().toString(36).substring(2, 11)}`);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const lastStateIntent = useRef<boolean>(isAutoPlay);
 
   // Initialize YouTube API and Player
   useEffect(() => {
@@ -92,7 +91,7 @@ export function MusicPlayer({
             rel: 0,
             enablejsapi: 1,
             origin: origin,
-            mute: isAutoPlay ? 1 : 0 
+            mute: isAutoPlay ? 1 : 0 // Começa mudo para permitir autoplay, depois unmute via JS
           },
           events: {
             onReady: (event: any) => {
@@ -100,7 +99,6 @@ export function MusicPlayer({
               setDuration(event.target.getDuration());
               
               if (isAutoPlay && !isMutedByParam) {
-                // Tentativa agressiva de iniciar após Ready
                 event.target.unMute();
                 event.target.setVolume(100);
                 event.target.playVideo();
@@ -110,18 +108,18 @@ export function MusicPlayer({
               const state = event.data;
               const playing = state === window.YT.PlayerState.PLAYING;
               
-              if (state === window.YT.PlayerState.PLAYING || state === window.YT.PlayerState.PAUSED) {
-                setIsPlaying(playing);
-                
-                if (playing !== lastStateIntent.current) {
-                  lastStateIntent.current = playing;
-                  if (onStateChange) onStateChange(playing);
-                }
-              }
-
-              if (playing) {
+              if (state === window.YT.PlayerState.PLAYING) {
+                setIsPlaying(true);
+                if (onStateChange) onStateChange(true);
                 startTimer();
-              } else {
+                // Reforça o unmute quando começa a tocar de fato
+                if (!isMutedByParam) {
+                  event.target.unMute();
+                  event.target.setVolume(100);
+                }
+              } else if (state === window.YT.PlayerState.PAUSED || state === window.YT.PlayerState.ENDED) {
+                setIsPlaying(false);
+                if (onStateChange) onStateChange(false);
                 stopTimer();
               }
             }
@@ -143,20 +141,19 @@ export function MusicPlayer({
     };
   }, [musicData?.id]);
 
-  // Sincronização de comando externo: Força Play/Pause e Unmute
+  // Sincronização de comando externo (Play/Pause)
   useEffect(() => {
     if (!playerRef.current || !isReady) return;
     
-    // Forçar unMute sempre que isAutoPlay for verdadeiro
-    if (isAutoPlay && !isMutedByParam) {
-      playerRef.current.unMute();
-      playerRef.current.setVolume(100);
+    if (isAutoPlay) {
+      if (!isMutedByParam) {
+        playerRef.current.unMute();
+        playerRef.current.setVolume(100);
+      }
       playerRef.current.playVideo();
-    } else if (!isAutoPlay) {
+    } else {
       playerRef.current.pauseVideo();
     }
-    
-    lastStateIntent.current = isAutoPlay;
   }, [isAutoPlay, isReady, isMutedByParam]);
 
   const startTimer = () => {
@@ -178,20 +175,15 @@ export function MusicPlayer({
     
     if (!playerRef.current || !isReady) return;
     
-    if (typeof playerRef.current.unMute === 'function') playerRef.current.unMute();
-    if (typeof playerRef.current.setVolume === 'function') playerRef.current.setVolume(100);
-
-    const newState = !isPlaying;
-    lastStateIntent.current = newState;
-    
-    if (newState) {
+    if (!isPlaying) {
+      if (!isMutedByParam) {
+        playerRef.current.unMute();
+        playerRef.current.setVolume(100);
+      }
       playerRef.current.playVideo();
     } else {
       playerRef.current.pauseVideo();
     }
-    
-    setIsPlaying(newState);
-    if (onStateChange) onStateChange(newState);
   };
 
   const seek = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -291,7 +283,7 @@ export function MusicPlayer({
             style={{ boxShadow: neonShadow }}
           >
             {!isReady ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
             ) : isPlaying ? (
               <Pause size={22} fill="white" />
             ) : (

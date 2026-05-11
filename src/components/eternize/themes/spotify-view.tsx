@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -27,17 +28,12 @@ interface SpotifyViewProps {
   onCloseFullscreen: () => void;
   showSpotifyFullscreen: boolean;
   message?: string;
-  musicData?: any;
   isPackEnabled?: boolean;
   onModuleClick?: (id: string) => void;
 }
 
-// Selo de Verificado para o Spotify (Estilo oficial)
 const VerifiedBadge = ({ size = 16 }: { size?: number }) => (
-  <div 
-    className="bg-[#1DB954] rounded-full flex items-center justify-center shrink-0" 
-    style={{ width: size, height: size }}
-  >
+  <div className="bg-[#1DB954] rounded-full flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
     <Check className="text-white" style={{ width: size * 0.7, height: size * 0.7 }} strokeWidth={4} />
   </div>
 );
@@ -63,7 +59,6 @@ export function SpotifyView({
   onCloseFullscreen,
   showSpotifyFullscreen,
   message,
-  musicData,
   isPackEnabled = false,
   onModuleClick
 }: SpotifyViewProps) {
@@ -215,7 +210,6 @@ export function SpotifyView({
           </section>
         )}
 
-        {/* Seção "Sobre" (Bio/Letra) no estilo Spotify Artist Bio */}
         {message && (
           <section className="px-6 mb-10">
             <h2 className="text-white text-xl font-black mb-4 font-['DM_Sans']">Sobre</h2>
@@ -266,25 +260,6 @@ export function SpotifyView({
           </section>
         )}
       </div>
-      
-      {musicData && !showSpotifyFullscreen && (
-        <div className="absolute bottom-6 left-0 right-0 z-[60] px-3 animate-in slide-in-from-bottom-4 duration-500">
-          <div className="w-full rounded-xl p-2.5 flex flex-col shadow-2xl border border-white/5 cursor-pointer active:scale-[0.98] transition-all overflow-hidden relative" style={{ backgroundColor: dynamicSpotifyColor }} onClick={onShowFullscreen}>
-            <div className="flex items-center relative z-10">
-              <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 shadow-lg mr-3 relative">
-                {uploadedPhotos.length > 0 ? <Image src={uploadedPhotos[activeHeroIndex] || uploadedPhotos[0]} fill className="object-cover" alt="Capa" /> : <div className="w-full h-full bg-neutral-800 flex items-center justify-center"></div>}
-              </div>
-              <div className="flex-1 min-w-0 mr-4">
-                <h4 className="text-white text-[13px] font-bold truncate leading-tight font-['DM_Sans']">{musicData.title}</h4>
-                <p className="text-[#b3b3b3] text-[12px] font-medium truncate mt-0.5 font-['DM_Sans']">{pageTitle || 'Eternize'}</p>
-              </div>
-              <button onClick={(e) => { e.stopPropagation(); onAudioToggle(!isAudioPlaying); }} className="text-white">
-                {isAudioPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current" />}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
