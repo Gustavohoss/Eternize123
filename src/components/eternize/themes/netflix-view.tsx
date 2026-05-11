@@ -139,37 +139,34 @@ export function NetflixView({
         
         {activeTab === 'episodios' ? (
           <div className="space-y-6">
-            {/* Episódios Reais */}
-            {uploadedPhotos.map((photo, i) => (
-              <div key={i} className="flex gap-3 items-center group cursor-pointer" onClick={() => onPhotoClick(i)}>
-                <div className="w-32 h-[72px] bg-[#2a2a2a] rounded-md relative overflow-hidden shrink-0">
-                  <Image src={photo} fill className="object-cover group-hover:opacity-70 transition-opacity" alt={`Ep ${i}`} />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                     <div className="w-8 h-8 rounded-full border border-white flex items-center justify-center">
+            {uploadedPhotos.length > 0 ? (
+              uploadedPhotos.map((photo, i) => (
+                <div key={i} className="flex gap-3 items-center group cursor-pointer" onClick={() => onPhotoClick(i)}>
+                  <div className="w-32 h-[72px] bg-[#2a2a2a] rounded-md relative overflow-hidden shrink-0">
+                    <Image src={photo} fill className="object-cover group-hover:opacity-70 transition-opacity" alt={`Ep ${i}`} />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+                      <div className="w-8 h-8 rounded-full border border-white flex items-center justify-center">
                         <Play className="w-3 h-3 text-white fill-white ml-0.5" />
-                     </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-white mb-0.5 group-hover:text-red-500 transition-colors">{(i + 1)}. Memória {(i + 1)}</p>
+                    <p className="text-[10px] text-neutral-500 leading-tight">Capítulo especial da nossa história.</p>
                   </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-white mb-0.5 group-hover:text-red-500 transition-colors">{(i + 1)}. Memória {(i + 1)}</p>
-                  <p className="text-[10px] text-neutral-500 leading-tight">Capítulo especial da nossa história.</p>
-                </div>
-              </div>
-            ))}
-
-            {/* Esqueletos para completar a lista (até 8 slots) */}
-            {Array.from({ length: Math.max(0, 8 - uploadedPhotos.length) }).map((_, i) => {
-              const index = uploadedPhotos.length + i + 1;
-              return (
-                <div key={`skeleton-${index}`} className="flex gap-3 items-center opacity-30">
+              ))
+            ) : (
+              Array.from({ length: 8 }).map((_, i) => (
+                <div key={`skeleton-${i}`} className="flex gap-3 items-center opacity-30">
                   <div className="w-32 h-[72px] bg-[#2a2a2a] rounded-md animate-pulse shrink-0" />
                   <div className="flex-1 min-w-0 space-y-2">
                     <div className="h-3 bg-[#2a2a2a] rounded-full w-2/3 animate-pulse" />
                     <div className="h-2 bg-[#2a2a2a] rounded-full w-1/2 animate-pulse" />
                   </div>
                 </div>
-              );
-            })}
+              ))
+            )}
           </div>
         ) : (
           <div className="space-y-4 pt-2 animate-in fade-in duration-500">
