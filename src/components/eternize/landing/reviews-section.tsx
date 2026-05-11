@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { Star, Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const REVIEWS_1 = [
   { stars: 5, text: '"Gente, fiz isso pro meu mozão e ele CHOROU 😭 Nunca vi ele assim. As fotos, a música, o texto... tudo ficou perfeito."', name: 'Mariana & João', time: '1 mês atrás', initials: 'MJ', color: 'linear-gradient(135deg,#e11d48,#ff6b6b)' },
@@ -31,32 +32,32 @@ const AVATAR_DATA = [
 
 function ReviewCard({ review }: { review: any }) {
   return (
-    <div className="bg-[#0c0c0c] border border-white/5 rounded-2xl p-5 w-[260px] md:w-[300px] shrink-0 text-left transition-all hover:border-white/10 group relative">
-      <div className="flex gap-0.5 mb-4">
+    <div className="bg-[#0c0c0c] border border-white/5 rounded-2xl p-4 md:p-5 w-[210px] md:w-[300px] shrink-0 text-left transition-all hover:border-white/10 group relative">
+      <div className="flex gap-0.5 mb-3 md:mb-4">
         {[...Array(review.stars)].map((_, i) => (
-          <Star key={i} className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
+          <Star key={i} className="w-3 h-3 md:w-3.5 md:h-3.5 fill-yellow-500 text-yellow-500" />
         ))}
       </div>
-      <div className="absolute top-5 right-5 text-3xl font-serif text-white/5 opacity-40 group-hover:text-primary/10 transition-colors pointer-events-none">"</div>
-      <p className="text-white/80 text-[12px] md:text-[13px] leading-relaxed mb-6 min-h-[70px] italic font-medium">
+      <div className="absolute top-4 right-4 md:top-5 md:right-5 text-2xl md:text-3xl font-serif text-white/5 opacity-40 group-hover:text-primary/10 transition-colors pointer-events-none">"</div>
+      <p className="text-white/80 text-[11px] md:text-[13px] leading-relaxed mb-4 md:mb-6 min-h-[60px] md:min-h-[70px] italic font-medium">
         {review.text}
       </p>
-      <div className="flex items-center justify-between pt-4 border-t border-white/5">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between pt-3 md:pt-4 border-t border-white/5">
+        <div className="flex items-center gap-2 md:gap-3">
           <div 
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black text-white shrink-0 shadow-lg"
+            className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[9px] md:text-[10px] font-black text-white shrink-0 shadow-lg"
             style={{ background: review.color }}
           >
             {review.initials}
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[11px] font-black text-white uppercase tracking-tight truncate">{review.name}</span>
-            <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{review.time}</span>
+            <span className="text-[10px] md:text-[11px] font-black text-white uppercase tracking-tight truncate max-w-[70px] md:max-w-none">{review.name}</span>
+            <span className="text-[8px] md:text-[9px] font-bold text-white/20 uppercase tracking-widest">{review.time}</span>
           </div>
         </div>
-        <div className="flex items-center gap-1 bg-green-500/5 border border-green-500/10 px-2.5 py-1 rounded-full shrink-0">
-          <Check className="w-2.5 h-2.5 text-green-500" strokeWidth={4} />
-          <span className="text-[8px] font-black text-green-500 uppercase tracking-[0.1em]">Verificado</span>
+        <div className="flex items-center gap-1 bg-green-500/5 border border-green-500/10 px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-full shrink-0">
+          <Check className="w-2 md:w-2.5 h-2 md:h-2.5 text-green-500" strokeWidth={4} />
+          <span className="text-[7px] md:text-[8px] font-black text-green-500 uppercase tracking-[0.1em]">Ok</span>
         </div>
       </div>
     </div>
@@ -65,55 +66,55 @@ function ReviewCard({ review }: { review: any }) {
 
 export function ReviewsSection() {
   return (
-    <section className="py-24 md:py-32 bg-[#0a0a0a] border-t border-white/5 relative overflow-hidden">
+    <section className="py-20 md:py-32 bg-[#0a0a0a] border-t border-white/5 relative overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 md:px-6 relative z-10 flex flex-col items-center">
-        <div className="inline-flex items-center gap-2 text-white/40 text-[11px] font-black uppercase tracking-[0.2em] mb-6 relative group">
+        <div className="inline-flex items-center gap-2 text-white/40 text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] mb-6 relative group">
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-primary rounded-full"></div>
-          <Star className="w-4 h-4 text-primary" />
+          <Star className="w-3.5 h-3.5 text-primary" />
           Avaliações reais
         </div>
 
-        <h2 className="text-2xl sm:text-3xl md:text-6xl font-black text-center leading-tight tracking-tighter mb-6 italic uppercase italic-shadow px-2">
+        <h2 className="text-xl sm:text-3xl md:text-6xl font-black text-center leading-tight tracking-tighter mb-4 md:mb-6 italic uppercase italic-shadow px-2">
           75.000 casais não podem<br /> <span className="text-primary">estar errados.</span>
         </h2>
         
-        <p className="text-white/40 text-center text-sm md:text-lg max-w-lg mb-12 font-medium leading-relaxed px-4">
+        <p className="text-white/40 text-center text-xs md:text-lg max-w-lg mb-10 md:mb-12 font-medium leading-relaxed px-4">
           Histórias reais de quem criou algo especial e fez alguém chorar de emoção.
         </p>
 
-        <div className="bg-[#111] border border-white/10 rounded-2xl flex flex-col sm:flex-row items-center mb-16 overflow-hidden shadow-2xl w-full max-w-sm sm:max-w-none">
-          <div className="w-full sm:w-auto px-8 py-6 border-b sm:border-b-0 sm:border-r border-white/5 text-center">
-            <div className="text-4xl font-black text-white leading-none mb-1.5">4.9</div>
+        <div className="bg-[#111] border border-white/10 rounded-2xl flex flex-col sm:flex-row items-center mb-12 md:mb-16 overflow-hidden shadow-2xl w-full max-w-[280px] sm:max-w-none">
+          <div className="w-full sm:w-auto px-6 py-4 md:px-8 md:py-6 border-b sm:border-b-0 sm:border-r border-white/5 text-center">
+            <div className="text-3xl md:text-4xl font-black text-white leading-none mb-1.5">4.9</div>
             <div className="flex gap-0.5 justify-center">
-              {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-yellow-500 text-yellow-500" />)}
+              {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 md:w-4 md:h-4 fill-yellow-500 text-yellow-500" />)}
             </div>
           </div>
-          <div className="px-8 py-6 flex items-center justify-center gap-5 w-full sm:w-auto">
-            <div className="flex -space-x-2.5">
+          <div className="px-6 py-4 md:px-8 md:py-6 flex items-center justify-center gap-4 md:gap-5 w-full sm:w-auto">
+            <div className="flex -space-x-2 md:-space-x-2.5">
               {AVATAR_DATA.map((a, i) => (
-                <div key={i} className="w-9 h-9 rounded-full border-2 border-[#111] flex items-center justify-center text-[10px] font-black text-white shadow-md" style={{ background: a.color }}>
+                <div key={i} className="w-7 h-7 md:w-9 md:h-9 rounded-full border-2 border-[#111] flex items-center justify-center text-[8px] md:text-[10px] font-black text-white shadow-md" style={{ background: a.color }}>
                   {a.initials}
                 </div>
               ))}
             </div>
-            <div className="flex flex-col">
-              <strong className="text-base font-black text-white">+75.000</strong>
-              <span className="text-[10px] text-white/30 font-bold uppercase tracking-[0.1em]">avaliações</span>
+            <div className="flex flex-col text-left">
+              <strong className="text-sm md:text-base font-black text-white">+75k</strong>
+              <span className="text-[8px] md:text-[10px] text-white/30 font-bold uppercase tracking-[0.1em]">reviews</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="relative w-full overflow-hidden before:absolute before:left-0 before:top-0 before:bottom-0 before:w-20 md:before:w-40 before:bg-gradient-to-r before:from-black before:to-transparent before:z-10 after:absolute after:right-0 after:top-0 after:bottom-0 after:w-20 md:after:w-40 after:bg-gradient-to-l after:from-black after:to-transparent after:z-10">
-        <div className="flex gap-6 w-max animate-scroll-left px-6">
+      <div className="relative w-full overflow-hidden before:absolute before:left-0 before:top-0 before:bottom-0 before:w-16 md:before:w-40 before:bg-gradient-to-r before:from-black before:to-transparent before:z-10 after:absolute after:right-0 after:top-0 after:bottom-0 after:w-16 md:after:w-40 after:bg-gradient-to-l after:from-black after:to-transparent after:z-10">
+        <div className="flex gap-4 md:gap-6 w-max animate-scroll-left px-4">
           {[...REVIEWS_1, ...REVIEWS_1].map((review, i) => (
             <ReviewCard key={i} review={review} />
           ))}
         </div>
       </div>
 
-      <div className="relative w-full overflow-hidden mt-8 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-20 md:before:w-40 before:bg-gradient-to-r before:from-black before:to-transparent before:z-10 after:absolute after:right-0 after:top-0 after:bottom-0 after:w-20 md:after:w-40 after:bg-gradient-to-l after:from-black after:to-transparent after:z-10">
-        <div className="flex gap-6 w-max animate-scroll-right px-6">
+      <div className="relative w-full overflow-hidden mt-6 md:mt-8 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-16 md:before:w-40 before:bg-gradient-to-r before:from-black before:to-transparent before:z-10 after:absolute after:right-0 after:top-0 after:bottom-0 after:w-16 md:after:w-40 after:bg-gradient-to-l after:from-black after:to-transparent after:z-10">
+        <div className="flex gap-4 md:gap-6 w-max animate-scroll-right px-4">
           {[...Array.from({length: 10})].map((_, i) => (
             <ReviewCard key={i} review={REVIEWS_2[i % REVIEWS_2.length]} />
           ))}
