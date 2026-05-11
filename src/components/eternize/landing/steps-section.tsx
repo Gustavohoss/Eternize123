@@ -113,7 +113,7 @@ export function StepsSection() {
           </h2>
           
           <NextLink href="/criador" className="bg-gradient-to-r from-primary to-red-800 text-white px-10 py-5 rounded-full text-[18px] font-bold inline-flex items-center gap-3 transition-all hover:scale-105 hover:shadow-[0_15px_35px_rgba(225,29,72,0.5)] shadow-[0_10px_25px_rgba(225,29,72,0.3)] group">
-            Criar minha página agora →
+            Criar minha página agora
           </NextLink>
         </div>
       </div>
