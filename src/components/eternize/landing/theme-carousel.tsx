@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -17,7 +18,8 @@ export function ThemeCarousel() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setOrigin(window.location.origin);
+      const currentOrigin = window.location.origin;
+      setOrigin(currentOrigin);
     }
   }, []);
 
@@ -175,8 +177,8 @@ export function ThemeCarousel() {
                       <div className="absolute inset-0 pointer-events-none overflow-hidden">
                         <iframe
                           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.25] border-none"
-                          src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}`}
-                          allow="autoplay; encrypted-media"
+                          src={`https://www.youtube-nocookie.com/embed/${videoId}?mute=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}`}
+                          allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           title={theme.name}
                         />
                       </div>
