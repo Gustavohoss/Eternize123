@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -14,7 +13,6 @@ import { CuriosidadesModulePreview } from '@/components/eternize/curiosidades-mo
 import { RouletteModulePreview } from '@/components/eternize/roulette-module-preview';
 import { cn } from '@/lib/utils';
 
-// Importação dinâmica do mapa para evitar erros de SSR
 const JourneyModulePreview = dynamic(
   () => import('@/components/eternize/journey-module-preview').then(mod => mod.JourneyModulePreview),
   { ssr: false, loading: () => <div className="flex-1 bg-[#0d1117] flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div></div> }
@@ -87,7 +85,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
   const [dragOffset, setDragOffset] = useState(0);
   const [previewModuleId, setPreviewModuleId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [origin, setOrigin] = useState('');
+  const [origin, setOrigin] = useState('https://www.eternizee.shop');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -165,8 +163,6 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
 
   return (
     <div className="flex flex-col items-center md:items-start w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-      
-      {/* Visual Carousel */}
       <div className={cn("relative w-full flex flex-col items-center mb-10 mt-6")} ref={containerRef}>
         <div 
           className="absolute w-[400px] h-[400px] rounded-full blur-[120px] -z-10 transition-all duration-700 pointer-events-none" 
@@ -192,7 +188,6 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
                 const total = MODULES.length;
                 let offset = i - currentIndex;
                 
-                // Lógica de Loop
                 if (offset > total / 2) offset -= total;
                 if (offset < -total / 2) offset += total;
 
@@ -235,7 +230,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
                         <div className="absolute inset-0 pointer-events-none overflow-hidden">
                           <iframe
                             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.3] border-none"
-                            src={`https://www.youtube.com/embed/${module.videoUrl}?autoplay=1&mute=1&loop=1&playlist=${module.videoUrl}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}`}
+                            src={`https://www.youtube-nocookie.com/embed/${module.videoUrl}?autoplay=1&mute=1&loop=1&playlist=${module.videoUrl}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}`}
                             allow="autoplay; encrypted-media; picture-in-picture"
                           />
                         </div>
@@ -323,7 +318,6 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
         </div>
       </div>
 
-      {/* Botões de Navegação */}
       <div className="grid grid-cols-2 gap-4 w-full pt-10">
         <Button 
           onClick={onBack} 
@@ -340,7 +334,6 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
         </Button>
       </div>
 
-      {/* Preview Modal */}
       <Dialog open={!!previewModuleId} onOpenChange={(open) => !open && setPreviewModuleId(null)}>
         <DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[500] translate-x-0 translate-y-0 rounded-none max-w-none">
           <DialogTitle className="sr-only">Prévia do Módulo</DialogTitle>

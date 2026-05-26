@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -14,6 +13,13 @@ export function ThemeCarousel() {
   const [startX, setStartX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [origin, setOrigin] = useState('https://www.eternizee.shop');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin);
+    }
+  }, []);
 
   const nextStep = () => {
     setCurrentIndex(prev => (prev + 1) % THEME_OPTIONS.length);
@@ -23,7 +29,6 @@ export function ThemeCarousel() {
     setCurrentIndex(prev => (prev - 1 + THEME_OPTIONS.length) % THEME_OPTIONS.length);
   };
 
-  // Lógica de Auto-Advance (4 segundos)
   useEffect(() => {
     if (isDragging) return;
     
@@ -102,7 +107,6 @@ export function ThemeCarousel() {
 
   return (
     <div className={cn("relative w-full max-w-[520px] flex flex-col items-center justify-center py-10 gap-6", isDragging && "dragging")} ref={containerRef}>
-      {/* Dynamic Background Glow */}
       <div 
         className="absolute w-[480px] h-[480px] rounded-full blur-[120px] -z-10 transition-all duration-700 pointer-events-none" 
         style={{ background: `radial-gradient(${getGlowColor(currentTheme.id)} 0%, transparent 70%)` }}
@@ -127,7 +131,6 @@ export function ThemeCarousel() {
               const total = THEME_OPTIONS.length;
               let offset = i - currentIndex;
               
-              // Lógica de Loop: calcula o caminho mais curto
               if (offset > total / 2) offset -= total;
               if (offset < -total / 2) offset += total;
 
@@ -172,7 +175,7 @@ export function ThemeCarousel() {
                       <div className="absolute inset-0 pointer-events-none overflow-hidden">
                         <iframe
                           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.25] border-none"
-                          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0`}
+                          src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}`}
                           allow="autoplay; encrypted-media"
                         />
                       </div>

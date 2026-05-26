@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
@@ -56,7 +55,6 @@ export const MusicPlayer = forwardRef<MusicPlayerRef, MusicPlayerProps>(({
   const containerId = useRef(`yt-player-${Math.random().toString(36).substring(2, 11)}`);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Expor métodos para o pai (DeviceMockup)
   useImperativeHandle(ref, () => ({
     play: () => {
       if (playerRef.current && isReady) {
@@ -112,12 +110,13 @@ export const MusicPlayer = forwardRef<MusicPlayerRef, MusicPlayerProps>(({
       if (!window.YT || !window.YT.Player || playerRef.current || !document.getElementById(containerId.current)) return;
 
       try {
-        const origin = typeof window !== 'undefined' ? window.location.origin : '';
+        const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.eternizee.shop';
         
         playerRef.current = new window.YT.Player(containerId.current, {
           height: '1',
           width: '1',
           videoId: musicData?.id || '',
+          host: 'https://www.youtube-nocookie.com',
           playerVars: {
             autoplay: isAutoPlay ? 1 : 0,
             controls: 0,
@@ -148,7 +147,6 @@ export const MusicPlayer = forwardRef<MusicPlayerRef, MusicPlayerProps>(({
                 setIsPlaying(true);
                 if (onStateChange) onStateChange(true);
                 startTimer();
-                // Agressively try to unmute in case of browser restrictions
                 if (!isMutedByParam) {
                   event.target.unMute();
                   event.target.setVolume(100);
@@ -161,10 +159,6 @@ export const MusicPlayer = forwardRef<MusicPlayerRef, MusicPlayerProps>(({
             },
             onError: (event: any) => {
               console.warn("YouTube Player Error:", event.data);
-              // Retry on specific errors if possible
-              if (event.data === 150 || event.data === 101) {
-                // This is the error the user reported, sometimes it's transient
-              }
             }
           }
         });
