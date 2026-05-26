@@ -126,6 +126,8 @@ export const MusicPlayer = forwardRef<MusicPlayerRef, MusicPlayerProps>(({
             rel: 0,
             enablejsapi: 1,
             origin: origin,
+            widget_referrer: origin,
+            playsinline: 1,
             mute: isAutoPlay ? 1 : 0 
           },
           events: {
@@ -146,10 +148,22 @@ export const MusicPlayer = forwardRef<MusicPlayerRef, MusicPlayerProps>(({
                 setIsPlaying(true);
                 if (onStateChange) onStateChange(true);
                 startTimer();
+                // Agressively try to unmute in case of browser restrictions
+                if (!isMutedByParam) {
+                  event.target.unMute();
+                  event.target.setVolume(100);
+                }
               } else if (state === window.YT.PlayerState.PAUSED || state === window.YT.PlayerState.ENDED) {
                 setIsPlaying(false);
                 if (onStateChange) onStateChange(false);
                 stopTimer();
+              }
+            },
+            onError: (event: any) => {
+              console.warn("YouTube Player Error:", event.data);
+              // Retry on specific errors if possible
+              if (event.data === 150 || event.data === 101) {
+                // This is the error the user reported, sometimes it's transient
               }
             }
           }

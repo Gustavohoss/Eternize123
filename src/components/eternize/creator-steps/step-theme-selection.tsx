@@ -24,6 +24,13 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
   const [startX, setStartX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [origin, setOrigin] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin);
+    }
+  }, []);
 
   const nextStep = () => {
     const nextIdx = (currentIndex + 1) % THEME_OPTIONS.length;
@@ -191,8 +198,8 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                         <div className="absolute inset-0 pointer-events-none overflow-hidden">
                           <iframe
                             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.25] border-none"
-                            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0`}
-                            allow="autoplay; encrypted-media"
+                            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}`}
+                            allow="autoplay; encrypted-media; picture-in-picture"
                           />
                         </div>
                       ) : (
@@ -244,10 +251,10 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
           </div>
 
           <button 
-            onClick={nextStep} 
+            onClick={prevStep} 
             className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90"
           >
-            <ChevronRight className="w-5 h-5 text-white" />
+            <ChevronLeft className="w-5 h-5 text-white" />
           </button>
         </div>
 

@@ -27,8 +27,13 @@ export function FeaturesDashboard() {
   const [previewThemeIndex, setPreviewThemeIndex] = useState(0);
   const [counter, setCounter] = useState({ years: '00', months: '00', days: '00', hours: '00' });
   const [waveformBars, setWaveformBars] = useState<{ height: string; duration: string }[]>([]);
+  const [origin, setOrigin] = useState('');
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin);
+    }
+    
     const updateCounter = () => {
       const start = new Date('2022-02-14T00:00:00');
       const now = new Date();
@@ -328,7 +333,7 @@ export function FeaturesDashboard() {
                  <div className="absolute inset-0 pointer-events-none">
                    <iframe
                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.25] border-none opacity-40 group-hover:opacity-60 transition-opacity"
-                     src={`https://www.youtube.com/embed/${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}?autoplay=1&mute=1&loop=1&playlist=${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0`}
+                     src={`https://www.youtube.com/embed/${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}?autoplay=1&mute=1&loop=1&playlist=${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}`}
                      allow="autoplay; encrypted-media"
                      tabIndex={-1}
                    />
