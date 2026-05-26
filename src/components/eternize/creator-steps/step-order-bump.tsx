@@ -230,8 +230,9 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
                         <div className="absolute inset-0 pointer-events-none overflow-hidden">
                           <iframe
                             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.3] border-none"
-                            src={`https://www.youtube-nocookie.com/embed/${module.videoUrl}?autoplay=1&mute=1&loop=1&playlist=${module.videoUrl}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&volume=0&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}`}
+                            src={`https://www.youtube-nocookie.com/embed/${module.videoUrl}?autoplay=1&mute=1&loop=1&playlist=${module.videoUrl}&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}`}
                             allow="autoplay; encrypted-media; picture-in-picture"
+                            title={module.title}
                           />
                         </div>
                       ) : (
