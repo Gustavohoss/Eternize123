@@ -31,7 +31,7 @@ export function FeaturesDashboard() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setOrigin(window.location.origin);
+      setOrigin(window.location.origin || 'https://www.eternizee.shop');
     }
     
     const updateCounter = () => {
@@ -333,9 +333,10 @@ export function FeaturesDashboard() {
                  <div className="absolute inset-0 pointer-events-none">
                    <iframe
                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.25] border-none opacity-40 group-hover:opacity-60 transition-opacity"
-                     src={`https://www.youtube-nocookie.com/embed/${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}?autoplay=1&mute=1&controls=0&loop=1&playlist=${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(origin)}`}
+                     src={`https://www.youtube.com/embed/${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}?autoplay=1&mute=1&loop=1&playlist=${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}&playsinline=1`}
                      allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                      title="Preview"
+                     loading="eager"
                    />
                  </div>
                ) : (
