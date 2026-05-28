@@ -438,6 +438,7 @@ export function DeviceMockup({
           {showSpotifyWrapped && (
             <SpotifyWrappedView 
               pageTitle={pageTitle}
+              totalDays={totalDays}
               onClose={() => setShowSpotifyWrapped(false)}
               onComplete={() => {
                 setShowSpotifyWrapped(false);
