@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
@@ -439,6 +440,7 @@ export function DeviceMockup({
             <SpotifyWrappedView 
               pageTitle={pageTitle}
               totalDays={totalDays}
+              photos={uploadedPhotos}
               onClose={() => setShowSpotifyWrapped(false)}
               onComplete={() => {
                 setShowSpotifyWrapped(false);
