@@ -109,12 +109,12 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
                           }, 30);
                         }, 400); // Aguarda o zíper abrir um pouco
                       }, 500);
-                    }
-                  }, 30);
-                }, 800);
+                    }, 800);
+                  }
+                }, 30);
               }, 800);
             }, 800);
-          }, 500);
+          }, 800);
         }
       }, 30);
     }, 1600);
