@@ -77,7 +77,7 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
                   if (p2 >= 100) {
                     clearInterval(interval2);
 
-                    // Transição para o ATO 3 (Elevador) - MELHORADA
+                    // Transição para o ATO 3 (Elevador)
                     setTimeout(() => {
                       setIsTextVisible(false);
                       setIsReveal(false);
@@ -250,12 +250,6 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
                   <div className="strip bg-black-yellow"><span className="number-text">{totalHours}</span></div>
                 </div>
               ))}
-           </div>
-           {/* Overlay de texto para o elevador */}
-           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-              <div className="bg-black/40 backdrop-blur-sm px-6 py-2 rounded-full border border-white/10 mb-4 animate-in fade-in zoom-in-95 duration-700 delay-500">
-                 <p className="text-white font-black text-xs uppercase tracking-[0.3em]">Total de Horas</p>
-              </div>
            </div>
         </div>
       )}
