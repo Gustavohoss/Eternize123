@@ -24,19 +24,11 @@ export function SpotifyWrappedView({ pageTitle, totalDays, photos, onClose, onCo
   const [isTextVisible, setIsTextVisible] = useState(false);
   
   // Estado para os cards do Slide 5
-  const [cardStack, setCardStack] = useState<number[]>([]);
   const [removedCards, setRemovedCards] = useState<number[]>([]);
 
   const barCount = 20;
   const centerIndex = (barCount - 1) / 2;
   const totalHours = useMemo(() => (totalDays * 24).toLocaleString('pt-BR'), [totalDays]);
-
-  // Inicializa a pilha de cards
-  useEffect(() => {
-    if (photos.length > 0) {
-      setCardStack(photos.map((_, i) => i).reverse());
-    }
-  }, [photos]);
 
   useEffect(() => {
     // Início: Fecha o zíper (Slide 1)
@@ -128,14 +120,14 @@ export function SpotifyWrappedView({ pageTitle, totalDays, photos, onClose, onCo
                                             setTimeout(() => {
                                               setIsReveal(true);
                                               setIsTextVisible(true);
-                                              // A barra 5 não termina sozinha, termina quando os cards acabam ou tempo expira
+                                              // Barra progride, mas não fecha sozinha
                                               let p5 = 0;
                                               const interval5 = setInterval(() => {
                                                 p5 += 0.2;
                                                 setProgress(p5);
                                                 if (p5 >= 100) {
                                                   clearInterval(interval5);
-                                                  setTimeout(onComplete, 1000);
+                                                  // Não chama onComplete aqui, espera o usuário
                                                 }
                                               }, 100);
                                             }, 800);
@@ -164,12 +156,15 @@ export function SpotifyWrappedView({ pageTitle, totalDays, photos, onClose, onCo
       clearTimeout(startTimeout);
       clearTimeout(reveal1Timeout);
     };
-  }, [onComplete, totalDays]);
+  }, [totalDays]); // Removido onComplete das dependências para evitar loops
 
   const handleCardClick = (index: number) => {
+    if (removedCards.includes(index)) return;
     setRemovedCards(prev => [...prev, index]);
+    
+    // Se removeu o último card, completa
     if (removedCards.length + 1 >= photos.length) {
-      setTimeout(onComplete, 800);
+      setTimeout(onComplete, 1000);
     }
   };
 
@@ -186,7 +181,7 @@ export function SpotifyWrappedView({ pageTitle, totalDays, photos, onClose, onCo
         color = `rgb(29, ${g}, 84)`;
       } else if (currentSlide === 5) {
         const r = Math.floor(180 + (i * (75 / barCount)));
-        color = `rgb(${r}, 30, 140)`; // Rosa Spotify
+        color = `rgb(${r}, 30, 140)`; 
       } else {
         const g = Math.floor(180 + (i * (50 / barCount)));
         color = `rgb(255, ${g}, 0)`;
@@ -206,7 +201,7 @@ export function SpotifyWrappedView({ pageTitle, totalDays, photos, onClose, onCo
           display: flex;
           flex-direction: column;
           transition: transform 0.8s cubic-bezier(0.45, 0.05, 0.55, 0.95);
-          min-width: calc(100% / ${barCount} + 0.5px);
+          min-width: calc(100% / ${barCount} + 1px);
           margin-right: -0.5px;
           will-change: transform;
         }
@@ -282,12 +277,19 @@ export function SpotifyWrappedView({ pageTitle, totalDays, photos, onClose, onCo
           padding: 10px 10px 35px 10px;
           box-shadow: 0 10px 30px rgba(0,0,0,0.5);
           cursor: pointer;
-          transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s ease;
+          transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s ease;
           border-radius: 4px;
         }
-        .polaroid-card:hover { transform: scale(1.02) rotate(0deg) !important; z-index: 100 !important; }
         .card-removed { transform: translate3d(150%, -50%, 0) rotate(45deg) !important; opacity: 0; }
       `}</style>
+
+      {/* Botão de Fechar */}
+      <button 
+        onClick={onClose}
+        className="absolute top-6 right-6 z-[1100] w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white transition-all active:scale-90"
+      >
+        <X className="w-6 h-6" />
+      </button>
 
       {(currentSlide !== 3 || isActive) && (
         <div className={cn(
@@ -423,7 +425,7 @@ export function SpotifyWrappedView({ pageTitle, totalDays, photos, onClose, onCo
                         style={{ 
                           zIndex: i + 10,
                           transform: `rotate(${rotation}deg)`,
-                          display: isRemoved && removedCards.indexOf(i) < removedCards.length - 2 ? 'none' : 'block'
+                          display: isRemoved && removedCards.indexOf(i) < (removedCards.length - 1) ? 'none' : 'block'
                         }}
                       >
                          <div className="w-full aspect-square relative bg-neutral-100 overflow-hidden mb-2">

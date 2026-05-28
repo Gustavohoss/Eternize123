@@ -158,8 +158,6 @@ export function DeviceMockup({
   }, [activeModuleId]);
 
   // Animation/Experience States
-  const [isIntroActive, setIsIntroActive] = useState(false);
-  const [introPhase, setIntroPhase] = useState<'idle' | 'closing' | 'logo' | 'fading'>('idle');
   const [showStories, setShowStories] = useState(false);
   const [showSpotifyWrapped, setShowSpotifyWrapped] = useState(false);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
@@ -176,7 +174,6 @@ export function DeviceMockup({
   const [selectedPostIndex, setSelectedPostIndex] = useState(0);
   const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({});
   const [savedPosts, setSavedPosts] = useState<Record<number, boolean>>({});
-  const [dynamicSpotifyColor, setDynamicSpotifyColor] = useState('#1a0a0a');
   const [spotifyHeaderOpacity, setSpotifyHeaderOpacity] = useState(0);
 
   // Inicializa o estado de áudio baseado no config se estiver no editor
@@ -247,7 +244,7 @@ export function DeviceMockup({
   const prevStory = useCallback(() => {
     if (isFading) return;
     if (currentStoryIndex > 0) triggerFade(() => { setCurrentStoryIndex(prev => prev - 1); setStoryProgress(0); });
-  }, [currentStoryIndex, triggerFade, isFading]);
+  }, [currentStoryIndex, triggerFade, iFading]);
 
   useEffect(() => {
     if (!showStories || uploadedPhotos.length === 0 || isStoryPaused || isFading) return;
@@ -275,56 +272,9 @@ export function DeviceMockup({
 
   const slugifiedTitle = (pageTitle || '').toLowerCase().replace(/\s+/g, '-').normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-  // Curtain Bars generation
-  const curtainBars = useMemo(() => {
-    const count = 30;
-    return Array.from({ length: count }).map((_, i) => {
-      const r = Math.floor(26 + (i * (192 / count)));
-      return {
-        color: `rgb(${r}, 0, 0)`,
-        delay: `${i * 0.02}s`
-      };
-    });
-  }, []);
-
-  const handleStartNetflixExperience = useCallback(() => {
-    if (selectedTheme !== 'netflix') {
-      setShowStories(true);
-      setCurrentStoryIndex(0);
-      setStoryProgress(0);
-      return;
-    }
-
-    setIsIntroActive(true);
-    setIntroPhase('closing');
-    
-    setTimeout(() => {
-      setIntroPhase('logo');
-    }, 1600);
-
-    setTimeout(() => {
-      setIsIntroActive(false);
-      setIntroPhase('idle');
-      setShowStories(true);
-      setCurrentStoryIndex(0);
-      setStoryProgress(0);
-    }, 4500);
-  }, [selectedTheme]);
-
-  // Handler de scroll para o Spotify
-  const handleSpotifyScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const scrollTop = e.currentTarget.scrollTop;
-    const opacity = Math.min(1, Math.max(0, (scrollTop - 20) / 100));
-    setSpotifyHeaderOpacity(opacity);
-  }, []);
-
-  // Inicia a experiência e libera áudio
   const handleStartExperience = () => {
     setHasStarted(true);
     setIsAudioPlaying(true);
-    
-    // CHAMADA IMPERATIVA: Força o play no player através do Ref
-    // Isso é um gesto de usuário garantido para o navegador
     setTimeout(() => {
       if (musicPlayerRef.current) {
         musicPlayerRef.current.play();
@@ -346,32 +296,12 @@ export function DeviceMockup({
                     <Heart className="w-10 h-10 text-primary fill-primary animate-pulse" />
                  </div>
               </div>
-              
               <div className="space-y-3">
                  <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white">PARA VOCÊ<span className="text-primary">.</span></h2>
                  <p className="text-white/40 text-sm font-medium leading-relaxed">Prepare-se para uma surpresa especial. Ligue o som para uma experiência completa.</p>
               </div>
-
-              <Button 
-                onClick={handleStartExperience}
-                className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-3"
-              >
-                Dar o Play ❤️ <Play className="w-4 h-4 fill-current" />
-              </Button>
+              <Button onClick={handleStartExperience} className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-3">Dar o Play ❤️ <Play className="w-4 h-4 fill-current" /></Button>
            </div>
-        </div>
-      )}
-
-      {/* Intro Layer Netflix */}
-      {selectedTheme === 'netflix' && isIntroActive && (
-        <div className="absolute inset-0 z-[1000] bg-black flex items-center justify-center overflow-hidden">
-           <div className={cn("curtain-container", (introPhase === 'closing' || introPhase === 'logo') && "curtain-active")}>
-             {curtainBars.map((bar, i) => (
-               <div key={i} className="curtain-bar" style={{ backgroundColor: bar.color, transitionDelay: bar.delay }} />
-             ))}
-           </div>
-           <div className="curtain-overlay"></div>
-           <h1 className={cn("curtain-logo-text", introPhase === 'logo' && "curtain-logo-visible")}>ETERNIZE</h1>
         </div>
       )}
 
@@ -406,10 +336,10 @@ export function DeviceMockup({
                 <ClassicView {...{uploadedPhotos, photoEffect, showCard, cardColor, titlePosition, pageTitle, titleStyle, message, messageColor, messageFontFamily: getFontFamily(messageFont || 'inter'), date, selectedCountStyle, dateStyle, dateIsBold, dateBoxBgColor, dateBoxBorderColor, timeDiff, totalDays, isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'netflix' && (
-                <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: handleStartNetflixExperience, onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList), isPackEnabled, onModuleClick: setPreviewModuleId}} />
+                <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: () => setShowStories(true), onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList), isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'spotify' && (
-                <SpotifyView {...{uploadedPhotos, activeHeroIndex, pageTitle, totalDays, timeDiff, date, activeTab, onTabChange: setActiveTab, onPhotoClick: (i) => { setActiveHeroIndex(i); setShowSpotifyFullscreen(true); }, isLiked, onLikeToggle: () => setIsLiked(!isLiked), isAudioPlaying, onAudioToggle: setIsAudioPlaying, dynamicSpotifyColor, spotifyHeaderOpacity, onHeaderScroll: handleSpotifyScroll, onShowFullscreen: () => setShowSpotifyFullscreen(true), onCloseFullscreen: () => setShowSpotifyFullscreen(false), showSpotifyFullscreen, message, isPackEnabled, onModuleClick: setPreviewModuleId, spotifyCardPhoto, onStartWrapped: () => setShowSpotifyWrapped(true)}} />
+                <SpotifyView {...{uploadedPhotos, activeHeroIndex, pageTitle, totalDays, timeDiff, date, activeTab, onTabChange: setActiveTab, onPhotoClick: (i) => { setActiveHeroIndex(i); setShowSpotifyFullscreen(true); }, isLiked, onLikeToggle: () => setIsLiked(!isLiked), isAudioPlaying, onAudioToggle: setIsAudioPlaying, dynamicSpotifyColor: '#121212', spotifyHeaderOpacity, onHeaderScroll: (e) => setSpotifyHeaderOpacity(Math.min(1, e.currentTarget.scrollTop / 100)), onShowFullscreen: () => setShowSpotifyFullscreen(true), onCloseFullscreen: () => setShowSpotifyFullscreen(false), showSpotifyFullscreen, message, isPackEnabled, onModuleClick: setPreviewModuleId, spotifyCardPhoto, onStartWrapped: () => setShowSpotifyWrapped(true)}} />
               )}
               {selectedTheme === 'instagram' && (
                 <InstagramView {...{uploadedPhotos, pageTitle, totalDays, timeDiff, date, message, isFollowing, onFollowToggle: () => setIsFollowing(!isFollowing), activeTab, onTabChange: setActiveTab, onStartStories: () => { setShowStories(true); setCurrentStoryIndex(0); setStoryProgress(0); }, onPostClick: (i) => { setSelectedPostIndex(i); setShowInstagramPost(true); }, showPostDetail: showInstagramPost, selectedPostIndex, onClosePost: () => setShowInstagramPost(false), likedPosts, onLikePost: (i) => setLikedPosts(prev => ({...prev, [i]: !prev[i]})), savedPosts, onSavePost: (i) => setSavedPosts(prev => ({...prev, [i]: !prev[i]})), isAudioPlaying, onAudioToggle: setIsAudioPlaying, isPackEnabled, onModuleClick: setPreviewModuleId}} />
@@ -417,7 +347,7 @@ export function DeviceMockup({
             </div>
           </div>
 
-          {/* Stories Layer - Agora dentro do frame */}
+          {/* Stories Layer */}
           {showStories && (
             <StoriesView 
               photos={uploadedPhotos} 
@@ -435,29 +365,24 @@ export function DeviceMockup({
             />
           )}
 
-          {/* Spotify Wrapped Intro Layer - Agora dentro do frame */}
+          {/* Spotify Wrapped Intro Layer */}
           {showSpotifyWrapped && (
             <SpotifyWrappedView 
               pageTitle={pageTitle}
               totalDays={totalDays}
               photos={uploadedPhotos}
               onClose={() => setShowSpotifyWrapped(false)}
-              onComplete={() => {
-                setShowSpotifyWrapped(false);
-                setShowStories(true);
-                setCurrentStoryIndex(0);
-                setStoryProgress(0);
-              }}
+              onComplete={() => setShowSpotifyWrapped(false)}
             />
           )}
 
-          {/* ÚNICO PLAYER DE ÁUDIO - INSTÂNCIA MESTRA */}
+          {/* MUSIC PLAYER */}
           {musicData && (
             <div className="absolute bottom-6 left-4 right-4 z-[100] animate-in slide-in-from-bottom-4 duration-500">
                <MusicPlayer 
                  ref={musicPlayerRef}
                  musicData={musicData} 
-                 musicBoxColor={selectedTheme === 'classic' ? musicBoxColor : '#0c0c0c/90'}
+                 musicBoxColor={selectedTheme === 'classic' ? musicBoxColor : 'rgba(12,12,12,0.9)'}
                  musicTextColor={selectedTheme === 'classic' ? musicTextColor : '#ffffff'}
                  musicHasNeon={selectedTheme === 'classic' ? musicHasNeon : false}
                  musicNeonStrength={musicNeonStrength}
