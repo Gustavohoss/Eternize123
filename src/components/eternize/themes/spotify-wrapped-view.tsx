@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -76,35 +77,41 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
                   if (p2 >= 100) {
                     clearInterval(interval2);
 
-                    // Transição para o ATO 3 (Elevador)
+                    // Transição para o ATO 3 (Elevador) - MELHORADA
                     setTimeout(() => {
                       setIsTextVisible(false);
                       setIsReveal(false);
                       
                       setTimeout(() => {
-                        setCurrentSlide(3);
-                        setProgress(0);
-                        setIsTextVisible(true);
+                        // Abre a cortina para dar lugar ao slide que vem de cima
+                        setIsActive(false);
+                        
+                        setTimeout(() => {
+                          setCurrentSlide(3);
+                          setProgress(0);
+                          setIsTextVisible(true);
 
-                        // --- ATO 3: ELEVADOR ---
-                        let p3 = 0;
-                        const interval3 = setInterval(() => {
-                          p3 += 0.6;
-                          setProgress(p3);
-                          if (p3 >= 100) {
-                            clearInterval(interval3);
-                            
-                            // Finaliza e vai para Stories
-                            setTimeout(() => {
-                              setIsActive(false);
-                              setTimeout(onComplete, 800);
-                            }, 1000);
-                          }
-                        }, 30);
-                      }, 800);
-                    }, 500);
-                  }
-                }, 30);
+                          // --- ATO 3: ELEVADOR ---
+                          let p3 = 0;
+                          const interval3 = setInterval(() => {
+                            p3 += 0.6;
+                            setProgress(p3);
+                            if (p3 >= 100) {
+                              clearInterval(interval3);
+                              
+                              // Finaliza e vai para Stories
+                              setTimeout(() => {
+                                // Transição final suave para sair do elevador
+                                setProgress(100);
+                                setTimeout(onComplete, 1200);
+                              }, 1000);
+                            }
+                          }, 30);
+                        }, 400); // Aguarda o zíper abrir um pouco
+                      }, 500);
+                    }
+                  }, 30);
+                }, 800);
               }, 800);
             }, 800);
           }, 500);
@@ -229,9 +236,9 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
         </div>
       )}
 
-      {/* ATO 3: ELEVADOR */}
+      {/* ATO 3: ELEVADOR - COM TRANSIÇÃO DE CIMA PARA BAIXO */}
       {currentSlide === 3 && (
-        <div className="absolute inset-0 z-0 flex flex-col animate-in fade-in duration-700">
+        <div className="absolute inset-0 z-0 flex flex-col animate-in slide-in-from-top duration-1000 ease-out">
            <div className="elevator-track">
               {[1, 2].map((group) => (
                 <div key={group} className="strips-group">
@@ -246,7 +253,7 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
            </div>
            {/* Overlay de texto para o elevador */}
            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-              <div className="bg-black/40 backdrop-blur-sm px-6 py-2 rounded-full border border-white/10 mb-4">
+              <div className="bg-black/40 backdrop-blur-sm px-6 py-2 rounded-full border border-white/10 mb-4 animate-in fade-in zoom-in-95 duration-700 delay-500">
                  <p className="text-white font-black text-xs uppercase tracking-[0.3em]">Total de Horas</p>
               </div>
            </div>
