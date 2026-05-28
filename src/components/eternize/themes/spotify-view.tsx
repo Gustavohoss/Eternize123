@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -31,6 +30,7 @@ interface SpotifyViewProps {
   isPackEnabled?: boolean;
   onModuleClick?: (id: string) => void;
   spotifyCardPhoto?: string;
+  onStartWrapped?: () => void;
 }
 
 const VerifiedBadge = ({ size = 16 }: { size?: number }) => (
@@ -62,7 +62,8 @@ export function SpotifyView({
   message,
   isPackEnabled = false,
   onModuleClick,
-  spotifyCardPhoto = ''
+  spotifyCardPhoto = '',
+  onStartWrapped
 }: SpotifyViewProps) {
   
   const modules = [
@@ -210,7 +211,7 @@ export function SpotifyView({
                  <h2 className="text-4xl font-black text-white tracking-tighter mb-2 font-['DM_Sans']">Sua Retrospectiva</h2>
                  <p className="text-white/80 text-sm font-light mb-8 font-['DM_Sans']">Explore o seu tempo de casal.</p>
                  <button 
-                   onClick={onShowFullscreen}
+                   onClick={onStartWrapped}
                    className="bg-[#1ed760] text-black px-12 py-4 rounded-full text-sm font-bold uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(30,215,96,0.3)]"
                  >
                    Vamos lá

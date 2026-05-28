@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
@@ -30,6 +29,7 @@ import { NetflixView } from './themes/netflix-view';
 import { SpotifyView } from './themes/spotify-view';
 import { InstagramView } from './themes/instagram-view';
 import { StoriesView } from './themes/stories-view';
+import { SpotifyWrappedView } from './themes/spotify-wrapped-view';
 
 interface DeviceMockupProps {
   selectedTheme?: ThemeId;
@@ -160,6 +160,7 @@ export function DeviceMockup({
   const [isIntroActive, setIsIntroActive] = useState(false);
   const [introPhase, setIntroPhase] = useState<'idle' | 'closing' | 'logo' | 'fading'>('idle');
   const [showStories, setShowStories] = useState(false);
+  const [showSpotifyWrapped, setShowSpotifyWrapped] = useState(false);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [storyProgress, setStoryProgress] = useState(0);
   const [isStoryPaused, setIsStoryPaused] = useState(false);
@@ -253,7 +254,7 @@ export function DeviceMockup({
     const timer = setInterval(() => {
       setStoryProgress(prev => { if (prev >= 100) { nextStory(); return 0; } return prev + step; });
     }, intervalTime);
-    return () => clearInterval(intervalTime);
+    return () => clearInterval(timer);
   }, [showStories, nextStory, uploadedPhotos.length, isStoryPaused, isFading]);
 
   // Dynamic Styles
@@ -391,6 +392,20 @@ export function DeviceMockup({
         />
       )}
 
+      {/* Spotify Wrapped Intro Layer */}
+      {showSpotifyWrapped && (
+        <SpotifyWrappedView 
+          pageTitle={pageTitle}
+          onClose={() => setShowSpotifyWrapped(false)}
+          onComplete={() => {
+            setShowSpotifyWrapped(false);
+            setShowStories(true);
+            setCurrentStoryIndex(0);
+            setStoryProgress(0);
+          }}
+        />
+      )}
+
       {!isFullscreen && (
         <div className="bg-white border-x border-t border-neutral-200 p-2.5 flex items-center justify-center shrink-0 rounded-t-2xl">
           <div className="bg-neutral-100 rounded-full h-8 w-full flex items-center px-4 gap-2 border border-neutral-200 max-w-[400px]">
@@ -425,7 +440,7 @@ export function DeviceMockup({
                 <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: handleStartNetflixExperience, onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList), isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'spotify' && (
-                <SpotifyView {...{uploadedPhotos, activeHeroIndex, pageTitle, totalDays, timeDiff, date, activeTab, onTabChange: setActiveTab, onPhotoClick: (i) => { setActiveHeroIndex(i); setShowSpotifyFullscreen(true); }, isLiked, onLikeToggle: () => setIsLiked(!isLiked), isAudioPlaying, onAudioToggle: setIsAudioPlaying, dynamicSpotifyColor, spotifyHeaderOpacity, onHeaderScroll: handleSpotifyScroll, onShowFullscreen: () => setShowSpotifyFullscreen(true), onCloseFullscreen: () => setShowSpotifyFullscreen(false), showSpotifyFullscreen, message, isPackEnabled, onModuleClick: setPreviewModuleId, spotifyCardPhoto}} />
+                <SpotifyView {...{uploadedPhotos, activeHeroIndex, pageTitle, totalDays, timeDiff, date, activeTab, onTabChange: setActiveTab, onPhotoClick: (i) => { setActiveHeroIndex(i); setShowSpotifyFullscreen(true); }, isLiked, onLikeToggle: () => setIsLiked(!isLiked), isAudioPlaying, onAudioToggle: setIsAudioPlaying, dynamicSpotifyColor, spotifyHeaderOpacity, onHeaderScroll: handleSpotifyScroll, onShowFullscreen: () => setShowSpotifyFullscreen(true), onCloseFullscreen: () => setShowSpotifyFullscreen(false), showSpotifyFullscreen, message, isPackEnabled, onModuleClick: setPreviewModuleId, spotifyCardPhoto, onStartWrapped: () => setShowSpotifyWrapped(true)}} />
               )}
               {selectedTheme === 'instagram' && (
                 <InstagramView {...{uploadedPhotos, pageTitle, totalDays, timeDiff, date, message, isFollowing, onFollowToggle: () => setIsFollowing(!isFollowing), activeTab, onTabChange: setActiveTab, onStartStories: () => { setShowStories(true); setCurrentStoryIndex(0); setStoryProgress(0); }, onPostClick: (i) => { setSelectedPostIndex(i); setShowInstagramPost(true); }, showPostDetail: showInstagramPost, selectedPostIndex, onClosePost: () => setShowInstagramPost(false), likedPosts, onLikePost: (i) => setLikedPosts(prev => ({...prev, [i]: !prev[i]})), savedPosts, onSavePost: (i) => setSavedPosts(prev => ({...prev, [i]: !prev[i]})), isAudioPlaying, onAudioToggle: setIsAudioPlaying, isPackEnabled, onModuleClick: setPreviewModuleId}} />
