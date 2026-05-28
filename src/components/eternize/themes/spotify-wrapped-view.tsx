@@ -24,7 +24,6 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
   const centerIndex = (barCount - 1) / 2;
   const totalHours = useMemo(() => (totalDays * 24).toLocaleString('pt-BR'), [totalDays]);
 
-  // Lógica de Sequência de Slides
   useEffect(() => {
     // Início: Fecha o zíper (Slide 1)
     const startTimeout = setTimeout(() => {
@@ -32,7 +31,7 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
       setShowProgress(true);
     }, 100);
 
-    // --- ATO 1: NOMES ---
+    // ATO 1: NOMES
     const reveal1Timeout = setTimeout(() => {
       setIsReveal(true);
       setIsTextVisible(true);
@@ -44,7 +43,6 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
         if (p1 >= 100) {
           clearInterval(interval1);
           
-          // Transição para o ATO 2
           setTimeout(() => {
             setIsTextVisible(false);
             setIsReveal(false);
@@ -53,7 +51,7 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
               setCurrentSlide(2);
               setProgress(0);
               
-              // --- ATO 2: DIAS ---
+              // ATO 2: DIAS
               setTimeout(() => {
                 setIsReveal(true);
                 setIsTextVisible(true);
@@ -77,20 +75,18 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
                   if (p2 >= 100) {
                     clearInterval(interval2);
 
-                    // Transição para o ATO 3 (Elevador)
                     setTimeout(() => {
                       setIsTextVisible(false);
                       setIsReveal(false);
                       
                       setTimeout(() => {
-                        // Abre a cortina para dar lugar ao elevador
                         setIsActive(false);
                         
                         setTimeout(() => {
                           setCurrentSlide(3);
                           setProgress(0);
 
-                          // --- ATO 3: ELEVADOR ---
+                          // ATO 3: ELEVADOR
                           let p3 = 0;
                           const interval3 = setInterval(() => {
                             p3 += 0.6;
@@ -98,16 +94,14 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
                             if (p3 >= 100) {
                               clearInterval(interval3);
                               
-                              // Transição para o ATO 4 (Horas Summary)
                               setTimeout(() => {
-                                // Fecha o zíper novamente (agora amarelo)
                                 setIsActive(true);
                                 
                                 setTimeout(() => {
                                   setCurrentSlide(4);
                                   setProgress(0);
                                   
-                                  // --- ATO 4: RESUMO HORAS ---
+                                  // ATO 4: RESUMO HORAS
                                   setTimeout(() => {
                                     setIsReveal(true);
                                     setIsTextVisible(true);
@@ -118,14 +112,12 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
                                       setProgress(p4);
                                       if (p4 >= 100) {
                                         clearInterval(interval4);
-                                        
-                                        // Finaliza e vai para Stories
                                         setTimeout(onComplete, 1000);
                                       }
                                     }, 30);
                                   }, 800);
                                 }, 800);
-                              }, 3500); // Tempo do elevador antes de fechar a cortina amarela
+                              }, 3500);
                             }
                           }, 30);
                         }, 400); 
@@ -151,9 +143,10 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
       const distFromCenter = Math.abs(i - centerIndex);
       const normalizedDist = distFromCenter - 0.5;
       const maxNormalizedDist = centerIndex - 0.5;
-      const retractionPct = 110 - (normalizedDist / maxNormalizedDist) * 90;
       
-      // Cores variam entre Verde (Slides 1-2) e Amarelo (Slide 4)
+      // Aumentado para 120 para garantir limpeza total no centro
+      const retractionPct = 120 - (normalizedDist / maxNormalizedDist) * 95;
+      
       let color;
       if (currentSlide <= 2) {
         const g = Math.floor(80 + (i * (100 / barCount)));
@@ -177,16 +170,22 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
           display: flex;
           flex-direction: column;
           transition: transform 0.8s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+          /* Correção de frestas verticais */
+          min-width: calc(100% / ${barCount} + 0.5px);
+          margin-right: -0.5px;
+          will-change: transform;
         }
-        .wrapped-column.odd { transform: translateY(-100%); }
-        .wrapped-column.even { transform: translateY(100%); }
-        .active .wrapped-column { transform: translateY(0%); }
+        .wrapped-column.odd { transform: translate3d(0, -100%, 0); }
+        .wrapped-column.even { transform: translate3d(0, 100%, 0); }
+        .active .wrapped-column { transform: translate3d(0, 0, 0); }
         
         .wrapped-half {
           flex: 1; 
           width: 100%;
           transition: transform 1.2s cubic-bezier(0.45, 0.05, 0.55, 0.95);
           position: relative; 
+          will-change: transform;
+          backface-visibility: hidden;
         }
         .wrapped-half::after {
           content: '';
@@ -201,17 +200,17 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
         .top-half::after { bottom: 0; background: linear-gradient(to bottom, transparent 0%, #000 100%); }
         .bottom-half::after { top: 0; background: linear-gradient(to top, transparent 0%, #000 100%); }
         
-        .reveal .top-half { transform: translateY(var(--reveal-up)); }
-        .reveal .bottom-half { transform: translateY(var(--reveal-down)); }
+        .reveal .top-half { transform: translate3d(0, var(--reveal-up), 0); }
+        .reveal .bottom-half { transform: translate3d(0, var(--reveal-down), 0); }
         .reveal .wrapped-half::after { opacity: 1; }
 
-        /* Elevador */
         .elevator-track {
           display: flex;
           flex-direction: column;
           height: 200%; 
           width: 100%;
           animation: scrollDown 4s linear infinite;
+          will-change: transform;
         }
         .strips-group { height: 100%; display: flex; flex-direction: column; }
         .strip { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; border-bottom: 2px solid rgba(0, 0, 0, 0.2); }
@@ -236,12 +235,11 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
         .bg-black-yellow .number-text { text-shadow: 5px 5px 0px #5c6b00; }
 
         @keyframes scrollDown {
-          0% { transform: translateY(-50%); }
-          100% { transform: translateY(0%); }
+          0% { transform: translate3d(0, -50%, 0); }
+          100% { transform: translate3d(0, 0%, 0); }
         }
       `}</style>
 
-      {/* Container de Cortinas (Zíper) */}
       {(currentSlide !== 3 || isActive) && (
         <div className={cn(
           "absolute inset-0 flex z-10 pointer-events-none",
@@ -266,7 +264,6 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
         </div>
       )}
 
-      {/* ATO 3: ELEVADOR */}
       {currentSlide === 3 && (
         <div className="absolute inset-0 z-0 flex flex-col animate-in slide-in-from-top duration-1000 ease-out">
            <div className="elevator-track">
@@ -284,7 +281,6 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
         </div>
       )}
 
-      {/* Overlay de Fundo Dinâmico */}
       {(currentSlide !== 3) && (
         <div className={cn(
           "absolute inset-0 transition-opacity duration-500 z-[5] pointer-events-none",
@@ -295,7 +291,6 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
         )} />
       )}
 
-      {/* Barras de Progresso estilo Stories */}
       <div className={cn(
         "absolute top-0 left-0 w-full flex gap-1 px-4 py-6 z-[100] transition-opacity duration-800",
         showProgress ? "opacity-100" : "opacity-0"
@@ -315,7 +310,6 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
         ))}
       </div>
 
-      {/* Conteúdo Central */}
       <div className={cn(
         "relative z-20 flex flex-col items-center text-center px-6 transition-all duration-1000",
         isTextVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
@@ -361,4 +355,3 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
     </div>
   );
 }
-
