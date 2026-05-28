@@ -197,6 +197,28 @@ export function SpotifyView({
            </div>
         </section>
 
+        {/* RETROSPECTIVA CARD */}
+        <section className="px-6 mb-10 animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-200">
+           <div className="relative w-full rounded-[28px] overflow-hidden border border-white/10 shadow-[0_15px_35px_rgba(0,0,0,0.6)] group">
+              <img 
+                src="https://s3.typebotstorage.com/public/workspaces/cm87fx6c6001i920ze1ryoryq/typebots/cmpb8altd00020bkmal2nn1wc/blocks/m8waj0r5v8a3yopdwtk7eox3?v=1779956936120" 
+                alt="Retrospectiva"
+                className="w-full h-auto block"
+              />
+              <div className="absolute inset-0 bg-black/60 z-1" />
+              <div className="absolute inset-0 z-2 flex flex-col items-center justify-center p-5 text-center">
+                 <h2 className="text-4xl font-black text-white tracking-tighter mb-2 font-['DM_Sans']">Sua Retrospectiva</h2>
+                 <p className="text-white/80 text-sm font-light mb-8 font-['DM_Sans']">Explore o seu tempo de casal.</p>
+                 <button 
+                   onClick={onShowFullscreen}
+                   className="bg-[#1ed760] text-black px-12 py-4 rounded-full text-sm font-bold uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(30,215,96,0.3)]"
+                 >
+                   Vamos lá
+                 </button>
+              </div>
+           </div>
+        </section>
+
         {activeTab === 'músicas' && (
           <section className="px-6 mb-12">
             <h2 className="text-white text-xl font-black mb-4 font-['DM_Sans']">Populares</h2>
