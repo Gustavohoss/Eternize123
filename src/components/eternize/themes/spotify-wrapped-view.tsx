@@ -26,7 +26,7 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
 
   // Lógica de Sequência de Slides
   useEffect(() => {
-    // Início: Fecha o zíper
+    // Início: Fecha o zíper (Slide 1)
     const startTimeout = setTimeout(() => {
       setIsActive(true);
       setShowProgress(true);
@@ -83,13 +83,12 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
                       setIsReveal(false);
                       
                       setTimeout(() => {
-                        // Abre a cortina para dar lugar ao slide que vem de cima
+                        // Abre a cortina para dar lugar ao elevador
                         setIsActive(false);
                         
                         setTimeout(() => {
                           setCurrentSlide(3);
                           setProgress(0);
-                          setIsTextVisible(true);
 
                           // --- ATO 3: ELEVADOR ---
                           let p3 = 0;
@@ -99,15 +98,37 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
                             if (p3 >= 100) {
                               clearInterval(interval3);
                               
-                              // Finaliza e vai para Stories
+                              // Transição para o ATO 4 (Horas Summary)
                               setTimeout(() => {
-                                // Transição final suave para sair do elevador
-                                setProgress(100);
-                                setTimeout(onComplete, 1200);
-                              }, 1000);
+                                // Fecha o zíper novamente (agora amarelo)
+                                setIsActive(true);
+                                
+                                setTimeout(() => {
+                                  setCurrentSlide(4);
+                                  setProgress(0);
+                                  
+                                  // --- ATO 4: RESUMO HORAS ---
+                                  setTimeout(() => {
+                                    setIsReveal(true);
+                                    setIsTextVisible(true);
+                                    
+                                    let p4 = 0;
+                                    const interval4 = setInterval(() => {
+                                      p4 += 0.5;
+                                      setProgress(p4);
+                                      if (p4 >= 100) {
+                                        clearInterval(interval4);
+                                        
+                                        // Finaliza e vai para Stories
+                                        setTimeout(onComplete, 1000);
+                                      }
+                                    }, 30);
+                                  }, 800);
+                                }, 800);
+                              }, 3500); // Tempo do elevador antes de fechar a cortina amarela
                             }
                           }, 30);
-                        }, 400); // Aguarda o zíper abrir um pouco
+                        }, 400); 
                       }, 500);
                     }, 800);
                   }
@@ -131,12 +152,21 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
       const normalizedDist = distFromCenter - 0.5;
       const maxNormalizedDist = centerIndex - 0.5;
       const retractionPct = 110 - (normalizedDist / maxNormalizedDist) * 90;
-      const g = Math.floor(80 + (i * (100 / barCount)));
-      const color = `rgb(29, ${g}, 84)`;
+      
+      // Cores variam entre Verde (Slides 1-2) e Amarelo (Slide 4)
+      let color;
+      if (currentSlide <= 2) {
+        const g = Math.floor(80 + (i * (100 / barCount)));
+        color = `rgb(29, ${g}, 84)`;
+      } else {
+        const g = Math.floor(180 + (i * (50 / barCount)));
+        color = `rgb(255, ${g}, 0)`;
+      }
+      
       const delay = `${i * 0.03}s`;
       return { i, retractionPct, color, delay, isOdd: i % 2 !== 0 };
     });
-  }, [barCount, centerIndex]);
+  }, [barCount, centerIndex, currentSlide]);
 
   return (
     <div className="absolute inset-0 z-[1000] bg-black flex flex-col items-center justify-center overflow-hidden font-sans select-none">
@@ -211,8 +241,8 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
         }
       `}</style>
 
-      {/* Container de Cortinas (Zíper) - Apenas nos slides 1 e 2 */}
-      {currentSlide < 3 && (
+      {/* Container de Cortinas (Zíper) */}
+      {(currentSlide !== 3 || isActive) && (
         <div className={cn(
           "absolute inset-0 flex z-10 pointer-events-none",
           isActive && "active",
@@ -236,7 +266,7 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
         </div>
       )}
 
-      {/* ATO 3: ELEVADOR - COM TRANSIÇÃO DE CIMA PARA BAIXO */}
+      {/* ATO 3: ELEVADOR */}
       {currentSlide === 3 && (
         <div className="absolute inset-0 z-0 flex flex-col animate-in slide-in-from-top duration-1000 ease-out">
            <div className="elevator-track">
@@ -254,62 +284,81 @@ export function SpotifyWrappedView({ pageTitle, totalDays, onClose, onComplete }
         </div>
       )}
 
-      {/* Overlay de Fundo */}
-      {currentSlide < 3 && (
+      {/* Overlay de Fundo Dinâmico */}
+      {(currentSlide !== 3) && (
         <div className={cn(
-          "absolute inset-0 bg-black opacity-0 transition-opacity duration-500 z-[5] pointer-events-none",
-          isReveal && "opacity-100"
+          "absolute inset-0 transition-opacity duration-500 z-[5] pointer-events-none",
+          isReveal ? "opacity-100" : "opacity-0",
+          currentSlide === 4 
+            ? "bg-[radial-gradient(circle_at_50%_50%,rgba(255,230,0,0.1)_0%,#000000_80%)]" 
+            : "bg-black"
         )} />
       )}
 
-      {/* Barras de Progresso */}
+      {/* Barras de Progresso estilo Stories */}
       <div className={cn(
         "absolute top-0 left-0 w-full flex gap-1 px-4 py-6 z-[100] transition-opacity duration-800",
         showProgress ? "opacity-100" : "opacity-0"
       )}>
-        <div className="flex-1 h-[3px] bg-white/20 rounded-full overflow-hidden">
-          <div className={cn("h-full bg-white transition-all duration-100", currentSlide > 1 ? "w-full" : "")} style={currentSlide === 1 ? { width: `${progress}%` } : {}} />
-        </div>
-        <div className="flex-1 h-[3px] bg-white/20 rounded-full overflow-hidden">
-          <div className={cn("h-full bg-white transition-all duration-100", currentSlide > 2 ? "w-full" : "w-0")} style={currentSlide === 2 ? { width: `${progress}%` } : {}} />
-        </div>
-        <div className="flex-1 h-[3px] bg-white/20 rounded-full overflow-hidden">
-          <div className={cn("h-full bg-white transition-all duration-100", currentSlide > 3 ? "w-full" : "w-0")} style={currentSlide === 3 ? { width: `${progress}%` } : {}} />
-        </div>
-        <div className="flex-1 h-[3px] bg-white/20 rounded-full" />
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex-1 h-[3px] bg-white/20 rounded-full overflow-hidden">
+            <div 
+              className={cn("h-full transition-all duration-100", currentSlide > i ? "w-full" : "w-0")} 
+              style={currentSlide === i ? { 
+                width: `${progress}%`,
+                backgroundColor: i === 4 ? '#ffe600' : '#fff'
+              } : {
+                backgroundColor: i === 4 ? '#ffe600' : '#fff'
+              }} 
+            />
+          </div>
+        ))}
       </div>
 
-      {/* Conteúdo Central (Slides 1 e 2) */}
-      {currentSlide < 3 && (
-        <div className={cn(
-          "relative z-20 flex flex-col items-center text-center px-6 transition-all duration-1000",
-          isTextVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
-        )}>
-          {currentSlide === 1 ? (
-            <>
-              <h1 className="text-[#1DB954] text-5xl md:text-7xl font-black tracking-tighter mb-4 uppercase italic leading-[1.1] drop-shadow-2xl">
-                {pageTitle || 'Edu e Ana'}
-              </h1>
-              <p className="text-white text-lg md:text-2xl font-bold opacity-90 max-w-[280px] leading-relaxed">
-                Os momentos que marcaram essa relação
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="text-[#b3b3b3] text-xl font-semibold uppercase tracking-wider mb-2">Desde o primeiro sim...</p>
-              <div className="flex flex-col items-center my-6">
-                <span className="text-[#1DB954] text-8xl font-black leading-none tracking-tighter drop-shadow-[0_0_40px_rgba(29,185,84,0.4)] tabular-nums">
-                  {daysDisplay.toLocaleString('pt-BR')}
-                </span>
-                <span className="text-white text-2xl font-bold tracking-[0.2em] mt-2">DIAS</span>
-              </div>
-              <p className="text-white/80 text-lg font-medium max-w-[280px] leading-relaxed">
-                construindo a nossa história e somando momentos inesquecíveis.
-              </p>
-            </>
-          )}
-        </div>
-      )}
+      {/* Conteúdo Central */}
+      <div className={cn(
+        "relative z-20 flex flex-col items-center text-center px-6 transition-all duration-1000",
+        isTextVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+      )}>
+        {currentSlide === 1 && (
+          <>
+            <h1 className="text-[#1DB954] text-5xl md:text-7xl font-black tracking-tighter mb-4 uppercase italic leading-[1.1] drop-shadow-2xl">
+              {pageTitle || 'Edu e Ana'}
+            </h1>
+            <p className="text-white text-lg md:text-2xl font-bold opacity-90 max-w-[280px] leading-relaxed">
+              Os momentos que marcaram essa relação
+            </p>
+          </>
+        )}
+
+        {currentSlide === 2 && (
+          <>
+            <p className="text-[#b3b3b3] text-xl font-semibold uppercase tracking-wider mb-2">Desde o primeiro sim...</p>
+            <div className="flex flex-col items-center my-6">
+              <span className="text-[#1DB954] text-8xl font-black leading-none tracking-tighter drop-shadow-[0_0_40px_rgba(29,185,84,0.4)] tabular-nums">
+                {daysDisplay.toLocaleString('pt-BR')}
+              </span>
+              <span className="text-white text-2xl font-bold tracking-[0.2em] mt-2">DIAS</span>
+            </div>
+            <p className="text-white/80 text-lg font-medium max-w-[280px] leading-relaxed">
+              construindo a nossa história e somando momentos inesquecíveis.
+            </p>
+          </>
+        )}
+
+        {currentSlide === 4 && (
+          <>
+            <span className="text-[#b3b3b3] text-sm md:text-xl font-semibold uppercase tracking-[0.2em] mb-4">Este ano, nós vivemos...</span>
+            <h1 className="text-[#ffe600] text-7xl md:text-9xl font-black leading-none tracking-tighter drop-shadow-[0_0_50px_rgba(255,230,0,0.4)] mb-4">
+              {totalHours}
+            </h1>
+            <p className="text-white text-xl md:text-3xl font-bold tracking-tight max-w-[280px] leading-tight">
+              horas incríveis juntinhos.
+            </p>
+          </>
+        )}
+      </div>
     </div>
   );
 }
+
