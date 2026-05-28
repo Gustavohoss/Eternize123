@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface SpotifyWrappedViewProps {
@@ -64,7 +63,7 @@ export function SpotifyWrappedView({ pageTitle, onClose, onComplete }: SpotifyWr
   }, [barCount, centerIndex]);
 
   return (
-    <div className="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-center overflow-hidden font-sans select-none">
+    <div className="absolute inset-0 z-[1000] bg-black flex flex-col items-center justify-center overflow-hidden font-sans select-none">
       {/* Container da Cortina */}
       <div className="absolute inset-0 flex z-10 pointer-events-none">
         {columns.map((col) => (
@@ -113,7 +112,7 @@ export function SpotifyWrappedView({ pageTitle, onClose, onComplete }: SpotifyWr
 
       {/* Camada de Overlay */}
       <div className={cn(
-        "fixed inset-0 bg-black transition-opacity duration-500 z-[5] pointer-events-none",
+        "absolute inset-0 bg-black transition-opacity duration-500 z-[5] pointer-events-none",
         phase === 'reveal' ? "opacity-100" : "opacity-0"
       )} />
 

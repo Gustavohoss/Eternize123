@@ -374,38 +374,6 @@ export function DeviceMockup({
         </div>
       )}
 
-      {/* Stories Layer */}
-      {showStories && (
-        <StoriesView 
-          photos={uploadedPhotos} 
-          currentIndex={currentStoryIndex} 
-          progress={storyProgress} 
-          isPaused={isStoryPaused} 
-          isFading={isFading} 
-          pageTitle={pageTitle} 
-          formattedDays={formattedTotalDays} 
-          onClose={() => setShowStories(false)} 
-          onPrev={prevStory} 
-          onNext={nextStory} 
-          onPauseToggle={setIsStoryPaused}
-          theme={selectedTheme}
-        />
-      )}
-
-      {/* Spotify Wrapped Intro Layer */}
-      {showSpotifyWrapped && (
-        <SpotifyWrappedView 
-          pageTitle={pageTitle}
-          onClose={() => setShowSpotifyWrapped(false)}
-          onComplete={() => {
-            setShowSpotifyWrapped(false);
-            setShowStories(true);
-            setCurrentStoryIndex(0);
-            setStoryProgress(0);
-          }}
-        />
-      )}
-
       {!isFullscreen && (
         <div className="bg-white border-x border-t border-neutral-200 p-2.5 flex items-center justify-center shrink-0 rounded-t-2xl">
           <div className="bg-neutral-100 rounded-full h-8 w-full flex items-center px-4 gap-2 border border-neutral-200 max-w-[400px]">
@@ -447,6 +415,38 @@ export function DeviceMockup({
               )}
             </div>
           </div>
+
+          {/* Stories Layer - Agora dentro do frame */}
+          {showStories && (
+            <StoriesView 
+              photos={uploadedPhotos} 
+              currentIndex={currentStoryIndex} 
+              progress={storyProgress} 
+              isPaused={isStoryPaused} 
+              isFading={isFading} 
+              pageTitle={pageTitle} 
+              formattedDays={formattedTotalDays} 
+              onClose={() => setShowStories(false)} 
+              onPrev={prevStory} 
+              onNext={nextStory} 
+              onPauseToggle={setIsStoryPaused}
+              theme={selectedTheme}
+            />
+          )}
+
+          {/* Spotify Wrapped Intro Layer - Agora dentro do frame */}
+          {showSpotifyWrapped && (
+            <SpotifyWrappedView 
+              pageTitle={pageTitle}
+              onClose={() => setShowSpotifyWrapped(false)}
+              onComplete={() => {
+                setShowSpotifyWrapped(false);
+                setShowStories(true);
+                setCurrentStoryIndex(0);
+                setStoryProgress(0);
+              }}
+            />
+          )}
 
           {/* ÚNICO PLAYER DE ÁUDIO - INSTÂNCIA MESTRA */}
           {musicData && (
