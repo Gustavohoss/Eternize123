@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
@@ -244,7 +243,7 @@ export function DeviceMockup({
   const prevStory = useCallback(() => {
     if (isFading) return;
     if (currentStoryIndex > 0) triggerFade(() => { setCurrentStoryIndex(prev => prev - 1); setStoryProgress(0); });
-  }, [currentStoryIndex, triggerFade, iFading]);
+  }, [currentStoryIndex, triggerFade, isFading]);
 
   useEffect(() => {
     if (!showStories || uploadedPhotos.length === 0 || isStoryPaused || isFading) return;
