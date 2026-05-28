@@ -66,7 +66,7 @@ export function SpotifyView({
   const modules = [
     { id: 'memorias', title: 'Memórias', icon: Heart, color: '#e11d48', bg: 'rgba(225, 29, 72, 0.1)' },
     { id: 'conquistas', title: 'Conquistas', icon: Trophy, color: '#eab308', bg: 'rgba(234, 179, 8, 0.1)' },
-    { id: 'curiosidades', title: 'Curiosidades', icon: Sparkles, color: '#a855f7', bg: 'rgba(168, 85, 247, 0.1)' },
+    { id: 'curiosidades', title: 'Curiosidades', icon: Star, color: '#a855f7', bg: 'rgba(168, 85, 247, 0.1)' },
     { id: 'jornada', title: 'Jornada', icon: Compass, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
   ];
 
@@ -110,7 +110,7 @@ export function SpotifyView({
   );
 
   return (
-    <div className="w-full h-full bg-[#121212] text-white font-inter relative flex flex-col no-scrollbar overflow-hidden">
+    <div className="w-full h-full bg-[#121212] text-white font-inter flex flex-col no-scrollbar overflow-hidden">
       {showSpotifyFullscreen && renderFullscreen()}
       
       <div 
@@ -157,25 +157,44 @@ export function SpotifyView({
           </div>
         </div>
 
-        <div className="px-6 mb-8">
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-[#181818] rounded-lg p-3 text-center border border-white/5">
-              <p className="font-black text-xl text-[#1DB954] leading-none mb-1">{timeDiff?.years || 0}</p>
-              <p className="text-[8px] text-neutral-400 uppercase font-bold tracking-wider">Anos juntos</p>
-            </div>
-            <div className="bg-[#181818] rounded-lg p-3 text-center border border-white/5">
-              <p className="font-black text-xl text-[#1DB954] background-clip-text leading-none mb-1">{totalDays.toLocaleString('pt-BR')}</p>
-              <p className="text-[8px] text-neutral-400 uppercase font-bold tracking-wider">Dias</p>
-            </div>
-            <div className="bg-[#181818] rounded-lg p-3 text-center border border-white/5">
-              <p className="font-black text-xl text-[#1DB954] leading-none mb-1">{date ? format(date, 'dd/MM') : '06/04'}</p>
-              <p className="text-[8px] text-neutral-400 uppercase font-bold tracking-wider">Desde</p>
-            </div>
-          </div>
-        </div>
+        {/* CONTADOR PERSONALIZADO ESTILO CARD DISCORD/SPOTIFY */}
+        <section className="px-6 mb-10 mt-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+           <div className="w-full bg-[#2b2d31] rounded-[24px] overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.5),0_0_30px_rgba(61,0,117,0.2)] border border-white/5">
+              <div className="relative w-full h-[260px]">
+                {uploadedPhotos.length > 0 ? (
+                  <Image src={uploadedPhotos[0]} fill className="object-cover" alt="Couple" />
+                ) : (
+                  <div className="w-full h-full bg-neutral-800" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
+                <div className="absolute top-5 left-5 font-bold text-sm tracking-tight text-white shadow-sm drop-shadow-md">Sobre o casal</div>
+              </div>
+
+              <div className="p-5">
+                <h2 className="text-3xl font-extrabold text-white tracking-tighter mb-1 font-['DM_Sans'] uppercase italic leading-none">{pageTitle || 'Nossa História'}</h2>
+                <p className="text-[#a3a6aa] text-sm font-medium mb-6">Juntos desde <span className="font-bold text-white">{date ? date.getFullYear() : '...'}</span></p>
+
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { val: timeDiff?.years || 0, label: 'Anos' },
+                    { val: timeDiff?.months || 0, label: 'Meses' },
+                    { val: timeDiff?.days || 0, label: 'Dias' },
+                    { val: timeDiff?.hours || 0, label: 'Horas' },
+                    { val: timeDiff?.minutes || 0, label: 'Minutos' },
+                    { val: timeDiff?.seconds || 0, label: 'Segundos' },
+                  ].map((item, i) => (
+                    <div key={i} className="bg-[#313338] rounded-xl py-4 flex flex-col items-center justify-center border border-white/5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                      <span className="text-white text-xl font-bold leading-none mb-1 tabular-nums">{item.val}</span>
+                      <span className="text-[#a3a6aa] text-[9px] font-black uppercase tracking-wider">{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+           </div>
+        </section>
 
         {activeTab === 'músicas' && (
-          <section className="px-6 mb-8">
+          <section className="px-6 mb-12">
             <h2 className="text-white text-xl font-black mb-4 font-['DM_Sans']">Populares</h2>
             <div className="space-y-1">
               {uploadedPhotos.length > 0 ? (
@@ -212,7 +231,7 @@ export function SpotifyView({
 
         {message && (
           <section className="px-6 mb-10">
-            <h2 className="text-white text-xl font-black mb-4 font-['DM_Sans']">Sobre</h2>
+            <h2 className="text-white text-xl font-black mb-4 font-['DM_Sans']">Letra / História</h2>
             <div 
               onClick={onShowFullscreen}
               className="bg-[#181818] rounded-2xl overflow-hidden group cursor-pointer active:scale-[0.98] transition-all relative aspect-square shadow-2xl"
@@ -229,14 +248,14 @@ export function SpotifyView({
                <div className="absolute bottom-6 left-6 right-6">
                   <div className="flex items-center gap-2 mb-3">
                      <VerifiedBadge size={14} />
-                     <span className="text-[10px] font-black text-white/90 uppercase tracking-[0.2em]">Artista em destaque</span>
+                     <span className="text-[10px] font-black text-white/90 uppercase tracking-[0.2em]">Bio do Artista</span>
                   </div>
                   <div 
                     className="text-white text-base font-bold line-clamp-5 leading-relaxed font-['DM_Sans']"
                     dangerouslySetInnerHTML={{ __html: message }}
                   />
                   <div className="mt-4 flex items-center gap-2 text-[10px] font-black text-white/30 uppercase tracking-widest">
-                    <span>Ver mais</span>
+                    <span>Ver letra completa</span>
                     <SkipForward className="w-2 h-2 fill-current" />
                   </div>
                </div>
