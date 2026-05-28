@@ -1,6 +1,8 @@
+
 'use client';
 
 import React, { useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { 
   Calendar as CalendarIcon, 
   Clock, 
@@ -12,7 +14,9 @@ import {
   Palette, 
   Bold, 
   Zap,
-  Box
+  Box,
+  ImageIcon,
+  Upload
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -50,6 +54,8 @@ interface StepDataLocationProps {
   onDateBoxBgColorChange: (color: string) => void;
   dateBoxBorderColor: string;
   onDateBoxBorderColorChange: (color: string) => void;
+  spotifyCardPhoto?: string;
+  onSpotifyCardPhotoChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function StepDataLocation({
@@ -77,6 +83,8 @@ export function StepDataLocation({
   onDateBoxBgColorChange,
   dateBoxBorderColor,
   onDateBoxBorderColorChange,
+  spotifyCardPhoto,
+  onSpotifyCardPhotoChange,
 }: StepDataLocationProps) {
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
@@ -103,6 +111,39 @@ export function StepDataLocation({
       </div>
       
       <div className="space-y-6 md:space-y-8 w-full max-w-md">
+        {selectedTheme === 'spotify' && (
+          <div className="space-y-4 w-full bg-white/5 p-6 rounded-2xl border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <Label className="text-[11px] font-black uppercase tracking-wider text-white/60 flex items-center justify-center md:justify-start gap-2">
+              <ImageIcon className="w-4 h-4" /> Foto do Card "Sobre o Casal"
+            </Label>
+            <div className="flex items-center gap-5">
+              <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-black border border-white/10 shrink-0 group">
+                {spotifyCardPhoto ? (
+                  <>
+                    <Image src={spotifyCardPhoto} fill className="object-cover" alt="Card" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                       <label className="cursor-pointer bg-white text-black p-1.5 rounded-full scale-90">
+                          <Upload className="w-3 h-3" />
+                          <input type="file" className="hidden" accept="image/*" onChange={onSpotifyCardPhotoChange} />
+                       </label>
+                    </div>
+                  </>
+                ) : (
+                  <label className="w-full h-full flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-white/5 transition-all">
+                     <Upload className="w-4 h-4 text-white/20" />
+                     <span className="text-[7px] font-black uppercase text-white/20">Subir foto</span>
+                     <input type="file" className="hidden" accept="image/*" onChange={onSpotifyCardPhotoChange} />
+                  </label>
+                )}
+              </div>
+              <div className="flex-1 space-y-1.5">
+                <p className="text-[11px] font-bold text-white/80">Esta foto aparecerá no card de estatísticas do Spotify.</p>
+                <p className="text-[10px] text-white/30 leading-relaxed">Se não enviar nenhuma, usaremos a primeira foto do seu álbum.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-4">
           <Label className="text-[11px] font-black uppercase tracking-wider text-white/60 flex items-center justify-center md:justify-start gap-2">
             <Clock className="w-4 h-4" /> Quando essa história de amor começou? <span className="text-primary">*</span>

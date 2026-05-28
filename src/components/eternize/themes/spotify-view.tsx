@@ -30,6 +30,7 @@ interface SpotifyViewProps {
   message?: string;
   isPackEnabled?: boolean;
   onModuleClick?: (id: string) => void;
+  spotifyCardPhoto?: string;
 }
 
 const VerifiedBadge = ({ size = 16 }: { size?: number }) => (
@@ -60,7 +61,8 @@ export function SpotifyView({
   showSpotifyFullscreen,
   message,
   isPackEnabled = false,
-  onModuleClick
+  onModuleClick,
+  spotifyCardPhoto = ''
 }: SpotifyViewProps) {
   
   const modules = [
@@ -161,7 +163,9 @@ export function SpotifyView({
         <section className="px-6 mb-10 mt-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
            <div className="w-full bg-[#2b2d31] rounded-[24px] overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.5),0_0_30px_rgba(61,0,117,0.2)] border border-white/5">
               <div className="relative w-full h-[260px]">
-                {uploadedPhotos.length > 0 ? (
+                {spotifyCardPhoto ? (
+                  <Image src={spotifyCardPhoto} fill className="object-cover" alt="Couple" />
+                ) : uploadedPhotos.length > 0 ? (
                   <Image src={uploadedPhotos[0]} fill className="object-cover" alt="Couple" />
                 ) : (
                   <div className="w-full h-full bg-neutral-800" />

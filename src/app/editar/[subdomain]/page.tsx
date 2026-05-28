@@ -87,6 +87,7 @@ export default function EditSitePage() {
   const [hasPackPurchased, setHasPackPurchased] = useState<boolean>(false);
   const [memories, setMemories] = useState<any[]>([]);
   const [journeyPoints, setJourneyPoints] = useState<JourneyPoint[]>([]);
+  const [spotifyCardPhoto, setSpotifyCardPhoto] = useState<string>('');
   
   const [sparklesDensity, setSparklesDensity] = useState<number>(100);
   const [sparklesSpeed, setSparklesSpeed] = useState<number>(0.5);
@@ -144,6 +145,7 @@ export default function EditSitePage() {
         setUploadedPhotos(config.uploadedPhotos || []);
         setMemories(config.memories || []);
         setJourneyPoints(config.journeyPoints || []);
+        setSpotifyCardPhoto(config.spotifyCardPhoto || '');
         
         const packPurchased = siteData.isPackEnabled === true;
         setHasPackPurchased(packPurchased);
@@ -244,7 +246,7 @@ export default function EditSitePage() {
         showCard, titlePosition, titleColor, titleFont, titleIsBold, titleHasNeon, titleNeonStrength,
         dateColor, dateFont, dateIsBold, dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor,
         messageColor, messageFont, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength,
-        isMusicAutoPlay, locationQuery, isPackEnabled, memories, journeyPoints
+        isMusicAutoPlay, locationQuery, isPackEnabled, memories, journeyPoints, spotifyCardPhoto
       };
 
       const jsonContent = JSON.stringify(contentData);
@@ -285,6 +287,17 @@ export default function EditSitePage() {
     });
   };
 
+  const handleSpotifyCardPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const compressed = await compressImage(reader.result as string);
+      setSpotifyCardPhoto(compressed);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const removePhoto = (index: number) => setUploadedPhotos(prev => prev.filter((_, i) => i !== index));
 
   const filteredCities = locationQuery.length > 0 
@@ -300,7 +313,8 @@ export default function EditSitePage() {
     musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength, isAutoPlay: false,
     sparklesDensity, sparklesSpeed, sparklesColor, smokeIntensity, smokeColor, patternDuration,
     patternDensity, patternColor, isPackEnabled, memories, journeyPoints,
-    activeModuleId: activeModulePreview
+    activeModuleId: activeModulePreview,
+    spotifyCardPhoto
   };
 
   if (isAuthLoading || isDocLoading) {
@@ -353,7 +367,7 @@ export default function EditSitePage() {
             {step === 'page-title' && <StepPageTitle {...{selectedTheme, pageTitle, onPageTitleChange: setPageTitle, titleFont, onTitleFontChange: setTitleFont, titleIsBold, onTitleIsBoldChange: setTitleIsBold, titleHasNeon, onTitleHasNeonChange: setTitleHasNeon, titleNeonStrength, onTitleNeonStrengthChange: setTitleNeonStrength, titleColor, onTitleColorChange: (c) => setTitleColor(c), onBack: handleBack, onNext: handleNext}} />}
             {step === 'message' && <StepMessage {...{selectedTheme, message, onMessageChange: setMessage, messageFont, onMessageFontChange: setMessageFont, messageColor, onMessageColorChange: setMessageColor, onBack: handleBack, onNext: handleNext}} />}
             {step === 'music' && <StepMusic {...{selectedTheme, musicData, onMusicSelect: setMusicData, musicBoxColor, onMusicBoxColorChange: setMusicBoxColor, musicTextColor, onMusicTextColorChange: setMusicTextColor, musicHasNeon, onMusicHasNeonChange: setMusicHasNeon, musicNeonStrength, onMusicNeonStrengthChange: setMusicNeonStrength, isAutoPlay: isMusicAutoPlay, onAutoPlayChange: setIsMusicAutoPlay, onBack: handleBack, onNext: handleNext}} />}
-            {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: setLocationQuery, showSuggestions, onShowSuggestionsChange: setShowSuggestions, filteredCities, selectedCountStyle, onCountStyleChange: setSelectedCountStyle, dateFont, onDateFontChange: setDateFont, dateIsBold, onDateIsBoldChange: setDateIsBold, dateHasNeon, onDateHasNeonChange: setDateHasNeon, dateNeonStrength, onDateNeonStrengthChange: setDateNeonStrength, dateColor, onDateColorChange: setDateColor, dateBoxBgColor, onDateBoxBgColorChange: setDateBoxBgColor, dateBoxBorderColor, onDateBoxBorderColorChange: setDateBoxBorderColor, onBack: handleBack, onNext: handleNext}} />}
+            {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: setLocationQuery, showSuggestions, onShowSuggestionsChange: setShowSuggestions, filteredCities, selectedCountStyle, onCountStyleChange: setSelectedCountStyle, dateFont, onDateFontChange: setDateFont, dateIsBold, onDateIsBoldChange: setDateIsBold, dateHasNeon, onDateHasNeonChange: setDateHasNeon, dateNeonStrength, onDateNeonStrengthChange: setDateNeonStrength, dateColor, onDateColorChange: setDateColor, dateBoxBgColor, onDateBoxBgColorChange: setDateBoxBgColor, dateBoxBorderColor, onDateBoxBorderColorChange: setDateBoxBorderColor, onBack: handleBack, onNext: handleNext, spotifyCardPhoto, onSpotifyCardPhotoChange: handleSpotifyCardPhotoUpload}} />}
             {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} memories={memories} onMemoriesChange={setMemories} journeyPoints={journeyPoints} onJourneyPointsChange={setJourneyPoints} onBack={handleBack} onNext={handleSave} isModulesOnlyMode={isModulesOnlyMode} onSubModuleChange={setActiveModulePreview} />}
 
             <div className="lg:hidden flex flex-col items-center mt-12 w-full gap-4">
