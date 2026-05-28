@@ -24,13 +24,6 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
   const [startX, setStartX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [origin, setOrigin] = useState('https://www.eternizee.shop');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setOrigin(window.location.origin || 'https://www.eternizee.shop');
-    }
-  }, []);
 
   const nextStep = () => {
     const nextIdx = (currentIndex + 1) % THEME_OPTIONS.length;
@@ -194,15 +187,25 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                     }}
                   >
                     <div className="absolute inset-0 bg-neutral-900 z-0">
+                      {/* VÍDEO NATIVO PARA AUTOPLAY NO TIKTOK */}
                       {videoId ? (
                         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                          <iframe
-                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.25] border-none"
-                            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}&playsinline=1`}
-                            allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            title={theme.name}
-                            loading="eager"
-                          />
+                           <video 
+                             key={videoId}
+                             autoPlay 
+                             muted 
+                             loop 
+                             playsInline 
+                             className="absolute inset-0 w-full h-full object-cover opacity-60"
+                           >
+                             <source src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`} type="video/mp4" />
+                             {/* Fallback para Iframe caso o usuário prefira manter YouTube */}
+                             <iframe
+                               className="w-full h-full scale-[1.25] border-none"
+                               src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&playsinline=1`}
+                               allow="autoplay"
+                             />
+                           </video>
                         </div>
                       ) : (
                         <NextImage src={theme.image} fill className="object-cover" alt={theme.name} priority />

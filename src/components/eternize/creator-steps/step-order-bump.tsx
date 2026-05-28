@@ -86,13 +86,6 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
   const [dragOffset, setDragOffset] = useState(0);
   const [previewModuleId, setPreviewModuleId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [origin, setOrigin] = useState('https://www.eternizee.shop');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setOrigin(window.location.origin || 'https://www.eternizee.shop');
-    }
-  }, []);
 
   const nextStep = () => {
     setCurrentIndex(prev => (prev + 1) % MODULES.length);
@@ -229,13 +222,21 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
                     <div className="absolute inset-0 bg-neutral-900 z-0">
                       {module.videoUrl ? (
                         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                          <iframe
-                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.3] border-none"
-                            src={`https://www.youtube.com/embed/${module.videoUrl}?autoplay=1&mute=1&loop=1&playlist=${module.videoUrl}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}&playsinline=1`}
-                            allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            title={module.title}
-                            loading="eager"
-                          />
+                           <video 
+                             autoPlay 
+                             muted 
+                             loop 
+                             playsInline 
+                             className="absolute inset-0 w-full h-full object-cover opacity-60"
+                           >
+                             <source src={`https://www.youtube.com/embed/${module.videoUrl}?autoplay=1&mute=1`} type="video/mp4" />
+                             {/* Fallback Iframe */}
+                             <iframe
+                               className="w-full h-full scale-[1.3] border-none"
+                               src={`https://www.youtube.com/embed/${module.videoUrl}?autoplay=1&mute=1&loop=1&playlist=${module.videoUrl}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&playsinline=1`}
+                               allow="autoplay"
+                             />
+                           </video>
                         </div>
                       ) : (
                         <Image 
