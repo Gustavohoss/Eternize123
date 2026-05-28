@@ -22,7 +22,7 @@ export function SpotifyWrappedView({ pageTitle, onClose, onComplete }: SpotifyWr
     // Inicia Fase 1: Zíper Fechando (quase imediato)
     const timerActive = setTimeout(() => setIsActive(true), 100);
     
-    // Inicia Fase 2: Abertura Diamante (Após 1.5s conforme o seu script)
+    // Inicia Fase 2: Abertura Diamante (Após 1.5s conforme o script)
     const timerReveal = setTimeout(() => {
       setIsReveal(true);
       setShowProgress(true);
@@ -51,14 +51,14 @@ export function SpotifyWrappedView({ pageTitle, onClose, onComplete }: SpotifyWr
     };
   }, [onComplete]);
 
-  // Gera as colunas com a lógica exata do seu loop
+  // Gera as colunas com a lógica exata do loop
   const columns = useMemo(() => {
     return Array.from({ length: barCount }).map((_, i) => {
       const distFromCenter = Math.abs(i - centerIndex);
       const normalizedDist = distFromCenter - 0.5;
       const maxNormalizedDist = centerIndex - 0.5;
       
-      // Fórmula exata do seu script: 110 - (distancia / max) * 90
+      // Fórmula: 110 - (distancia / max) * 90
       const retractionPct = 110 - (normalizedDist / maxNormalizedDist) * 90;
       
       const g = Math.floor(80 + (i * (100 / barCount)));
@@ -126,7 +126,7 @@ export function SpotifyWrappedView({ pageTitle, onClose, onComplete }: SpotifyWr
         .reveal .wrapped-half::after { opacity: 1; } 
       `}</style>
 
-      {/* Curtain Container */}
+      {/* Curtain Container - Agora ABSOLUTE */}
       <div className={cn(
         "absolute inset-0 flex z-10 pointer-events-none",
         isActive && "active",
@@ -155,9 +155,9 @@ export function SpotifyWrappedView({ pageTitle, onClose, onComplete }: SpotifyWr
         ))}
       </div>
 
-      {/* Background Overlay */}
+      {/* Background Overlay - Agora ABSOLUTE para não vazar do celular */}
       <div className={cn(
-        "fixed inset-0 bg-black opacity-0 transition-opacity duration-500 z-[5] pointer-events-none",
+        "absolute inset-0 bg-black opacity-0 transition-opacity duration-500 z-[5] pointer-events-none",
         isReveal && "opacity-100"
       )} />
 
