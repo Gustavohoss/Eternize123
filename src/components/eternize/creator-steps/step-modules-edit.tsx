@@ -31,6 +31,8 @@ interface StepModulesEditProps {
   onNext: () => void;
   isModulesOnlyMode?: boolean;
   onSubModuleChange?: (subModule: string | null) => void;
+  onRemoveMemory?: (id: string) => void;
+  onRemoveJourneyPoint?: (id: string) => void;
 }
 
 const compressImage = (base64Str: string): Promise<string> => {
@@ -39,9 +41,8 @@ const compressImage = (base64Str: string): Promise<string> => {
     img.src = base64Str;
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      // Reduzido para 600 para economizar espaço no Firestore em documentos com muitos módulos
-      const MAX_WIDTH = 600;
-      const MAX_HEIGHT = 600;
+      const MAX_WIDTH = 800;
+      const MAX_HEIGHT = 800;
       let width = img.width;
       let height = img.height;
       if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
@@ -49,8 +50,7 @@ const compressImage = (base64Str: string): Promise<string> => {
       canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx?.drawImage(img, 0, 0, width, height);
-      // Qualidade reduzida para 0.6 para garantir que caiba no limite de 1MB do Firestore
-      resolve(canvas.toDataURL('image/jpeg', 0.6));
+      resolve(canvas.toDataURL('image/jpeg', 0.7));
     };
   });
 };
@@ -67,20 +67,20 @@ export function StepModulesEdit({
   onBack, 
   onNext,
   isModulesOnlyMode = false,
-  onSubModuleChange
+  onSubModuleChange,
+  onRemoveMemory,
+  onRemoveJourneyPoint
 }: StepModulesEditProps) {
   const [activeSubModule, setActiveSubModule] = useState<SubModule>('menu');
   const [editingMemoryId, setEditingMemoryId] = useState<string | null>(null);
   const [editingPointId, setEditingPointId] = useState<string | null>(null);
 
-  // Estados para busca de local
   const [locationSearch, setLocationSearch] = useState('');
   const [locationResults, setSearchResults] = useState<any[]>([]);
   const [isSearchingLocation, setIsSearchingLocation] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Notifica o pai sobre a mudança do submódulo para atualizar a prévia
   useEffect(() => {
     if (onSubModuleChange) {
       if (activeSubModule === 'menu') {
@@ -111,8 +111,12 @@ export function StepModulesEdit({
     setEditingMemoryId(newMemory.id);
   };
 
-  const removeMemory = (id: string) => {
-    onMemoriesChange(memories.filter(m => m.id !== id));
+  const removeMemoryLocal = (id: string) => {
+    if (onRemoveMemory) {
+      onRemoveMemory(id);
+    } else {
+      onMemoriesChange(memories.filter(m => m.id !== id));
+    }
     if (editingMemoryId === id) setEditingMemoryId(null);
   };
 
@@ -135,7 +139,6 @@ export function StepModulesEdit({
     reader.readAsDataURL(file);
   };
 
-  // Journey Point Handlers
   const addJourneyPoint = () => {
     if (journeyPoints.length >= 8 || !onJourneyPointsChange) return;
     const newPoint: JourneyPoint = {
@@ -152,9 +155,12 @@ export function StepModulesEdit({
     setEditingPointId(newPoint.id);
   };
 
-  const removeJourneyPoint = (id: string) => {
-    if (!onJourneyPointsChange) return;
-    onJourneyPointsChange(journeyPoints.filter(p => p.id !== id));
+  const removeJourneyPointLocal = (id: string) => {
+    if (onRemoveJourneyPoint) {
+      onRemoveJourneyPoint(id);
+    } else if (onJourneyPointsChange) {
+      onJourneyPointsChange(journeyPoints.filter(p => p.id !== id));
+    }
     if (editingPointId === id) setEditingPointId(null);
   };
 
@@ -163,53 +169,33 @@ export function StepModulesEdit({
     onJourneyPointsChange(journeyPoints.map(p => p.id === id ? { ...p, ...updates } : p));
   };
 
-  // Busca de local usando Nominatim
   const searchLocation = (query: string) => {
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-    
-    if (query.length < 3) {
-      setSearchResults([]);
-      setHasSearched(false);
-      return;
-    }
+    if (query.length < 3) { setSearchResults([]); setHasSearched(false); return; }
 
     debounceTimerRef.current = setTimeout(async () => {
       setIsSearchingLocation(true);
       setHasSearched(true);
       try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&accept-language=pt-BR`
-        );
-        
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&accept-language=pt-BR`);
         if (!response.ok) throw new Error('API Error');
-        
         const data = await response.json();
-        
-        const formattedResults = (data || []).map((res: any) => {
-          return {
-            display_name: res.display_name,
-            lat: parseFloat(res.lat),
-            lon: parseFloat(res.lon),
-            name: res.address.city || res.address.town || res.address.municipality || res.address.suburb || res.name || "Local Encontrado"
-          };
-        });
-
+        const formattedResults = (data || []).map((res: any) => ({
+          display_name: res.display_name,
+          lat: parseFloat(res.lat),
+          lon: parseFloat(res.lon),
+          name: res.address.city || res.address.town || res.address.municipality || res.address.suburb || res.name || "Local Encontrado"
+        }));
         setSearchResults(formattedResults);
       } catch (error) {
-        console.warn("Erro ao buscar local no Nominatim:", error);
+        console.warn("Erro ao buscar local:", error);
         setSearchResults([]);
-      } finally {
-        setIsSearchingLocation(false);
-      }
+      } finally { setIsSearchingLocation(false); }
     }, 800);
   };
 
   const handleLocationSelect = (id: string, result: any) => {
-    updateJourneyPoint(id, {
-      lat: result.lat,
-      lng: result.lon,
-      title: result.name
-    });
+    updateJourneyPoint(id, { lat: result.lat, lng: result.lon, title: result.name });
     setLocationSearch('');
     setSearchResults([]);
     setHasSearched(false);
@@ -265,9 +251,7 @@ export function StepModulesEdit({
           </h2>
         </div>
         <p className="text-xs md:text-base text-white/40 font-medium">
-          {activeSubModule === 'menu' 
-            ? 'Selecione o módulo que deseja configurar agora.' 
-            : 'Personalize os detalhes deste módulo para deixar do seu jeito.'}
+          {activeSubModule === 'menu' ? 'Selecione o módulo que deseja configurar agora.' : 'Personalize os detalhes deste módulo para deixar do seu jeito.'}
         </p>
       </div>
 
@@ -307,35 +291,16 @@ export function StepModulesEdit({
                       <p className="text-[9px] font-bold text-white/30 uppercase">{memories.length}/8 momentos</p>
                    </div>
                 </div>
-                <Button 
-                  onClick={() => setActiveSubModule('menu')}
-                  variant="ghost" 
-                  className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 gap-1"
-                >
-                   <ChevronLeft className="w-3 h-3" /> Voltar ao menu
-                </Button>
+                <Button onClick={() => setActiveSubModule('menu')} variant="ghost" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 gap-1"><ChevronLeft className="w-3 h-3" /> Voltar ao menu</Button>
              </div>
 
              <div className="grid grid-cols-1 gap-4">
                 {memories.map((memory, index) => (
-                  <div 
-                    key={memory.id}
-                    className={cn(
-                      "bg-[#0c0c0c] border rounded-[2rem] transition-all duration-300 overflow-hidden",
-                      editingMemoryId === memory.id ? "border-primary/40 bg-primary/[0.02]" : "border-white/5 hover:border-white/10"
-                    )}
-                  >
-                    <div 
-                      className="p-5 flex items-center justify-between cursor-pointer"
-                      onClick={() => setEditingMemoryId(editingMemoryId === memory.id ? null : memory.id)}
-                    >
+                  <div key={memory.id} className={cn("bg-[#0c0c0c] border rounded-[2rem] transition-all duration-300 overflow-hidden", editingMemoryId === memory.id ? "border-primary/40 bg-primary/[0.02]" : "border-white/5 hover:border-white/10")}>
+                    <div className="p-5 flex items-center justify-between cursor-pointer" onClick={() => setEditingMemoryId(editingMemoryId === memory.id ? null : memory.id)}>
                       <div className="flex items-center gap-4 min-w-0">
                          <div className="w-10 h-10 rounded-xl overflow-hidden bg-white/5 border border-white/10 shrink-0 relative">
-                            {memory.photo ? (
-                              <Image src={memory.photo} fill className="object-cover" alt="" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-4 h-4 text-white/10" /></div>
-                            )}
+                            {memory.photo ? <Image src={memory.photo} fill className="object-cover" alt="" /> : <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-4 h-4 text-white/10" /></div>}
                          </div>
                          <div className="min-w-0">
                             <h4 className="text-xs font-black text-white truncate uppercase tracking-tight">{memory.title || `Memória ${index + 1}`}</h4>
@@ -343,348 +308,60 @@ export function StepModulesEdit({
                          </div>
                       </div>
                       <div className="flex items-center gap-2">
-                         <button 
-                           onClick={(e) => { e.stopPropagation(); removeMemory(memory.id); }}
-                           className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg text-white/20 transition-all"
-                         >
-                           <Trash2 className="w-4 h-4" />
-                         </button>
-                         <div className={cn("transition-transform duration-300 text-white/20", editingMemoryId === memory.id ? "rotate-180" : "rotate-90")}>
-                            <ChevronDown className="w-4 h-4" />
-                         </div>
+                         <button onClick={(e) => { e.stopPropagation(); removeMemoryLocal(memory.id); }} className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg text-white/20 transition-all"><Trash2 className="w-4 h-4" /></button>
+                         <div className={cn("transition-transform duration-300 text-white/20", editingMemoryId === memory.id ? "rotate-180" : "rotate-90")}><ChevronDown className="w-4 h-4" /></div>
                       </div>
                     </div>
-
                     {editingMemoryId === memory.id && (
                       <div className="px-5 pb-6 space-y-5 border-t border-white/5 pt-6 animate-in slide-in-from-top-2">
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                               <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Type className="w-2.5 h-2.5" /> Título curto</Label>
-                               <Input 
-                                 value={memory.title}
-                                 onChange={(e) => updateMemory(memory.id, { title: e.target.value })}
-                                 placeholder="Ex: Primeiro Encontro"
-                                 className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"
-                               />
-                            </div>
-                            <div className="space-y-2">
-                               <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Calendar className="w-2.5 h-2.5" /> Data</Label>
-                               <Input 
-                                 value={memory.date}
-                                 onChange={(e) => updateMemory(memory.id, { date: e.target.value })}
-                                 placeholder="Ex: 14 de Fevereiro, 2022"
-                                 className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"
-                               />
-                            </div>
+                            <div className="space-y-2"><Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Type className="w-2.5 h-2.5" /> Título curto</Label><Input value={memory.title} onChange={(e) => updateMemory(memory.id, { title: e.target.value })} placeholder="Ex: Primeiro Encontro" className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"/></div>
+                            <div className="space-y-2"><Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Calendar className="w-2.5 h-2.5" /> Data</Label><Input value={memory.date} onChange={(e) => updateMemory(memory.id, { date: e.target.value })} placeholder="Ex: 14 de Fevereiro, 2022" className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"/></div>
                          </div>
-
-                         <div className="space-y-2">
-                            <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><MessageSquare className="w-2.5 h-2.5" /> Descrição da memória</Label>
-                            <Textarea 
-                              value={memory.description}
-                              onChange={(e) => updateMemory(memory.id, { description: e.target.value })}
-                              placeholder="Conte o que aconteceu nesse dia..."
-                              className="bg-white/5 border-white/5 min-h-[80px] rounded-xl text-xs leading-relaxed"
-                            />
-                         </div>
-
-                         <div className="space-y-3">
-                            <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><ImageIcon className="w-2.5 h-2.5" /> Foto do momento</Label>
-                            <div className="flex items-center gap-4">
-                               <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-white/5 border border-white/10 shrink-0 group">
-                                  {memory.photo ? (
-                                    <>
-                                      <Image src={memory.photo} fill className="object-cover" alt="" />
-                                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                         <label className="cursor-pointer bg-white text-black p-1.5 rounded-full scale-90">
-                                            <ImageIcon className="w-3 h-3" />
-                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload(e, memory.id, 'memory')} />
-                                         </label>
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <label className="w-full h-full flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-white/5 transition-all">
-                                       <Plus className="w-4 h-4 text-white/20" />
-                                       <span className="text-[7px] font-black uppercase text-white/20">Subir foto</span>
-                                       <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload(e, memory.id, 'memory')} />
-                                    </label>
-                                  )}
-                               </div>
-                               <div className="flex-1 space-y-1">
-                                  <p className="text-[10px] font-bold text-white/60">Uma imagem vale mais que mil palavras.</p>
-                                  <p className="text-[9px] text-white/20 leading-relaxed">Recomendamos fotos quadradas ou verticais para melhor visualização na linha do tempo.</p>
-                               </div>
-                            </div>
-                         </div>
+                         <div className="space-y-2"><Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><MessageSquare className="w-2.5 h-2.5" /> Descrição</Label><Textarea value={memory.description} onChange={(e) => updateMemory(memory.id, { description: e.target.value })} placeholder="Conte o que aconteceu..." className="bg-white/5 border-white/5 min-h-[80px] rounded-xl text-xs leading-relaxed"/></div>
+                         <div className="space-y-3"><Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><ImageIcon className="w-2.5 h-2.5" /> Foto</Label><div className="flex items-center gap-4"><div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-white/5 border border-white/10 shrink-0 group">{memory.photo ? (<><Image src={memory.photo} fill className="object-cover" alt="" /><div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"><label className="cursor-pointer bg-white text-black p-1.5 rounded-full scale-90"><ImageIcon className="w-3 h-3" /><input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload(e, memory.id, 'memory')} /></label></div></>) : (<label className="w-full h-full flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-white/5 transition-all"><Plus className="w-4 h-4 text-white/20" /><span className="text-[7px] font-black uppercase text-white/20">Subir foto</span><input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload(e, memory.id, 'memory')} /></label>)}</div><div className="flex-1 space-y-1"><p className="text-[10px] font-bold text-white/60">Individual e rápido.</p><p className="text-[9px] text-white/20">Este item tem seu próprio espaço de 1MB.</p></div></div></div>
                       </div>
                     )}
                   </div>
                 ))}
-
-                {memories.length < 8 && (
-                  <button 
-                    onClick={addMemory}
-                    className="w-full h-16 rounded-[2rem] border-2 border-dashed border-white/5 bg-white/[0.02] hover:bg-white/5 hover:border-white/10 transition-all flex items-center justify-center gap-3 text-white/20 hover:text-primary group"
-                  >
-                    <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-black uppercase tracking-widest">Adicionar nova memória</span>
-                  </button>
-                )}
+                {memories.length < 8 && (<button onClick={addMemory} className="w-full h-16 rounded-[2rem] border-2 border-dashed border-white/5 bg-white/[0.02] hover:bg-white/5 transition-all flex items-center justify-center gap-3 text-white/20 hover:text-primary group"><Plus className="w-5 h-5 group-hover:scale-110 transition-transform" /><span className="text-xs font-black uppercase tracking-widest">Adicionar nova memória</span></button>)}
              </div>
           </div>
         ) : activeSubModule === 'journey' ? (
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
              <div className="flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl">
-                <div className="flex items-center gap-3">
-                   <div className="bg-green-500/20 p-2 rounded-xl"><MapIcon className="w-4 h-4 text-green-500" /></div>
-                   <div>
-                      <h4 className="text-xs font-black text-white uppercase tracking-wider">Módulo Jornada</h4>
-                      <p className="text-[9px] font-bold text-white/30 uppercase">{journeyPoints.length}/8 locais</p>
-                   </div>
-                </div>
-                <Button 
-                  onClick={() => setActiveSubModule('menu')}
-                  variant="ghost" 
-                  className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 gap-1"
-                >
-                   <ChevronLeft className="w-3 h-3" /> Voltar ao menu
-                </Button>
+                <div className="flex items-center gap-3"><div className="bg-green-500/20 p-2 rounded-xl"><MapIcon className="w-4 h-4 text-green-500" /></div><div><h4 className="text-xs font-black text-white uppercase tracking-wider">Módulo Jornada</h4><p className="text-[9px] font-bold text-white/30 uppercase">{journeyPoints.length}/8 locais</p></div></div>
+                <Button onClick={() => setActiveSubModule('menu')} variant="ghost" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 gap-1"><ChevronLeft className="w-3 h-3" /> Voltar ao menu</Button>
              </div>
-
              <div className="grid grid-cols-1 gap-4">
                 {journeyPoints.map((point, index) => (
-                  <div 
-                    key={point.id}
-                    className={cn(
-                      "bg-[#0c0c0c] border rounded-[2rem] transition-all duration-300 overflow-hidden",
-                      editingPointId === point.id ? "border-primary/40 bg-primary/[0.02]" : "border-white/5 hover:border-white/10"
-                    )}
-                  >
-                    <div 
-                      className="p-5 flex items-center justify-between cursor-pointer"
-                      onClick={() => {
-                        setEditingPointId(editingPointId === point.id ? null : point.id);
-                        setSearchResults([]);
-                        setHasSearched(false);
-                      }}
-                    >
+                  <div key={point.id} className={cn("bg-[#0c0c0c] border rounded-[2rem] transition-all duration-300 overflow-hidden", editingPointId === point.id ? "border-primary/40 bg-primary/[0.02]" : "border-white/5 hover:border-white/10")}>
+                    <div className="p-5 flex items-center justify-between cursor-pointer" onClick={() => { setEditingPointId(editingPointId === point.id ? null : point.id); setSearchResults([]); setHasSearched(false); }}>
                       <div className="flex items-center gap-4 min-w-0">
-                         <div className="w-10 h-10 rounded-xl overflow-hidden bg-white/5 border border-white/10 shrink-0 relative">
-                            {point.photo ? (
-                              <Image src={point.photo} fill className="object-cover" alt="" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-4 h-4 text-white/10" /></div>
-                            )}
-                         </div>
-                         <div className="min-w-0">
-                            <h4 className="text-xs font-black text-white truncate uppercase tracking-tight">{point.title || `Local ${index + 1}`}</h4>
-                            <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">{point.date}</p>
-                         </div>
+                         <div className="w-10 h-10 rounded-xl overflow-hidden bg-white/5 border border-white/10 shrink-0 relative">{point.photo ? <Image src={point.photo} fill className="object-cover" alt="" /> : <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-4 h-4 text-white/10" /></div>}</div>
+                         <div className="min-w-0"><h4 className="text-xs font-black text-white truncate uppercase tracking-tight">{point.title || `Local ${index + 1}`}</h4><p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">{point.date}</p></div>
                       </div>
                       <div className="flex items-center gap-2">
-                         <button 
-                           onClick={(e) => { e.stopPropagation(); removeJourneyPoint(point.id); }}
-                           className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg text-white/20 transition-all"
-                         >
-                           <Trash2 className="w-4 h-4" />
-                         </button>
-                         <div className={cn("transition-transform duration-300 text-white/20", editingPointId === point.id ? "rotate-180" : "rotate-90")}>
-                            <ChevronDown className="w-4 h-4" />
-                         </div>
+                         <button onClick={(e) => { e.stopPropagation(); removeJourneyPointLocal(point.id); }} className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg text-white/20 transition-all"><Trash2 className="w-4 h-4" /></button>
+                         <div className={cn("transition-transform duration-300 text-white/20", editingPointId === point.id ? "rotate-180" : "rotate-90")}><ChevronDown className="w-4 h-4" /></div>
                       </div>
                     </div>
-
                     {editingPointId === point.id && (
                       <div className="px-5 pb-6 space-y-5 border-t border-white/5 pt-6 animate-in slide-in-from-top-2">
-                         
-                         {/* Busca de Local */}
-                         <div className="space-y-3 relative">
-                            <Label className="text-[10px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5">
-                               <Search className="w-3 h-3 text-primary" /> Pesquisar Cidade ou Lugar
-                            </Label>
-                            <div className="relative group">
-                               <Input 
-                                 value={locationSearch}
-                                 onChange={(e) => {
-                                   setLocationSearch(e.target.value);
-                                   searchLocation(e.target.value);
-                                 }}
-                                 placeholder="Digite o nome do lugar..."
-                                 className="bg-black border-primary/20 h-12 rounded-xl text-xs font-bold pl-10 focus:border-primary/50 transition-all shadow-inner"
-                               />
-                               <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary opacity-50" />
-                               {isSearchingLocation && <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />}
-                            </div>
-                            
-                            {(locationResults.length > 0 || (hasSearched && !isSearchingLocation && locationResults.length === 0)) && (
-                              <div className="absolute top-full left-0 right-0 mt-2 bg-[#161b22] border border-[#30363d] rounded-xl overflow-hidden z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1">
-                                {locationResults.length > 0 ? (
-                                  locationResults.map((res: any, i) => (
-                                    <button 
-                                      key={i}
-                                      onClick={() => handleLocationSelect(point.id, res)}
-                                      className="w-full text-left px-4 py-3 text-[10px] font-bold text-[#c9d1d9] hover:bg-[#1f6feb] hover:text-white border-b border-white/5 last:border-0 transition-colors flex items-center gap-3 group/item"
-                                    >
-                                      <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center shrink-0">
-                                         <MapPin className="w-3 h-3 text-primary" />
-                                      </div>
-                                      <span className="truncate">{res.display_name}</span>
-                                    </button>
-                                  ))
-                                ) : (
-                                  <div className="px-4 py-6 text-[10px] font-bold text-white/20 italic text-center flex flex-col items-center gap-2">
-                                     <Info className="w-4 h-4" />
-                                     Local não encontrado. Tente outro nome.
-                                  </div>
-                                )}
-                              </div>
-                            )}
+                         <div className="space-y-3 relative"><Label className="text-[10px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Search className="w-3 h-3 text-primary" /> Pesquisar Lugar</Label><div className="relative group"><Input value={locationSearch} onChange={(e) => { setLocationSearch(e.target.value); searchLocation(e.target.value); }} placeholder="Digite o nome..." className="bg-black border-primary/20 h-12 rounded-xl text-xs font-bold pl-10 focus:border-primary/50 transition-all shadow-inner"/><MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary opacity-50" />{isSearchingLocation && <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />}</div>
+                            {(locationResults.length > 0 || (hasSearched && !isSearchingLocation && locationResults.length === 0)) && (<div className="absolute top-full left-0 right-0 mt-2 bg-[#161b22] border border-[#30363d] rounded-xl overflow-hidden z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1">{locationResults.length > 0 ? (locationResults.map((res: any, i) => (<button key={i} onClick={() => handleLocationSelect(point.id, res)} className="w-full text-left px-4 py-3 text-[10px] font-bold text-[#c9d1d9] hover:bg-[#1f6feb] hover:text-white border-b border-white/5 last:border-0 transition-colors flex items-center gap-3 group/item"><div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center shrink-0"><MapPin className="w-3 h-3 text-primary" /></div><span className="truncate">{res.display_name}</span></button>))) : (<div className="px-4 py-6 text-[10px] font-bold text-white/20 italic text-center flex flex-col items-center gap-2"><Info className="w-4 h-4" />Local não encontrado.</div>)}</div>)}
                          </div>
-
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                            <div className="space-y-2">
-                               <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Type className="w-2.5 h-2.5" /> Nome do Local</Label>
-                               <Input 
-                                 value={point.title}
-                                 onChange={(e) => updateJourneyPoint(point.id, { title: e.target.value })}
-                                 placeholder="Ex: Rio de Janeiro"
-                                 className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"
-                               />
-                            </div>
-                            <div className="space-y-2">
-                               <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Calendar className="w-2.5 h-2.5" /> Data</Label>
-                               <Input 
-                                 value={point.date}
-                                 onChange={(e) => updateJourneyPoint(point.id, { date: e.target.value })}
-                                 placeholder="Ex: 20 de Maio, 2023"
-                                 className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"
-                               />
-                            </div>
+                            <div className="space-y-2"><Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Type className="w-2.5 h-2.5" /> Nome do Local</Label><Input value={point.title} onChange={(e) => updateJourneyPoint(point.id, { title: e.target.value })} placeholder="Ex: Rio de Janeiro" className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"/></div>
+                            <div className="space-y-2"><Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><Calendar className="w-2.5 h-2.5" /> Data</Label><Input value={point.date} onChange={(e) => updateJourneyPoint(point.id, { date: e.target.value })} placeholder="Ex: 20 de Maio, 2023" className="bg-white/5 border-white/5 h-10 rounded-xl text-xs font-bold"/></div>
                          </div>
-
-                         <div className="space-y-2">
-                            <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><MessageSquare className="w-2.5 h-2.5" /> Relato do momento</Label>
-                            <Textarea 
-                              value={point.description}
-                              onChange={(e) => updateJourneyPoint(point.id, { description: e.target.value })}
-                              placeholder="O que aconteceu nesse lugar?"
-                              className="bg-white/5 border-white/5 min-h-[80px] rounded-xl text-xs leading-relaxed"
-                            />
-                         </div>
-
-                         <div className="space-y-3">
-                            <Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><ImageIcon className="w-2.5 h-2.5" /> Foto do local</Label>
-                            <div className="flex items-center gap-4">
-                               <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-white/5 border border-white/10 shrink-0 group">
-                                  {point.photo ? (
-                                    <>
-                                      <Image src={point.photo} fill className="object-cover" alt="" />
-                                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                         <label className="cursor-pointer bg-white text-black p-1.5 rounded-full scale-90">
-                                            <ImageIcon className="w-3 h-3" />
-                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload(e, point.id, 'journey')} />
-                                         </label>
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <label className="w-full h-full flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-white/5 transition-all">
-                                       <Plus className="w-4 h-4 text-white/20" />
-                                       <span className="text-[7px] font-black uppercase text-white/20">Subir foto</span>
-                                       <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload(e, point.id, 'journey')} />
-                                    </label>
-                                  )}
-                               </div>
-                               <div className="flex-1 space-y-1">
-                                  <p className="text-[10px] font-bold text-white/60">Posicionamos no mapa para você!</p>
-                                  <p className="text-[9px] text-white/20 leading-relaxed">Dica: Use a busca acima para encontrar a cidade. A latitude e longitude serão preenchidas automaticamente.</p>
-                               </div>
-                            </div>
-                         </div>
+                         <div className="space-y-2"><Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><MessageSquare className="w-2.5 h-2.5" /> Relato</Label><Textarea value={point.description} onChange={(e) => updateJourneyPoint(point.id, { description: e.target.value })} placeholder="O que aconteceu?" className="bg-white/5 border-white/5 min-h-[80px] rounded-xl text-xs leading-relaxed"/></div>
+                         <div className="space-y-3"><Label className="text-[9px] font-black uppercase text-white/40 ml-1 flex items-center gap-1.5"><ImageIcon className="w-2.5 h-2.5" /> Foto</Label><div className="flex items-center gap-4"><div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-white/5 border border-white/10 shrink-0 group">{point.photo ? (<><Image src={point.photo} fill className="object-cover" alt="" /><div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"><label className="cursor-pointer bg-white text-black p-1.5 rounded-full scale-90"><ImageIcon className="w-3 h-3" /><input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload(e, point.id, 'journey')} /></label></div></>) : (<label className="w-full h-full flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-white/5 transition-all"><Plus className="w-4 h-4 text-white/20" /><span className="text-[7px] font-black uppercase text-white/20">Subir foto</span><input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload(e, point.id, 'journey')} /></label>)}</div><div className="flex-1 space-y-1"><p className="text-[10px] font-bold text-white/60">Independente e leve.</p><p className="text-[9px] text-white/20">Dados e foto isolados em seu próprio documento.</p></div></div></div>
                       </div>
                     )}
                   </div>
                 ))}
-
-                {journeyPoints.length < 8 && (
-                  <button 
-                    onClick={addJourneyPoint}
-                    className="w-full h-16 rounded-[2rem] border-2 border-dashed border-white/5 bg-white/[0.02] hover:bg-white/5 hover:border-white/10 transition-all flex items-center justify-center gap-3 text-white/20 hover:text-primary group"
-                  >
-                    <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-black uppercase tracking-widest">Adicionar novo local</span>
-                  </button>
-                )}
-             </div>
-          </div>
-        ) : activeSubModule === 'surprise' ? (
-          <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
-             <div className="flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl">
-                <div className="flex items-center gap-3">
-                   <div className="bg-orange-500/20 p-2 rounded-xl"><RotateCcw className="w-4 h-4 text-orange-500" /></div>
-                   <div>
-                      <h4 className="text-xs font-black text-white uppercase tracking-wider">Roleta Surpresa</h4>
-                      <p className="text-[9px] font-bold text-white/30 uppercase">Conteúdo Estático</p>
-                   </div>
-                </div>
-                <Button 
-                  onClick={() => setActiveSubModule('menu')}
-                  variant="ghost" 
-                  className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 gap-1"
-                >
-                   <ChevronLeft className="w-3 h-3" /> Voltar ao menu
-                </Button>
-             </div>
-
-             <div className="bg-[#0c0c0c] border border-white/5 rounded-[2rem] p-8 text-center space-y-4">
-                <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(249,115,22,0.1)]">
-                   <RotateCcw className="w-8 h-8 text-orange-500" />
-                </div>
-                <div className="space-y-2">
-                   <h4 className="text-base font-black text-white uppercase tracking-tight italic">Sorteio de Momentos</h4>
-                   <p className="text-xs text-white/40 leading-relaxed font-medium">
-                     A Roleta Surpresa já vem configurada com os momentos mais marcantes que um casal pode viver. Toque na roleta ao lado para ver como ela funciona!
-                   </p>
-                   <p className="text-[10px] text-orange-500 font-bold uppercase tracking-widest pt-4">
-                     Edição customizada disponível em breve.
-                   </p>
-                </div>
-             </div>
-          </div>
-        ) : (activeSubModule === 'achievements' || activeSubModule === 'curiosities') ? (
-          <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
-             <div className="flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl">
-                <div className="flex items-center gap-3">
-                   <div className={cn("p-2 rounded-xl", activeSubModule === 'achievements' ? "bg-yellow-500/20" : "bg-purple-500/20")}>
-                     {activeSubModule === 'achievements' ? <Trophy className="w-4 h-4 text-yellow-500" /> : <Star className="w-4 h-4 text-purple-500" />}
-                   </div>
-                   <div>
-                      <h4 className="text-xs font-black text-white uppercase tracking-wider">
-                        {activeSubModule === 'achievements' ? 'Módulo Conquistas' : 'Módulo Curiosidades'}
-                      </h4>
-                      <p className="text-[9px] font-bold text-white/30 uppercase">Configuração Automática</p>
-                   </div>
-                </div>
-                <Button 
-                  onClick={() => setActiveSubModule('menu')}
-                  variant="ghost" 
-                  className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 gap-1"
-                >
-                   <ChevronLeft className="w-3 h-3" /> Voltar ao menu
-                </Button>
-             </div>
-
-             <div className="bg-[#0c0c0c] border border-white/5 rounded-[2rem] p-6 text-center space-y-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
-                   <RotateCcw className="w-6 h-6 text-primary" />
-                </div>
-                <div className="space-y-1">
-                   <h4 className="text-sm font-black text-white uppercase tracking-tight">Conteúdo Inteligente</h4>
-                   <p className="text-[11px] text-white/40 leading-relaxed font-medium">
-                     {activeSubModule === 'achievements' 
-                        ? 'As conquistas são calculadas automaticamente com base na data que você definiu no início da página. Não é necessário editar nada!'
-                        : 'As curiosidades astronômicas e climáticas são buscadas automaticamente de acordo com o dia em que vocês se conheceram.'}
-                   </p>
-                </div>
+                {journeyPoints.length < 8 && (<button onClick={addJourneyPoint} className="w-full h-16 rounded-[2rem] border-2 border-dashed border-white/5 bg-white/[0.02] hover:bg-white/5 transition-all flex items-center justify-center gap-3 text-white/20 hover:text-primary group"><Plus className="w-5 h-5 group-hover:scale-110 transition-transform" /><span className="text-xs font-black uppercase tracking-widest">Adicionar novo local</span></button>)}
              </div>
           </div>
         ) : null}
@@ -692,39 +369,26 @@ export function StepModulesEdit({
         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-start gap-4">
           <Info className="w-5 h-5 text-white/30 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <p className="text-[11px] font-black uppercase text-white/60 tracking-widest">Dica de Edição</p>
+            <p className="text-[11px] font-black uppercase text-white/60 tracking-widest">Armazenamento Premium</p>
             <p className="text-[11px] font-medium text-white/30 leading-relaxed">
-              O celular ao lado mostra exatamente o que você está editando. Clique nos itens acima para ver a mágica acontecer!
+              Cada memória e local é salvo de forma fracionada. Isso permite que você adicione fotos maiores e mais nítidas sem comprometer a velocidade.
             </p>
           </div>
         </div>
 
         <div className="pt-6 border-t border-white/5">
            <div className="w-full bg-[#0c0c0c] border border-white/5 rounded-2xl p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                 <Sparkles className="w-4 h-4 text-primary" />
-                 <span className="text-[10px] font-black uppercase text-white/60 tracking-widest">Exibir Pack no Site</span>
-              </div>
+              <div className="flex items-center gap-3"><Sparkles className="w-4 h-4 text-primary" /><span className="text-[10px] font-black uppercase text-white/60 tracking-widest">Exibir Pack no Site</span></div>
               <Switch checked={isPackEnabled} onCheckedChange={onPackToggle} />
            </div>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 w-full pt-6">
-        <Button 
-          onClick={activeSubModule === 'menu' ? onBack : () => setActiveSubModule('menu')} 
-          variant="outline" 
-          className="h-14 rounded-2xl border-white/10 bg-white/5 font-black text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-3 group"
-        >
-          <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> 
-          {activeSubModule === 'menu' 
-            ? (isModulesOnlyMode ? 'Sair do Editor' : 'Voltar Etapa') 
-            : 'Voltar ao Menu'}
+        <Button onClick={activeSubModule === 'menu' ? onBack : () => setActiveSubModule('menu')} variant="outline" className="h-14 rounded-2xl border-white/10 bg-white/5 font-black text-sm flex items-center justify-center gap-3 group">
+          <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> {activeSubModule === 'menu' ? (isModulesOnlyMode ? 'Sair do Editor' : 'Voltar Etapa') : 'Voltar ao Menu'}
         </Button>
-        <Button 
-          onClick={onNext}
-          className="h-14 rounded-2xl bg-[#15803d] hover:bg-[#166534] text-white font-black text-sm transition-all flex items-center justify-center gap-3 shadow-2xl active:scale-95 group"
-        >
+        <Button onClick={onNext} className="h-14 rounded-2xl bg-[#15803d] hover:bg-[#166534] text-white font-black text-sm flex items-center justify-center gap-3 shadow-2xl active:scale-95 group">
           Finalizar Edição <Check className="w-4 h-4" />
         </Button>
       </div>

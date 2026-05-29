@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { doc, updateDoc, serverTimestamp, collection, getDocs, writeBatch } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, collection, getDocs, writeBatch, deleteDoc } from 'firebase/firestore';
 import { useDoc, useFirestore, useUser } from '@/firebase';
 import { DeviceMockup } from '@/components/eternize/device-mockup';
 import { Button } from '@/components/ui/button';
@@ -22,26 +23,6 @@ import { StepMessage } from '@/components/eternize/creator-steps/step-message';
 import { StepMusic } from '@/components/eternize/creator-steps/step-music';
 import { StepDataLocation } from '@/components/eternize/creator-steps/step-data-location';
 import { StepModulesEdit } from '@/components/eternize/creator-steps/step-modules-edit';
-
-const compressImage = (base64Str: string): Promise<string> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.src = base64Str;
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const MAX_WIDTH = 1000;
-      const MAX_HEIGHT = 1000;
-      let width = img.width;
-      let height = img.height;
-      if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
-      else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
-      canvas.width = width; canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx?.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/jpeg', 0.75));
-    };
-  });
-};
 
 export default function EditSitePage() {
   const params = useParams();
@@ -69,7 +50,6 @@ export default function EditSitePage() {
 
   useEffect(() => { 
     setMounted(true); 
-    // Se o parâmetro startStep estiver presente, pula direto para os módulos
     if (searchParams.get('startStep') === 'modules') {
       setStep('modules');
     }
@@ -131,7 +111,10 @@ export default function EditSitePage() {
   const [locationQuery, setLocationQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  // BUSCA FOTOS DA SUBCOLEÇÃO
+  // Registro de IDs que foram apagados no editor para remover do banco ao salvar
+  const [deletedMediaIds, setDeletedMediaIds] = useState<string[]>([]);
+
+  // BUSCA DADOS FRACIONADOS DA SUBCOLEÇÃO
   useEffect(() => {
     if (siteData && firestore) {
       const loadMedia = async () => {
@@ -139,12 +122,11 @@ export default function EditSitePage() {
         try {
           const config = JSON.parse(siteData.contentJson);
           
-          // Busca todos os docs na subcoleção media
           const mediaSnap = await getDocs(collection(siteRef!, 'media'));
           const albumPhotos: string[] = [];
           let spotifyCard = '';
-          const memoryPhotos: Record<string, string> = {};
-          const journeyPhotos: Record<string, string> = {};
+          const loadedMemories: any[] = [];
+          const loadedJourneyPoints: any[] = [];
 
           mediaSnap.forEach(doc => {
             const data = doc.data();
@@ -154,9 +136,24 @@ export default function EditSitePage() {
             } else if (data.type === 'spotify') {
               spotifyCard = data.base64;
             } else if (data.type === 'memory') {
-              memoryPhotos[doc.id.replace('memory_', '')] = data.base64;
+              loadedMemories.push({
+                id: doc.id.replace('memory_', ''),
+                title: data.title || '',
+                date: data.date || '',
+                description: data.description || '',
+                photo: data.photo || ''
+              });
             } else if (data.type === 'journey') {
-              journeyPhotos[doc.id.replace('journey_', '')] = data.base64;
+              loadedJourneyPoints.push({
+                id: doc.id.replace('journey_', ''),
+                title: data.title || '',
+                date: data.date || '',
+                description: data.description || '',
+                photo: data.photo || '',
+                lat: data.lat,
+                lng: data.lng,
+                rotation: data.rotation
+              });
             }
           });
 
@@ -177,14 +174,14 @@ export default function EditSitePage() {
           setUploadedPhotos(albumPhotos.filter(p => !!p));
           setSpotifyCardPhoto(spotifyCard);
           
-          // Reconstruir memórias e jornada com as fotos individuais
-          setMemories((config.memories || []).map((m: any) => ({ ...m, photo: memoryPhotos[m.id] || m.photo })));
-          setJourneyPoints((config.journeyPoints || []).map((p: any) => ({ ...p, photo: journeyPhotos[p.id] || p.photo })));
+          setMemories(loadedMemories);
+          setJourneyPoints(loadedJourneyPoints);
           
           const packPurchased = siteData.isPackEnabled === true;
           setHasPackPurchased(packPurchased);
           setIsPackEnabled(config.isPackEnabled !== undefined ? config.isPackEnabled : packPurchased);
           
+          // ... rest of config sync
           setSparklesDensity(config.sparklesDensity || 100);
           setSparklesSpeed(config.sparklesSpeed || 0.5);
           setSparklesColor(config.sparklesColor || '#ffffff');
@@ -240,10 +237,7 @@ export default function EditSitePage() {
         showCard, titlePosition, titleColor, titleFont, titleIsBold, titleHasNeon, titleNeonStrength,
         dateColor, dateFont, dateIsBold, dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor,
         messageColor, messageFont, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength,
-        isMusicAutoPlay, locationQuery, isPackEnabled,
-        // Removemos os Base64 pesados do JSON
-        memories: memories.map(m => ({ ...m, photo: '' })),
-        journeyPoints: journeyPoints.map(p => ({ ...p, photo: '' }))
+        isMusicAutoPlay, locationQuery, isPackEnabled
       };
 
       await updateDoc(siteRef, {
@@ -253,23 +247,47 @@ export default function EditSitePage() {
         updatedAt: serverTimestamp(),
       });
 
-      // ATUALIZA FOTOS NA SUBCOLEÇÃO
       const batch = writeBatch(firestore);
+      const mediaCollection = collection(siteRef, 'media');
       
+      // Salva fotos do álbum
       uploadedPhotos.forEach((base64, index) => {
-        batch.set(doc(collection(siteRef, 'media'), `album_${index}`), { base64, type: 'album' });
+        batch.set(doc(mediaCollection, `album_${index}`), { base64, type: 'album' });
       });
 
+      // Salva foto do spotify
       if (spotifyCardPhoto) {
-        batch.set(doc(collection(siteRef, 'media'), 'spotify_card'), { base64: spotifyCardPhoto, type: 'spotify' });
+        batch.set(doc(mediaCollection, 'spotify_card'), { base64: spotifyCardPhoto, type: 'spotify' });
       }
 
+      // Salva Memórias (Metadados + Foto em 1 documento individual)
       memories.forEach(m => {
-        if (m.photo) batch.set(doc(collection(siteRef, 'media'), `memory_${m.id}`), { base64: m.photo, type: 'memory' });
+        batch.set(doc(mediaCollection, `memory_${m.id}`), {
+          type: 'memory',
+          title: m.title,
+          date: m.date,
+          description: m.description,
+          photo: m.photo || ''
+        });
       });
 
+      // Salva Jornada (Metadados + Foto em 1 documento individual)
       journeyPoints.forEach(p => {
-        if (p.photo) batch.set(doc(collection(siteRef, 'media'), `journey_${p.id}`), { base64: p.photo, type: 'journey' });
+        batch.set(doc(mediaCollection, `journey_${p.id}`), {
+          type: 'journey',
+          title: p.title,
+          date: p.date,
+          description: p.description,
+          photo: p.photo || '',
+          lat: p.lat,
+          lng: p.lng,
+          rotation: p.rotation
+        });
+      });
+
+      // Remove documentos apagados
+      deletedMediaIds.forEach(id => {
+        batch.delete(doc(mediaCollection, id));
       });
 
       await batch.commit();
@@ -280,6 +298,16 @@ export default function EditSitePage() {
       alert("Erro ao salvar: " + (error.message || "Tente novamente."));
     }
   };
+
+  const handleRemoveMemory = useCallback((id: string) => {
+    setMemories(prev => prev.filter(m => m.id !== id));
+    setDeletedMediaIds(prev => [...prev, `memory_${id}`]);
+  }, []);
+
+  const handleRemoveJourneyPoint = useCallback((id: string) => {
+    setJourneyPoints(prev => prev.filter(p => p.id !== id));
+    setDeletedMediaIds(prev => [...prev, `journey_${id}`]);
+  }, []);
 
   const stepSequence = useMemo(() => {
     const isFixed = selectedTheme === 'netflix' || selectedTheme === 'spotify' || selectedTheme === 'instagram';
@@ -342,7 +370,7 @@ export default function EditSitePage() {
             {step === 'message' && <StepMessage {...{selectedTheme, message, onMessageChange: setMessage, messageFont, onMessageFontChange: (e: any) => {}, messageColor, onMessageColorChange: (e: any) => {}, onBack: handleBack, onNext: handleNext}} />}
             {step === 'music' && <StepMusic {...{selectedTheme, musicData, onMusicSelect: setMusicData, musicBoxColor, onMusicBoxColorChange: (e: any) => {}, musicTextColor, onMusicTextColorChange: (e: any) => {}, musicHasNeon, onMusicHasNeonChange: (e: any) => {}, musicNeonStrength, onMusicNeonStrengthChange: (e: any) => {}, isAutoPlay: isMusicAutoPlay, onAutoPlayChange: (e: any) => {}, onBack: handleBack, onNext: handleNext}} />}
             {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: (e: any) => {}, showSuggestions, onShowSuggestionsChange: (e: any) => {}, filteredCities: [], selectedCountStyle, onCountStyleChange: (e: any) => {}, dateFont, onDateFontChange: (e: any) => {}, dateIsBold, onDateIsBoldChange: (e: any) => {}, dateHasNeon, onDateHasNeonChange: (e: any) => {}, dateNeonStrength, onDateNeonStrengthChange: (e: any) => {}, dateColor, onDateColorChange: (e: any) => {}, dateBoxBgColor, onDateBoxBgColorChange: (e: any) => {}, dateBoxBorderColor, onDateBoxBorderColorChange: (e: any) => {}, onBack: handleBack, onNext: handleNext}} />}
-            {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} memories={memories} onMemoriesChange={setMemories} journeyPoints={journeyPoints} onJourneyPointsChange={setJourneyPoints} onBack={handleBack} onNext={handleSave} isModulesOnlyMode={isModulesOnlyMode} onSubModuleChange={setActiveModulePreview} />}
+            {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} memories={memories} onMemoriesChange={setMemories} journeyPoints={journeyPoints} onJourneyPointsChange={setJourneyPoints} onBack={handleBack} onNext={handleSave} isModulesOnlyMode={isModulesOnlyMode} onSubModuleChange={setActiveModulePreview} onRemoveMemory={handleRemoveMemory} onRemoveJourneyPoint={handleRemoveJourneyPoint} />}
             <div className="lg:hidden mt-12 w-full gap-4">
                <Dialog><DialogTrigger asChild><Button variant="outline" className="w-full h-11 rounded-xl border-white/10 bg-white/5 font-black text-[10px] uppercase tracking-widest gap-2"><Maximize2 className="w-4 h-4" /> Ver prévia</Button></DialogTrigger><DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[200] rounded-none"><div className="absolute top-6 right-6 z-[250]"><DialogClose className="p-2.5 bg-black/60 rounded-full text-white border border-white/20"><X className="w-5 h-5" /></DialogClose></div>{mounted && <DeviceMockup {...previewProps} isFullscreen />}</DialogContent></Dialog>
                {mounted && isMobile && <DeviceMockup {...previewProps} />}

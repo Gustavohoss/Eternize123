@@ -23,7 +23,6 @@ export default function PublishedSitePage() {
 
   const { data: siteData, isLoading: isDocLoading, error } = useDoc(siteRef as any);
 
-  // Memo para identificar o tema assim que os dados do documento chegam
   const theme = useMemo(() => {
     if (!siteData) return null;
     try {
@@ -44,8 +43,8 @@ export default function PublishedSitePage() {
           
           const albumPhotos: string[] = [];
           let spotifyCard = '';
-          const memoryPhotos: Record<string, string> = {};
-          const journeyPhotos: Record<string, string> = {};
+          const loadedMemories: any[] = [];
+          const loadedJourneyPoints: any[] = [];
 
           mediaSnap.forEach(doc => {
             const data = doc.data();
@@ -55,9 +54,24 @@ export default function PublishedSitePage() {
             } else if (data.type === 'spotify') {
               spotifyCard = data.base64;
             } else if (data.type === 'memory') {
-              memoryPhotos[doc.id.replace('memory_', '')] = data.base64;
+              loadedMemories.push({
+                id: doc.id.replace('memory_', ''),
+                title: data.title || '',
+                date: data.date || '',
+                description: data.description || '',
+                photo: data.photo || ''
+              });
             } else if (data.type === 'journey') {
-              journeyPhotos[doc.id.replace('journey_', '')] = data.base64;
+              loadedJourneyPoints.push({
+                id: doc.id.replace('journey_', ''),
+                title: data.title || '',
+                date: data.date || '',
+                description: data.description || '',
+                photo: data.photo || '',
+                lat: data.lat,
+                lng: data.lng,
+                rotation: data.rotation
+              });
             }
           });
 
@@ -67,8 +81,8 @@ export default function PublishedSitePage() {
             date: config.date ? new Date(config.date) : undefined,
             uploadedPhotos: albumPhotos.filter(p => !!p),
             spotifyCardPhoto: spotifyCard,
-            memories: (config.memories || []).map((m: any) => ({ ...m, photo: memoryPhotos[m.id] || '' })),
-            journeyPoints: (config.journeyPoints || []).map((p: any) => ({ ...p, photo: journeyPhotos[p.id] || '' }))
+            memories: loadedMemories,
+            journeyPoints: loadedJourneyPoints
           };
 
           setSiteConfig(processedConfig);
@@ -82,17 +96,12 @@ export default function PublishedSitePage() {
     }
   }, [siteData, firestore, siteRef]);
 
-  // ESTADO DE LOADING
   if (isDocLoading || isLoadingMedia || !siteRef) {
-    // 1. LOADING ESPECIAL SPOTIFY (Só aparece se o tema for Spotify)
     if (theme === 'spotify') {
       return (
         <div className="fixed inset-0 bg-[#000000] flex flex-col items-center justify-center text-white overflow-hidden">
-          {/* Fundo com gradiente verde sutil pulsante */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(29,185,84,0.08)_0%,transparent_70%)] animate-pulse" />
-          
           <div className="relative flex flex-col items-center gap-12 z-10">
-            {/* Logo Central Premium */}
             <div className="relative">
                <div className="absolute inset-0 bg-[#1DB954]/20 rounded-full blur-[40px] animate-pulse scale-150" />
                <div className="w-24 h-24 bg-[#1DB954] rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(29,185,84,0.3)]">
@@ -104,11 +113,8 @@ export default function PublishedSitePage() {
                   </svg>
                </div>
             </div>
-
-            {/* Texto e Visualizer */}
             <div className="flex flex-col items-center gap-6">
                <p className="text-[#1DB954] text-[10px] font-black uppercase tracking-[0.6em] animate-pulse">Sintonizando</p>
-               
                <div className="flex gap-1.5 items-end h-8">
                   {[0.1, 0.4, 0.2, 0.5, 0.3, 0.6, 0.2].map((delay, i) => (
                     <div 
@@ -120,21 +126,17 @@ export default function PublishedSitePage() {
                </div>
             </div>
           </div>
-
           <style jsx>{`
             @keyframes wave {
               0%, 100% { height: 8px; opacity: 0.3; }
               50% { height: 32px; opacity: 1; }
             }
-            .animate-wave {
-              animation: wave 1s ease-in-out infinite;
-            }
+            .animate-wave { animation: wave 1s ease-in-out infinite; }
           `}</style>
         </div>
       );
     }
 
-    // 2. LOADING NEUTRO PREMIUM (Para quando ainda não sabemos o tema ou temas clássicos)
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center text-white">
         <div className="relative flex flex-col items-center gap-6">
