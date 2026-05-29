@@ -264,10 +264,10 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
           </div>
 
           <button 
-            onClick={prevStep} 
+            onClick={nextStep} 
             className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all z-30 active:scale-90"
           >
-            <ChevronLeft className="w-5 h-5 text-white" />
+            <ChevronRight className="w-5 h-5 text-white" />
           </button>
         </div>
 
