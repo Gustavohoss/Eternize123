@@ -15,6 +15,17 @@ export const FONT_OPTIONS = [
 
 export const THEME_OPTIONS = [
   { 
+    id: 'spotify', 
+    name: 'Spotify', 
+    description: 'Visual moderno inspirado no Spotify. Perfeito para quem ama música.', 
+    badge: 'Música',
+    isHot: true,
+    color: '#1db954',
+    image: 'https://picsum.photos/seed/spotify-theme/400/600',
+    videoUrl: 'AnnrA22c2ls',
+    demoUrl: '/site/demo-spotify?muted=true'
+  },
+  { 
     id: 'classic', 
     name: 'Clássico', 
     description: 'O estilo romântico e atemporal. Perfeito para declarações tradicionais.', 
@@ -33,16 +44,6 @@ export const THEME_OPTIONS = [
     image: 'https://picsum.photos/seed/netflix-theme/400/600',
     videoUrl: 'rfVydSVztXc',
     demoUrl: '/site/funcionando11111111-jfh8?muted=true'
-  },
-  { 
-    id: 'spotify', 
-    name: 'Spotify', 
-    description: 'Visual moderno inspirado no Spotify. Perfeito para quem ama música.', 
-    badge: 'Música',
-    color: '#1db954',
-    image: 'https://picsum.photos/seed/spotify-theme/400/600',
-    videoUrl: 'AnnrA22c2ls',
-    demoUrl: '/site/demo-spotify?muted=true'
   },
   { 
     id: 'instagram', 

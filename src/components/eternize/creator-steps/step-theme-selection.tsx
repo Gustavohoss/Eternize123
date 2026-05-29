@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import NextImage from 'next/image';
-import { ChevronLeft, ChevronRight, Play, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, X, Sparkles } from 'lucide-react';
 import { THEME_OPTIONS, ThemeId } from '@/app/criador/constants';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
@@ -158,6 +157,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                 const blur = distanceFromCenter < 0.1 ? "none" : "blur(1.5px)";
                 const shadow = isActive ? `0 32px 80px -8px ${getGlowColor(theme.id)}` : "none";
                 const videoId = (theme as any).videoUrl;
+                const isHot = (theme as any).isHot;
 
                 return (
                   <div
@@ -215,6 +215,14 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
 
                     <div className="absolute top-0 inset-x-0 h-[3px] z-20" style={{ background: getGradient(theme.id) }} />
                     
+                    {isHot && (
+                      <div className="absolute top-4 right-4 z-30 animate-in zoom-in duration-500">
+                         <div className="bg-[#1DB954] text-black text-[8px] font-black uppercase px-2 py-1 rounded-full flex items-center gap-1 shadow-lg shadow-black/40 border border-white/20">
+                            <Sparkles className="w-2 h-2 fill-current" /> MAIS USADO
+                         </div>
+                      </div>
+                    )}
+
                     <div className="absolute bottom-4 left-3 right-3 flex items-end justify-between z-20">
                       <span 
                         className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-white text-[10px] font-black uppercase tracking-wider" 
@@ -306,6 +314,13 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
         }
         .dragging .card-transition {
           transition: none !important;
+        }
+        @keyframes carousel-progress {
+          from { width: 0%; }
+          to { width: 100%; }
+        }
+        .animate-progress {
+          animation: carousel-progress 4s linear infinite;
         }
       `}</style>
     </div>

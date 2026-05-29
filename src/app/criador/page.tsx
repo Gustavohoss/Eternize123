@@ -63,7 +63,7 @@ export default function CriadorApp() {
 
   // States
   const [senderName, setSenderName] = useState('');
-  const [selectedTheme, setSelectedTheme] = useState<ThemeId>('classic');
+  const [selectedTheme, setSelectedTheme] = useState<ThemeId>('spotify');
   const [selectedGiftType, setSelectedGiftType] = useState<string>('amor');
   const [selectedBgColor, setSelectedBgColor] = useState<string>('#000000');
   const [selectedEffect, setSelectedEffect] = useState<string>('none');
