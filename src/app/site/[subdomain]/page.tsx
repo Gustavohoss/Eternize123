@@ -23,6 +23,17 @@ export default function PublishedSitePage() {
 
   const { data: siteData, isLoading: isDocLoading, error } = useDoc(siteRef as any);
 
+  // Memo para identificar o tema antes mesmo de carregar as fotos
+  const theme = useMemo(() => {
+    if (!siteData) return null;
+    try {
+      const config = JSON.parse(siteData.contentJson);
+      return config.selectedTheme;
+    } catch {
+      return null;
+    }
+  }, [siteData]);
+
   useEffect(() => {
     if (siteData && firestore && siteRef) {
       const fetchMedia = async () => {
@@ -72,6 +83,54 @@ export default function PublishedSitePage() {
   }, [siteData, firestore, siteRef]);
 
   if (isDocLoading || isLoadingMedia || !siteRef) {
+    // LOADING ESPECIAL SPOTIFY
+    if (theme === 'spotify') {
+      return (
+        <div className="min-h-screen bg-[#121212] flex flex-col items-center justify-center gap-10 text-white overflow-hidden">
+          <div className="relative">
+            {/* Efeito de brilho verde ao fundo */}
+            <div className="absolute inset-0 bg-[#1DB954]/20 rounded-full blur-3xl animate-pulse scale-150" />
+            
+            <div className="relative w-24 h-24 flex items-center justify-center">
+              {/* Círculo externo pulsante */}
+              <div className="absolute inset-0 border-2 border-[#1DB954]/30 rounded-full animate-[ping_2s_infinite]" />
+              
+              {/* Logo Spotify estilizada */}
+              <div className="bg-[#1DB954] rounded-full w-20 h-24 flex items-center justify-center shadow-[0_0_40px_rgba(29,185,84,0.4)]">
+                 <svg width="45" height="45" viewBox="0 0 40 40" fill="none">
+                    <circle cx="20" cy="20" r="20" fill="black"></circle>
+                    <path d="M10 26.5 Q20 22 31 24.5" stroke="#1DB954" strokeWidth="2.5" strokeLinecap="round" fill="none"></path>
+                    <path d="M9 21 Q20 15.5 32 19" stroke="#1DB954" strokeWidth="2.5" strokeLinecap="round" fill="none"></path>
+                    <path d="M8 15 Q20 8 33 13" stroke="#1DB954" strokeWidth="2.5" strokeLinecap="round" fill="none"></path>
+                  </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-4">
+             <p className="text-[#1DB954] text-[11px] font-black uppercase tracking-[0.5em] animate-pulse">Sintonizando Histórias</p>
+             
+             {/* Visualizer de áudio animado */}
+             <div className="flex gap-1.5 items-end h-6">
+                <div className="w-1 bg-[#1DB954] rounded-full animate-[wave-ani_1s_ease-in-out_infinite]" style={{ animationDelay: '0.1s' }} />
+                <div className="w-1 bg-[#1DB954] rounded-full animate-[wave-ani_1.2s_ease-in-out_infinite]" style={{ animationDelay: '0.3s' }} />
+                <div className="w-1 bg-[#1DB954] rounded-full animate-[wave-ani_0.8s_ease-in-out_infinite]" style={{ animationDelay: '0.5s' }} />
+                <div className="w-1 bg-[#1DB954] rounded-full animate-[wave-ani_1.1s_ease-in-out_infinite]" style={{ animationDelay: '0.2s' }} />
+                <div className="w-1 bg-[#1DB954] rounded-full animate-[wave-ani_0.9s_ease-in-out_infinite]" style={{ animationDelay: '0.4s' }} />
+             </div>
+          </div>
+
+          <style jsx>{`
+            @keyframes wave-ani {
+              0%, 100% { height: 10px; }
+              50% { height: 24px; }
+            }
+          `}</style>
+        </div>
+      );
+    }
+
+    // LOADING DEFAULT (PARA OUTROS TEMAS)
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 text-white">
         <div className="relative">
