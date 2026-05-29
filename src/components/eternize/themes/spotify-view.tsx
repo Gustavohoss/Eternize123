@@ -75,48 +75,71 @@ export function SpotifyView({
     { id: 'jornada', title: 'Jornada', icon: Compass, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
   ];
 
-  const renderFullscreen = () => (
-    <div className="absolute inset-0 z-[500] bg-[#121212] flex flex-col animate-in fade-in duration-500 overflow-hidden no-scrollbar">
-      <div className="absolute inset-0 z-0 scale-125 brightness-[0.4] blur-[60px] transition-all duration-1000">
-         {uploadedPhotos.length > 0 ? <Image src={uploadedPhotos[activeHeroIndex] || uploadedPhotos[0]} fill className="object-cover" alt="blur-bg" /> : <div className="w-full h-full bg-[#121212]" />}
-      </div>
-      <div className="relative z-10 flex flex-col h-full px-6 pt-4 no-scrollbar overflow-y-auto">
-        <div className="flex items-center justify-between mb-10 shrink-0">
-           <button onClick={onCloseFullscreen} className="w-8 h-8 flex items-center justify-center rounded-full bg-black/20 text-white active:scale-90 transition-transform"><ChevronDownIcon className="w-6 h-6 rotate-90" /></button>
-           <div className="text-center min-w-0 px-4"><p className="text-[9px] uppercase font-black tracking-[0.2em] text-white/50 mb-0.5">Tocando de</p><p className="text-[11px] font-black text-white truncate max-w-[150px]">{pageTitle || 'Eternize'}</p></div>
-           <button className="text-white/80 active:scale-90 transition-transform"><MoreHorizontal className="w-6 h-6" /></button>
+  const renderFullscreen = () => {
+    // Lógica para separar Cantor e Música
+    const musicTitle = musicData?.title || "";
+    let displayTitle = musicTitle;
+    let displayArtist = pageTitle || "Eternize";
+
+    if (musicTitle.includes(" - ")) {
+      const parts = musicTitle.split(" - ");
+      displayArtist = parts[0].trim();
+      displayTitle = parts.slice(1).join(" - ").trim();
+    } else if (musicTitle.includes(" – ")) {
+      const parts = musicTitle.split(" – ");
+      displayArtist = parts[0].trim();
+      displayTitle = parts.slice(1).join(" – ").trim();
+    }
+
+    // Se não tiver música, usa os fallbacks de memória
+    if (!musicTitle) {
+      displayTitle = activeHeroIndex >= 0 && uploadedPhotos[activeHeroIndex] ? `Memória ${activeHeroIndex + 1}` : (pageTitle || 'Nossa História');
+      displayArtist = pageTitle || "Eternize";
+    }
+
+    return (
+      <div className="absolute inset-0 z-[500] bg-[#121212] flex flex-col animate-in fade-in duration-500 overflow-hidden no-scrollbar">
+        <div className="absolute inset-0 z-0 scale-125 brightness-[0.4] blur-[60px] transition-all duration-1000">
+           {uploadedPhotos.length > 0 ? <Image src={uploadedPhotos[activeHeroIndex] || uploadedPhotos[0]} fill className="object-cover" alt="blur-bg" /> : <div className="w-full h-full bg-[#121212]" />}
         </div>
-        <div className="relative aspect-square w-full mb-12 shrink-0">
-          <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl">
-            {uploadedPhotos.length > 0 ? <Image src={uploadedPhotos[activeHeroIndex] || uploadedPhotos[0]} fill className="object-cover" alt="Album Cover" /> : <div className="w-full h-full bg-neutral-800 flex items-center justify-center"></div>}
+        <div className="relative z-10 flex flex-col h-full px-6 pt-4 no-scrollbar overflow-y-auto">
+          <div className="flex items-center justify-between mb-10 shrink-0">
+             <button onClick={onCloseFullscreen} className="w-8 h-8 flex items-center justify-center rounded-full bg-black/20 text-white active:scale-90 transition-transform"><ChevronDownIcon className="w-6 h-6 rotate-90" /></button>
+             <div className="text-center min-w-0 px-4"><p className="text-[9px] uppercase font-black tracking-[0.2em] text-white/50 mb-0.5">Tocando de</p><p className="text-[11px] font-black text-white truncate max-w-[150px]">{pageTitle || 'Eternize'}</p></div>
+             <button className="text-white/80 active:scale-90 transition-transform"><MoreHorizontal className="w-6 h-6" /></button>
           </div>
-        </div>
-        <div className="flex items-center justify-between mb-8 shrink-0">
-          <div className="min-w-0 pr-4">
-            <h2 className="text-[28px] font-black text-white leading-tight tracking-tight truncate font-['DM_Sans']">
-              {musicData?.title || (activeHeroIndex >= 0 && uploadedPhotos[activeHeroIndex] ? `Memória ${activeHeroIndex + 1}` : (pageTitle || 'Nossa História'))}
-            </h2>
-            <p className="text-base font-bold text-white/60 truncate font-['DM_Sans']">
-              {musicData?.title || (pageTitle || 'Eternize')}
-            </p>
-          </div>
-          <button onClick={onLikeToggle} className={cn("transition-all duration-300", isLiked ? "text-[#1DB954]" : "text-white/80")}>{isLiked ? <Heart className="w-8 h-8 fill-current text-[#1DB954]" /> : <Heart className="w-8 h-8" />}</button>
-        </div>
-        <div className="mb-8 shrink-0"><div className="w-full h-[4px] bg-white/20 rounded-full relative"><div className="absolute left-0 top-0 h-full bg-white rounded-full w-[45%]" /></div><div className="flex justify-between mt-2 text-[10px] font-black text-white/40 tracking-wider font-['DM_Sans']"><span>1:00</span><span>-3:11</span></div></div>
-        <div className="flex items-center justify-between mb-10 shrink-0 px-1"><button className="text-white/40 hover:text-white transition-colors"><Shuffle className="w-6 h-6" /></button><button className="text-white active:scale-90 transition-transform"><SkipBack className="w-8 h-8 fill-current" /></button><button onClick={() => onAudioToggle(!isAudioPlaying)} className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black shadow-2xl active:scale-95 transition-transform">{isAudioPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}</button><button className="text-white active:scale-90 transition-transform"><SkipForward className="w-8 h-8 fill-current" /></button><button className="text-white/40 hover:text-white transition-colors"><RotateCcw className="w-6 h-6" /></button></div>
-        {message && (
-          <div className="rounded-[24px] p-6 mb-8 shrink-0 shadow-lg group transition-colors duration-700" style={{ backgroundColor: dynamicSpotifyColor }}>
-            <div className="flex justify-between items-center mb-6">
-              <span className="text-white font-black text-xs uppercase tracking-widest">Letra / Bio</span>
-              <div className="flex gap-4 text-white/40"><Languages className="w-5 h-5" /><Share2 className="w-5 h-5" /></div>
+          <div className="relative aspect-square w-full mb-12 shrink-0">
+            <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl">
+              {uploadedPhotos.length > 0 ? <Image src={uploadedPhotos[activeHeroIndex] || uploadedPhotos[0]} fill className="object-cover" alt="Album Cover" /> : <div className="w-full h-full bg-neutral-800 flex items-center justify-center"></div>}
             </div>
-            <div className="text-white text-xl md:text-2xl font-black leading-snug tracking-tighter opacity-95 line-clamp-6 font-['DM_Sans']" dangerouslySetInnerHTML={{ __html: message }} />
           </div>
-        )}
-        <div className="h-10 shrink-0" />
+          <div className="flex items-center justify-between mb-8 shrink-0">
+            <div className="min-w-0 pr-4">
+              <h2 className="text-[28px] font-black text-white leading-tight tracking-tight truncate font-['DM_Sans']">
+                {displayTitle}
+              </h2>
+              <p className="text-base font-bold text-white/60 truncate font-['DM_Sans']">
+                {displayArtist}
+              </p>
+            </div>
+            <button onClick={onLikeToggle} className={cn("transition-all duration-300", isLiked ? "text-[#1DB954]" : "text-white/80")}>{isLiked ? <Heart className="w-8 h-8 fill-current text-[#1DB954]" /> : <Heart className="w-8 h-8" />}</button>
+          </div>
+          <div className="mb-8 shrink-0"><div className="w-full h-[4px] bg-white/20 rounded-full relative"><div className="absolute left-0 top-0 h-full bg-white rounded-full w-[45%]" /></div><div className="flex justify-between mt-2 text-[10px] font-black text-white/40 tracking-wider font-['DM_Sans']"><span>1:00</span><span>-3:11</span></div></div>
+          <div className="flex items-center justify-between mb-10 shrink-0 px-1"><button className="text-white/40 hover:text-white transition-colors"><Shuffle className="w-6 h-6" /></button><button className="text-white active:scale-90 transition-transform"><SkipBack className="w-8 h-8 fill-current" /></button><button onClick={() => onAudioToggle(!isAudioPlaying)} className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black shadow-2xl active:scale-95 transition-transform">{isAudioPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}</button><button className="text-white active:scale-90 transition-transform"><SkipForward className="w-8 h-8 fill-current" /></button><button className="text-white/40 hover:text-white transition-colors"><RotateCcw className="w-6 h-6" /></button></div>
+          {message && (
+            <div className="rounded-[24px] p-6 mb-8 shrink-0 shadow-lg group transition-colors duration-700" style={{ backgroundColor: dynamicSpotifyColor }}>
+              <div className="flex justify-between items-center mb-6">
+                <span className="text-white font-black text-xs uppercase tracking-widest">Letra / Bio</span>
+                <div className="flex gap-4 text-white/40"><Languages className="w-5 h-5" /><Share2 className="w-5 h-5" /></div>
+              </div>
+              <div className="text-white text-xl md:text-2xl font-black leading-snug tracking-tighter opacity-95 line-clamp-6 font-['DM_Sans']" dangerouslySetInnerHTML={{ __html: message }} />
+            </div>
+          )}
+          <div className="h-10 shrink-0" />
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="w-full h-full bg-[#121212] text-white font-inter flex flex-col no-scrollbar overflow-hidden">
