@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
@@ -286,21 +287,53 @@ export function DeviceMockup({
       
       {/* Gatilho de interação para o site publicado */}
       {isFullscreen && !hasStarted && (
-        <div className="fixed inset-0 z-[2000] bg-black flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
-           <div className="absolute inset-0 bg-hero-glow opacity-30 pointer-events-none" />
-           <div className="relative z-10 space-y-8 max-w-sm">
-              <div className="relative mx-auto w-24 h-24 flex items-center justify-center">
-                 <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping" />
-                 <div className="relative bg-primary/10 border border-primary/20 rounded-full p-6 shadow-[0_0_50px_rgba(225,29,72,0.3)]">
-                    <Heart className="w-10 h-10 text-primary fill-primary animate-pulse" />
-                 </div>
-              </div>
-              <div className="space-y-3">
-                 <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white">PARA VOCÊ<span className="text-primary">.</span></h2>
-                 <p className="text-white/40 text-sm font-medium leading-relaxed">Prepare-se para uma surpresa especial. Ligue o som para uma experiência completa.</p>
-              </div>
-              <Button onClick={handleStartExperience} className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-3">Dar o Play ❤️ <Play className="w-4 h-4 fill-current" /></Button>
-           </div>
+        <div className="fixed inset-0 z-[2000] bg-[#121212] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
+           {selectedTheme === 'spotify' ? (
+             <div className="w-full h-full flex flex-col items-center justify-center relative">
+                {/* Header icons mimicking Spotify Wrapped gate */}
+                <div className="absolute top-8 left-8 flex items-center gap-4">
+                   <button className="text-white/40 hover:text-white transition-colors">
+                      <X className="w-6 h-6" />
+                   </button>
+                   <div className="bg-[#1DB954] text-black text-[10px] font-black uppercase px-4 py-1.5 rounded-full tracking-widest">
+                      Wrapped
+                   </div>
+                </div>
+
+                <div className="max-w-[320px] space-y-10 flex flex-col items-center">
+                   <h2 className="text-[36px] font-black text-white leading-tight tracking-tighter font-['DM_Sans'] px-4">
+                      {(pageTitle.split(' ')[0] || 'Alguém')} separou um <span className="text-[#1DB954]">presente especial!</span>
+                   </h2>
+                   <p className="text-white/60 text-base font-medium leading-relaxed font-['DM_Sans'] px-6">
+                      Um momento único feito com carinho para celebrar a jornada de vocês
+                   </p>
+                   
+                   <button 
+                     onClick={handleStartExperience}
+                     className="mt-6 bg-[#1DB954] text-black px-14 py-4 rounded-full text-base font-black tracking-tight hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(29,185,84,0.3)]"
+                   >
+                     Ver Presente
+                   </button>
+                </div>
+             </div>
+           ) : (
+             <>
+               <div className="absolute inset-0 bg-hero-glow opacity-30 pointer-events-none" />
+               <div className="relative z-10 space-y-8 max-w-sm">
+                  <div className="relative mx-auto w-24 h-24 flex items-center justify-center">
+                     <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping" />
+                     <div className="relative bg-primary/10 border border-primary/20 rounded-full p-6 shadow-[0_0_50px_rgba(225,29,72,0.3)]">
+                        <Heart className="w-10 h-10 text-primary fill-primary animate-pulse" />
+                     </div>
+                  </div>
+                  <div className="space-y-3">
+                     <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white">PARA VOCÊ<span className="text-primary">.</span></h2>
+                     <p className="text-white/40 text-sm font-medium leading-relaxed">Prepare-se para uma surpresa especial. Ligue o som para uma experiência completa.</p>
+                  </div>
+                  <Button onClick={handleStartExperience} className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-3">Dar o Play ❤️ <Play className="w-4 h-4 fill-current" /></Button>
+               </div>
+             </>
+           )}
         </div>
       )}
 
