@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import { ChevronLeft, ChevronRight, ExternalLink, X, CheckCircle2, Heart, Trophy, Star, MapPin, RotateCcw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ExternalLink, X, CheckCircle2, Heart, Trophy, Star, MapPin, RotateCcw, Sparkles, Pencil, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
@@ -222,21 +222,11 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
                     <div className="absolute inset-0 bg-neutral-900 z-0">
                       {module.videoUrl ? (
                         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                           <video 
-                             autoPlay 
-                             muted 
-                             loop 
-                             playsInline 
-                             className="absolute inset-0 w-full h-full object-cover opacity-60"
-                           >
-                             <source src={`https://www.youtube.com/embed/${module.videoUrl}?autoplay=1&mute=1`} type="video/mp4" />
-                             {/* Fallback Iframe */}
-                             <iframe
-                               className="w-full h-full scale-[1.3] border-none"
-                               src={`https://www.youtube.com/embed/${module.videoUrl}?autoplay=1&mute=1&loop=1&playlist=${module.videoUrl}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&playsinline=1`}
-                               allow="autoplay"
-                             />
-                           </video>
+                           <iframe
+                             className="w-full h-full scale-[1.3] border-none"
+                             src={`https://www.youtube.com/embed/${module.videoUrl}?autoplay=1&mute=1&loop=1&playlist=${module.videoUrl}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&playsinline=1`}
+                             allow="autoplay"
+                           />
                         </div>
                       ) : (
                         <Image 
@@ -315,10 +305,29 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
           <Switch checked={isPackEnabled} onCheckedChange={onPackToggle} className="scale-110" />
         </div>
 
-        <div className="flex justify-center md:justify-start">
-           <p className="text-[10px] font-medium text-white/20 italic flex items-center gap-2">
-              <CheckCircle2 className="w-3 h-3" /> Você poderá configurar os módulos após a liberação
-           </p>
+        {/* MENSAGEM DE DESTAQUE REFORÇADA */}
+        <div className="bg-primary/10 border-2 border-primary/20 rounded-[2rem] p-6 space-y-4 animate-in zoom-in-95 duration-500">
+           <div className="flex items-center gap-3">
+              <div className="bg-primary p-1.5 rounded-lg shadow-[0_0_15px_rgba(225,29,72,0.5)]">
+                 <Sparkles className="w-5 h-5 text-white fill-current" />
+              </div>
+              <h4 className="text-sm font-black text-white uppercase tracking-tight">Aviso Importante</h4>
+           </div>
+           
+           <div className="space-y-3">
+              <p className="text-[13px] font-bold text-white leading-relaxed">
+                🚀 <span className="text-primary uppercase tracking-tighter">Você poderá configurar e personalizar todos os módulos</span> logo após a liberação do seu acesso no painel.
+              </p>
+              
+              <div className="h-px bg-white/5 w-full" />
+              
+              <div className="flex items-start gap-3">
+                 <Pencil className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                 <p className="text-[11px] font-medium text-white/60 leading-relaxed uppercase tracking-widest">
+                    Pode ficar tranquilo! Você poderá <span className="text-white font-black">editar sua página e os módulos quantas vezes quiser</span> após o pagamento, sem custos extras.
+                 </p>
+              </div>
+           </div>
         </div>
       </div>
 

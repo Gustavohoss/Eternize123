@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { Mail, Check, Crown, Lock, Infinity, Zap, HelpCircle, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Mail, Check, Crown, Lock, Infinity, Zap, HelpCircle, ChevronRight, ChevronLeft, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -25,7 +25,7 @@ export function StepPlans({ selectedPlan, onPlanChange, onBack, onFinish }: Step
           <h2 className="text-2xl md:text-4xl font-black tracking-tight">Escolha seu plano</h2>
         </div>
         <p className="text-xs md:text-base text-white/40 font-medium max-w-xl">
-          Selecione o plano que melhor atende às suas necessidades. Cada plano oferece diferentes características que transformarão seu site.
+          Selecione o plano que melhor atende às suas necessidades. Você poderá editar sua página quantas vezes quiser após o pagamento.
         </p>
       </div>
 
@@ -56,8 +56,8 @@ export function StepPlans({ selectedPlan, onPlanChange, onBack, onFinish }: Step
               "Contador em tempo real",
               "Texto dedicado",
               "Até 4 fotos",
+              "Edições ilimitadas ✍️",
               "URL personalizada",
-              "QR Code exclusivo",
               "Música dedicada",
               "Fundo dinâmico"
             ].map((feature, i) => (
@@ -110,8 +110,8 @@ export function StepPlans({ selectedPlan, onPlanChange, onBack, onFinish }: Step
               "Contador em tempo real",
               "Texto dedicado",
               "Até 8 fotos",
+              "Edições ilimitadas ✍️",
               "URL personalizada",
-              "QR Code exclusivo",
               "Música dedicada",
               "Fundo dinâmico",
               "Acesso ilimitado"
