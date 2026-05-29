@@ -31,6 +31,7 @@ interface SpotifyViewProps {
   onModuleClick?: (id: string) => void;
   spotifyCardPhoto?: string;
   onStartWrapped?: () => void;
+  musicData?: any;
 }
 
 const VerifiedBadge = ({ size = 16 }: { size?: number }) => (
@@ -63,7 +64,8 @@ export function SpotifyView({
   isPackEnabled = false,
   onModuleClick,
   spotifyCardPhoto = '',
-  onStartWrapped
+  onStartWrapped,
+  musicData
 }: SpotifyViewProps) {
   
   const modules = [
@@ -91,8 +93,12 @@ export function SpotifyView({
         </div>
         <div className="flex items-center justify-between mb-8 shrink-0">
           <div className="min-w-0 pr-4">
-            <h2 className="text-[28px] font-black text-white leading-tight tracking-tight truncate font-['DM_Sans']">{activeHeroIndex >= 0 && uploadedPhotos[activeHeroIndex] ? `Memória ${activeHeroIndex + 1}` : (pageTitle || 'Nossa História')}</h2>
-            <p className="text-base font-bold text-white/60 truncate font-['DM_Sans']">{pageTitle || 'Eternize'}</p>
+            <h2 className="text-[28px] font-black text-white leading-tight tracking-tight truncate font-['DM_Sans']">
+              {musicData?.title || (activeHeroIndex >= 0 && uploadedPhotos[activeHeroIndex] ? `Memória ${activeHeroIndex + 1}` : (pageTitle || 'Nossa História'))}
+            </h2>
+            <p className="text-base font-bold text-white/60 truncate font-['DM_Sans']">
+              {musicData?.title || (pageTitle || 'Eternize')}
+            </p>
           </div>
           <button onClick={onLikeToggle} className={cn("transition-all duration-300", isLiked ? "text-[#1DB954]" : "text-white/80")}>{isLiked ? <Heart className="w-8 h-8 fill-current text-[#1DB954]" /> : <Heart className="w-8 h-8" />}</button>
         </div>
