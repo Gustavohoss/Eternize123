@@ -26,27 +26,16 @@ service cloud.firestore {
     }
 
     match /published_sites/{subdomainName} {
-      // Leitura pública de um documento específico para visualização do site
       allow read, get: if true;
-      
-      // Listagem (Painel) restrita ESTRITAMENTE aos compradores reais via e-mail verificado
-      // Isso impede que sites de teste ou rascunhos apareçam no painel oficial do usuário.
-      allow list: if isSignedIn() && (
-        resource.data.customerEmail == request.auth.token.email
-      );
-      
-      // Permite criação (Fluxo do Criador)
+      allow list: if isSignedIn() && (resource.data.customerEmail == request.auth.token.email);
       allow create: if true;
-      
-      // Permite atualização se:
-      // 1. O site estiver pendente (Permite a liberação via Webhook/Checkout)
-      // 2. O usuário for o dono via e-mail de compra (Edição via Painel)
-      allow update: if 
-        (resource.data.status == 'pending') || 
-        (isSignedIn() && (resource.data.customerEmail == request.auth.token.email));
-        
-      // Deleção permitida apenas pelo dono original (UID) ou e-mail de compra
+      allow update: if (resource.data.status == 'pending') || (isSignedIn() && (resource.data.customerEmail == request.auth.token.email));
       allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.customerEmail == request.auth.token.email);
+
+      match /media/{mediaId} {
+        allow read, get: if true;
+        allow write, create, update, delete: if true; // Permitido durante o fluxo de criação anônima
+      }
     }
   }
 }

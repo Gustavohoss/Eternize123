@@ -3,8 +3,8 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { useDoc, useFirestore, useUser, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { doc, updateDoc, serverTimestamp, collection, getDocs, writeBatch } from 'firebase/firestore';
+import { useDoc, useFirestore, useUser } from '@/firebase';
 import { DeviceMockup } from '@/components/eternize/device-mockup';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
@@ -30,8 +30,8 @@ const compressImage = (base64Str: string): Promise<string> => {
     img.src = base64Str;
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const MAX_WIDTH = 800;
-      const MAX_HEIGHT = 800;
+      const MAX_WIDTH = 1000;
+      const MAX_HEIGHT = 1000;
       let width = img.width;
       let height = img.height;
       if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
@@ -39,7 +39,7 @@ const compressImage = (base64Str: string): Promise<string> => {
       canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx?.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/jpeg', 0.6));
+      resolve(canvas.toDataURL('image/jpeg', 0.75));
     };
   });
 };
@@ -58,10 +58,11 @@ export default function EditSitePage() {
     return doc(firestore, 'published_sites', subdomain);
   }, [firestore, subdomain]);
 
-  const { data: siteData, isLoading: isDocLoading, error: docError } = useDoc(siteRef as any);
+  const { data: siteData, isLoading: isDocLoading } = useDoc(siteRef as any);
 
   const [mounted, setMounted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isMediaLoading, setIsMediaLoading] = useState(true);
   const [step, setStep] = useState<Step>('customize-background');
   const [activeModulePreview, setActiveModulePreview] = useState<string | null>(null);
 
@@ -86,7 +87,7 @@ export default function EditSitePage() {
   const [isPackEnabled, setIsPackEnabled] = useState<boolean>(false);
   const [hasPackPurchased, setHasPackPurchased] = useState<boolean>(false);
   const [memories, setMemories] = useState<any[]>([]);
-  const [journeyPoints, setJourneyPoints] = useState<JourneyPoint[]>([]);
+  const [journeyPoints, setJourneyPoints] = useState<any[]>([]);
   const [spotifyCardPhoto, setSpotifyCardPhoto] = useState<string>('');
   
   const [sparklesDensity, setSparklesDensity] = useState<number>(100);
@@ -124,114 +125,100 @@ export default function EditSitePage() {
 
   useEffect(() => { setMounted(true); }, []);
 
+  // BUSCA FOTOS DA SUBCOLEÇÃO
   useEffect(() => {
-    if (siteData) {
-      try {
-        const config = JSON.parse(siteData.contentJson);
-        const theme = config.selectedTheme || 'classic';
-        setSelectedTheme(theme);
-        setSelectedBgColor(config.selectedBgColor || '#000000');
-        setSelectedEffect(config.selectedEffect || 'none');
-        setIsEmojiRainEnabled(config.isEmojiRainEnabled || false);
-        setSelectedEmojis(config.selectedEmojis || ['❤️']);
-        setEmojiSize(config.emojiSize || 20);
-        setEmojiRainPosition(config.emojiRainPosition || 'behind');
-        setSelectedCountStyle(config.selectedCountStyle || 'padrao');
-        setPhotoEffect(config.photoEffect || 'slide');
-        setDate(config.date ? new Date(config.date) : undefined);
-        setPageTitle(config.pageTitle || '');
-        setMessage(config.message || '');
-        setMusicData(config.musicData);
-        setUploadedPhotos(config.uploadedPhotos || []);
-        setMemories(config.memories || []);
-        setJourneyPoints(config.journeyPoints || []);
-        setSpotifyCardPhoto(config.spotifyCardPhoto || '');
-        
-        const packPurchased = siteData.isPackEnabled === true;
-        setHasPackPurchased(packPurchased);
-        setIsPackEnabled(config.isPackEnabled !== undefined ? config.isPackEnabled : packPurchased);
-        
-        setSparklesDensity(config.sparklesDensity || 100);
-        setSparklesSpeed(config.sparklesSpeed || 0.5);
-        setSparklesColor(config.sparklesColor || '#ffffff');
-        setSmokeIntensity(config.smokeIntensity || 0.5);
-        setSmokeColor(config.smokeColor || '#ffffff');
-        setPatternDuration(config.patternDuration || 150);
-        setPatternDensity(config.patternDensity || 1);
-        setPatternColor(config.patternColor || '#ffffff');
-        setCardColor(config.cardColor || '#ffffff');
-        setShowCard(config.showCard !== undefined ? config.showCard : true);
-        setTitlePosition(config.titlePosition || 'bottom');
-        setTitleColor(config.titleColor || '#111111');
-        setTitleFont(config.titleFont || 'dancing-script');
-        setTitleIsBold(config.titleIsBold || false);
-        setTitleHasNeon(config.titleHasNeon || false);
-        setTitleNeonStrength(config.titleNeonStrength || 10);
-        setDateColor(config.dateColor || '#ffffff');
-        setDateFont(config.dateFont || 'playfair');
-        setDateIsBold(config.dateIsBold !== undefined ? config.dateIsBold : true);
-        setDateHasNeon(config.dateHasNeon || false);
-        setDateNeonStrength(config.dateNeonStrength || 10);
-        setDateBoxBgColor(config.dateBoxBgColor || '#1a1a1a');
-        setDateBoxBorderColor(config.dateBoxBorderColor || '#2a2a2a');
-        setMessageColor(config.messageColor || '#ffffff');
-        setMessageFont(config.messageFont || 'inter');
-        setMusicBoxColor(config.musicBoxColor || '#0e0e0e');
-        setMusicTextColor(config.musicTextColor || '#ffffff');
-        setMusicHasNeon(config.musicHasNeon || false);
-        setMusicNeonStrength(config.musicNeonStrength || 15);
-        setIsMusicAutoPlay(config.isMusicAutoPlay || false);
-        setLocationQuery(config.locationQuery || '');
+    if (siteData && firestore) {
+      const loadMedia = async () => {
+        setIsMediaLoading(true);
+        try {
+          const config = JSON.parse(siteData.contentJson);
+          
+          // Busca todos os docs na subcoleção media
+          const mediaSnap = await getDocs(collection(siteRef!, 'media'));
+          const albumPhotos: string[] = [];
+          let spotifyCard = '';
+          const memoryPhotos: Record<string, string> = {};
+          const journeyPhotos: Record<string, string> = {};
 
-        const startStep = searchParams.get('startStep');
-        const isFixed = theme === 'netflix' || theme === 'spotify' || theme === 'instagram';
+          mediaSnap.forEach(doc => {
+            const data = doc.data();
+            if (data.type === 'album') {
+              const idx = parseInt(doc.id.split('_')[1]);
+              albumPhotos[idx] = data.base64;
+            } else if (data.type === 'spotify') {
+              spotifyCard = data.base64;
+            } else if (data.type === 'memory') {
+              memoryPhotos[doc.id.replace('memory_', '')] = data.base64;
+            } else if (data.type === 'journey') {
+              journeyPhotos[doc.id.replace('journey_', '')] = data.base64;
+            }
+          });
 
-        if (startStep === 'modules' && packPurchased) {
-          setStep('modules');
-        } else if (isFixed) {
-          setStep('data-location');
-        } else {
-          setStep('customize-background');
+          setSelectedTheme(config.selectedTheme || 'classic');
+          setSelectedBgColor(config.selectedBgColor || '#000000');
+          setSelectedEffect(config.selectedEffect || 'none');
+          setIsEmojiRainEnabled(config.isEmojiRainEnabled || false);
+          setSelectedEmojis(config.selectedEmojis || ['❤️']);
+          setEmojiSize(config.emojiSize || 20);
+          setEmojiRainPosition(config.emojiRainPosition || 'behind');
+          setSelectedCountStyle(config.selectedCountStyle || 'padrao');
+          setPhotoEffect(config.photoEffect || 'slide');
+          setDate(config.date ? new Date(config.date) : undefined);
+          setPageTitle(config.pageTitle || '');
+          setMessage(config.message || '');
+          setMusicData(config.musicData);
+          setUploadedPhotos(albumPhotos.filter(p => !!p));
+          setSpotifyCardPhoto(spotifyCard);
+          
+          // Reconstruir memórias e jornada com as fotos individuais
+          setMemories((config.memories || []).map((m: any) => ({ ...m, photo: memoryPhotos[m.id] || m.photo })));
+          setJourneyPoints((config.journeyPoints || []).map((p: any) => ({ ...p, photo: journeyPhotos[p.id] || p.photo })));
+          
+          const packPurchased = siteData.isPackEnabled === true;
+          setHasPackPurchased(packPurchased);
+          setIsPackEnabled(config.isPackEnabled !== undefined ? config.isPackEnabled : packPurchased);
+          
+          setSparklesDensity(config.sparklesDensity || 100);
+          setSparklesSpeed(config.sparklesSpeed || 0.5);
+          setSparklesColor(config.sparklesColor || '#ffffff');
+          setSmokeIntensity(config.smokeIntensity || 0.5);
+          setSmokeColor(config.smokeColor || '#ffffff');
+          setPatternDuration(config.patternDuration || 150);
+          setPatternDensity(config.patternDensity || 1);
+          setPatternColor(config.patternColor || '#ffffff');
+          setCardColor(config.cardColor || '#ffffff');
+          setShowCard(config.showCard !== undefined ? config.showCard : true);
+          setTitlePosition(config.titlePosition || 'bottom');
+          setTitleColor(config.titleColor || '#111111');
+          setTitleFont(config.titleFont || 'dancing-script');
+          setTitleIsBold(config.titleIsBold || false);
+          setTitleHasNeon(config.titleHasNeon || false);
+          setTitleNeonStrength(config.titleNeonStrength || 10);
+          setDateColor(config.dateColor || '#ffffff');
+          setDateFont(config.dateFont || 'playfair');
+          setDateIsBold(config.dateIsBold !== undefined ? config.dateIsBold : true);
+          setDateHasNeon(config.dateHasNeon || false);
+          setDateNeonStrength(config.dateNeonStrength || 10);
+          setDateBoxBgColor(config.dateBoxBgColor || '#1a1a1a');
+          setDateBoxBorderColor(config.dateBoxBorderColor || '#2a2a2a');
+          setMessageColor(config.messageColor || '#ffffff');
+          setMessageFont(config.messageFont || 'inter');
+          setMusicBoxColor(config.musicBoxColor || '#0e0e0e');
+          setMusicTextColor(config.musicTextColor || '#ffffff');
+          setMusicHasNeon(config.musicHasNeon || false);
+          setMusicNeonStrength(config.musicNeonStrength || 15);
+          setIsMusicAutoPlay(config.isMusicAutoPlay || false);
+          setLocationQuery(config.locationQuery || '');
+
+        } catch (e) {
+          console.error("Erro ao carregar mídia", e);
+        } finally {
+          setIsMediaLoading(false);
         }
-      } catch (e) {
-        console.error("Erro ao processar conteúdo do site", e);
-      }
+      };
+      loadMedia();
     }
-  }, [siteData, searchParams]);
-
-  const stepSequence = useMemo((): Step[] => {
-    const isFixed = selectedTheme === 'netflix' || selectedTheme === 'spotify' || selectedTheme === 'instagram';
-    let steps: Step[] = [];
-
-    if (isFixed) {
-      steps = ['data-location', 'page-title', 'message', 'photos', 'music'];
-    } else {
-      steps = ['customize-background', 'photos', 'page-title', 'message', 'data-location', 'music'];
-    }
-
-    if (hasPackPurchased) {
-      steps.push('modules');
-    }
-
-    return steps;
-  }, [selectedTheme, hasPackPurchased]);
-
-  const currentStepIndex = stepSequence.indexOf(step);
-
-  const handleBack = useCallback(() => {
-    if (isModulesOnlyMode && step === 'modules') {
-      router.push('/minhas-paginas');
-      return;
-    }
-    if (currentStepIndex <= 0) { router.push('/minhas-paginas'); return; }
-    setStep(stepSequence[currentStepIndex - 1]);
-  }, [currentStepIndex, stepSequence, router, isModulesOnlyMode, step]);
-
-  const handleNext = useCallback(() => {
-    if (currentStepIndex < stepSequence.length - 1) {
-      setStep(stepSequence[currentStepIndex + 1]);
-    }
-  }, [currentStepIndex, stepSequence]);
+  }, [siteData, firestore, siteRef]);
 
   const handleSave = async () => {
     if (!firestore || !siteRef || !user) return;
@@ -241,68 +228,79 @@ export default function EditSitePage() {
       const contentData = {
         selectedTheme, selectedBgColor, selectedEffect, isEmojiRainEnabled, selectedEmojis,
         emojiSize, emojiRainPosition, selectedCountStyle, photoEffect, date: date?.toISOString(),
-        pageTitle, message, musicData, uploadedPhotos, sparklesDensity, sparklesSpeed, sparklesColor,
+        pageTitle, message, musicData, sparklesDensity, sparklesSpeed, sparklesColor,
         smokeIntensity, smokeColor, patternDuration, patternDensity, patternColor, cardColor,
         showCard, titlePosition, titleColor, titleFont, titleIsBold, titleHasNeon, titleNeonStrength,
         dateColor, dateFont, dateIsBold, dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor,
         messageColor, messageFont, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength,
-        isMusicAutoPlay, locationQuery, isPackEnabled, memories, journeyPoints, spotifyCardPhoto
+        isMusicAutoPlay, locationQuery, isPackEnabled,
+        // Removemos os Base64 pesados do JSON
+        memories: memories.map(m => ({ ...m, photo: '' })),
+        journeyPoints: journeyPoints.map(p => ({ ...p, photo: '' }))
       };
 
-      const jsonContent = JSON.stringify(contentData);
-      
       await updateDoc(siteRef, {
         name: pageTitle || 'Meu Presente',
-        contentJson: jsonContent,
+        contentJson: JSON.stringify(contentData),
         isPackEnabled: isPackEnabled,
         updatedAt: serverTimestamp(),
       });
 
+      // ATUALIZA FOTOS NA SUBCOLEÇÃO
+      const batch = writeBatch(firestore);
+      
+      uploadedPhotos.forEach((base64, index) => {
+        batch.set(doc(collection(siteRef, 'media'), `album_${index}`), { base64, type: 'album' });
+      });
+
+      if (spotifyCardPhoto) {
+        batch.set(doc(collection(siteRef, 'media'), 'spotify_card'), { base64: spotifyCardPhoto, type: 'spotify' });
+      }
+
+      memories.forEach(m => {
+        if (m.photo) batch.set(doc(collection(siteRef, 'media'), `memory_${m.id}`), { base64: m.photo, type: 'memory' });
+      });
+
+      journeyPoints.forEach(p => {
+        if (p.photo) batch.set(doc(collection(siteRef, 'media'), `journey_${p.id}`), { base64: p.photo, type: 'journey' });
+      });
+
+      await batch.commit();
       router.push('/minhas-paginas');
     } catch (error: any) {
-      console.error("Erro ao salvar alterações:", error);
+      console.error("Erro ao salvar:", error);
       setIsSaving(false);
       alert("Erro ao salvar: " + (error.message || "Tente novamente."));
     }
   };
 
-  const toggleEmoji = (emoji: string) => {
-    if (selectedEmojis.includes(emoji)) {
-      if (selectedEmojis.length > 1) setSelectedEmojis(selectedEmojis.filter(e => e !== emoji));
-    } else {
-      if (selectedEmojis.length < 3) setSelectedEmojis([...selectedEmojis, emoji]);
-    }
-  };
+  const stepSequence = useMemo(() => {
+    const isFixed = selectedTheme === 'netflix' || selectedTheme === 'spotify' || selectedTheme === 'instagram';
+    let steps: Step[] = isFixed ? ['data-location', 'page-title', 'message', 'photos', 'music'] : ['customize-background', 'photos', 'page-title', 'message', 'data-location', 'music'];
+    if (hasPackPurchased) steps.push('modules');
+    return steps;
+  }, [selectedTheme, hasPackPurchased]);
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string);
-        setUploadedPhotos(prev => [...prev, compressed].slice(0, 8));
-      };
-      reader.readAsDataURL(file);
-    });
-  };
+  const currentStepIndex = stepSequence.indexOf(step);
 
-  const handleSpotifyCardPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const compressed = await compressImage(reader.result as string);
-      setSpotifyCardPhoto(compressed);
-    };
-    reader.readAsDataURL(file);
-  };
+  const handleBack = useCallback(() => {
+    if (isModulesOnlyMode && step === 'modules') { router.push('/minhas-paginas'); return; }
+    if (currentStepIndex <= 0) { router.push('/minhas-paginas'); return; }
+    setStep(stepSequence[currentStepIndex - 1]);
+  }, [currentStepIndex, stepSequence, router, isModulesOnlyMode, step]);
 
-  const removePhoto = (index: number) => setUploadedPhotos(prev => prev.filter((_, i) => i !== index));
+  const handleNext = useCallback(() => {
+    if (currentStepIndex < stepSequence.length - 1) setStep(stepSequence[currentStepIndex + 1]);
+  }, [currentStepIndex, stepSequence]);
 
-  const filteredCities = locationQuery.length > 0 
-    ? MOCK_CITIES.filter(city => city.toLowerCase().includes(locationQuery.toLowerCase()))
-    : [];
+  if (isAuthLoading || isDocLoading || isMediaLoading) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 text-white">
+        <Loader2 className="w-10 h-10 text-primary animate-spin" />
+        <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Carregando editor...</p>
+      </div>
+    );
+  }
 
   const previewProps = {
     selectedTheme, selectedBgColor, selectedEffect, isEmojiRainEnabled, selectedEmojis, emojiSize,
@@ -317,109 +315,44 @@ export default function EditSitePage() {
     spotifyCardPhoto
   };
 
-  if (isAuthLoading || isDocLoading) {
-    return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 text-white">
-        <Loader2 className="w-10 h-10 text-primary animate-spin" />
-        <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Carregando editor...</p>
-      </div>
-    );
-  }
-
-  if (!siteData || siteData.userId !== user?.uid) {
-    return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center text-white">
-        <Heart className="w-12 h-12 text-white/10 mb-4" />
-        <h1 className="text-2xl font-black mb-2 uppercase italic">Acesso Negado</h1>
-        <p className="text-white/40 text-sm max-w-xs mb-8">Você não tem permissão para editar esta página ou ela não existe.</p>
-        <Button onClick={() => router.push('/minhas-paginas')} className="bg-primary">Voltar para Minhas Páginas</Button>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-black text-white selection:bg-primary selection:text-white relative font-body overflow-x-hidden">
       <div className="fixed inset-0 bg-hero-glow pointer-events-none z-0" />
-
       <div className="relative z-10 container mx-auto px-4 pt-16 md:pt-20 pb-12 max-w-7xl">
-        <div className="fixed top-0 left-0 right-0 z-[110] px-4 md:px-10 bg-black/60 backdrop-blur-md border-b border-white/5">
-          <div className="max-w-7xl mx-auto flex items-center justify-between h-14">
-             <button onClick={() => router.push('/minhas-paginas')} className="flex items-center gap-2 text-white/40 hover:text-white transition-all">
-                <ArrowLeft className="w-4 h-4" />
-                <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Sair do Editor</span>
-             </button>
-             
-             <div className="flex-1 max-w-md mx-8 h-1 bg-white/10 rounded-full overflow-hidden hidden sm:block">
-                <div className="h-full bg-primary transition-all duration-500" style={{ width: `${(currentStepIndex / (stepSequence.length - 1)) * 100}%` }} />
-             </div>
-
-             <Button onClick={handleSave} disabled={isSaving} className="bg-[#15803d] hover:bg-[#166534] h-9 rounded-lg px-4 gap-2 text-[10px] font-black uppercase tracking-widest shadow-lg">
-                {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-                Salvar Alterações
-             </Button>
-          </div>
+        <div className="fixed top-0 left-0 right-0 z-[110] px-4 md:px-10 bg-black/60 backdrop-blur-md border-b border-white/5 h-14 flex items-center justify-between">
+           <button onClick={() => router.push('/minhas-paginas')} className="flex items-center gap-2 text-white/40 hover:text-white">
+              <ArrowLeft className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-widest">Sair</span>
+           </button>
+           <Button onClick={handleSave} disabled={isSaving} className="bg-[#15803d] hover:bg-[#166534] h-9 rounded-lg px-4 text-[10px] font-black uppercase shadow-lg">
+              {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Salvar
+           </Button>
         </div>
-
         <div className="grid lg:grid-cols-[1fr_420px] gap-8 md:gap-16 items-start pt-8">
           <div className="w-full min-w-0">
-            {step === 'customize-background' && <StepCustomizeBackground {...{selectedBgColor, onBgColorChange: setSelectedBgColor, selectedEffect, onEffectChange: setSelectedEffect, isEmojiRainEnabled, onEmojiRainToggle: setIsEmojiRainEnabled, selectedEmojis, onToggleEmoji: toggleEmoji, emojiSize, onEmojiSizeChange: setEmojiSize, emojiRainPosition, onEmojiRainPositionChange: setEmojiRainPosition, isEmojiPickerOpen, onEmojiPickerOpenChange: setIsEmojiPickerOpen, sparklesDensity, onSparklesDensityChange: setSparklesDensity, sparklesSpeed, onSparklesSpeedChange: setSparklesSpeed, sparklesColor, onSparklesColorChange: setSparklesColor, smokeIntensity, onSmokeIntensityChange: setSmokeIntensity, smokeColor, onSmokeColorChange: setSmokeColor, patternDuration, onPatternDurationChange: setPatternDuration, patternDensity, onPatternDensityChange: setPatternDensity, patternColor, onPatternColorChange: setPatternColor, onBack: handleBack, onNext: handleNext}} />}
-            {step === 'photos' && <StepPhotos {...{selectedTheme, uploadedPhotos, onPhotoUpload: handlePhotoUpload, onRemovePhoto: removePhoto, showCard, onShowCardChange: setShowCard, cardColor, onCardColorChange: setCardColor, titlePosition, onTitlePositionChange: setTitlePosition, photoEffect, onPhotoEffectChange: setPhotoEffect, onBack: handleBack, onNext: handleNext}} />}
-            {step === 'page-title' && <StepPageTitle {...{selectedTheme, pageTitle, onPageTitleChange: setPageTitle, titleFont, onTitleFontChange: setTitleFont, titleIsBold, onTitleIsBoldChange: setTitleIsBold, titleHasNeon, onTitleHasNeonChange: setTitleHasNeon, titleNeonStrength, onTitleNeonStrengthChange: setTitleNeonStrength, titleColor, onTitleColorChange: (c) => setTitleColor(c), onBack: handleBack, onNext: handleNext}} />}
-            {step === 'message' && <StepMessage {...{selectedTheme, message, onMessageChange: setMessage, messageFont, onMessageFontChange: setMessageFont, messageColor, onMessageColorChange: setMessageColor, onBack: handleBack, onNext: handleNext}} />}
-            {step === 'music' && <StepMusic {...{selectedTheme, musicData, onMusicSelect: setMusicData, musicBoxColor, onMusicBoxColorChange: setMusicBoxColor, musicTextColor, onMusicTextColorChange: setMusicTextColor, musicHasNeon, onMusicHasNeonChange: setMusicHasNeon, musicNeonStrength, onMusicNeonStrengthChange: setMusicNeonStrength, isAutoPlay: isMusicAutoPlay, onAutoPlayChange: setIsMusicAutoPlay, onBack: handleBack, onNext: handleNext}} />}
-            {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: setLocationQuery, showSuggestions, onShowSuggestionsChange: setShowSuggestions, filteredCities, selectedCountStyle, onCountStyleChange: setSelectedCountStyle, dateFont, onDateFontChange: setDateFont, dateIsBold, onDateIsBoldChange: setDateIsBold, dateHasNeon, onDateHasNeonChange: setDateHasNeon, dateNeonStrength, onDateNeonStrengthChange: setDateNeonStrength, dateColor, onDateColorChange: setDateColor, dateBoxBgColor, onDateBoxBgColorChange: setDateBoxBgColor, dateBoxBorderColor, onDateBoxBorderColorChange: setDateBoxBorderColor, onBack: handleBack, onNext: handleNext, spotifyCardPhoto, onSpotifyCardPhotoChange: handleSpotifyCardPhotoUpload}} />}
+            {step === 'customize-background' && <StepCustomizeBackground {...{selectedBgColor, onBgColorChange: setSelectedBgColor, selectedEffect, onEffectChange: setSelectedEffect, isEmojiRainEnabled, onEmojiRainToggle: setIsEmojiRainEnabled, selectedEmojis, onToggleEmoji: (e: any) => {}, emojiSize, onEmojiSizeChange: (e: any) => {}, emojiRainPosition, onEmojiRainPositionChange: (e: any) => {}, isEmojiPickerOpen, onEmojiPickerOpenChange: (e: any) => {}, sparklesDensity, onSparklesDensityChange: (e: any) => {}, sparklesSpeed, onSparklesSpeedChange: (e: any) => {}, sparklesColor, onSparklesColorChange: (e: any) => {}, smokeIntensity, onSmokeIntensityChange: (e: any) => {}, smokeColor, onSmokeColorChange: (e: any) => {}, patternDuration, onPatternDurationChange: (e: any) => {}, patternDensity, onPatternDensityChange: (e: any) => {}, patternColor, onPatternColorChange: (e: any) => {}, onBack: handleBack, onNext: handleNext}} />}
+            {step === 'photos' && <StepPhotos {...{selectedTheme, uploadedPhotos, onPhotoUpload: (e: any) => {}, onRemovePhoto: (e: any) => {}, showCard, onShowCardChange: (e: any) => {}, cardColor, onCardColorChange: (e: any) => {}, titlePosition, onTitlePositionChange: (e: any) => {}, photoEffect, onPhotoEffectChange: (e: any) => {} }} />}
+            {step === 'page-title' && <StepPageTitle {...{selectedTheme, pageTitle, onPageTitleChange: setPageTitle, titleFont, onTitleFontChange: setTitleFont, titleIsBold, onTitleIsBoldChange: (e: any) => {}, titleHasNeon, onTitleHasNeonChange: (e: any) => {}, titleNeonStrength, onTitleNeonStrengthChange: (e: any) => {}, titleColor, onTitleColorChange: (c) => setTitleColor(c), onBack: handleBack, onNext: handleNext}} />}
+            {step === 'message' && <StepMessage {...{selectedTheme, message, onMessageChange: setMessage, messageFont, onMessageFontChange: (e: any) => {}, messageColor, onMessageColorChange: (e: any) => {}, onBack: handleBack, onNext: handleNext}} />}
+            {step === 'music' && <StepMusic {...{selectedTheme, musicData, onMusicSelect: setMusicData, musicBoxColor, onMusicBoxColorChange: (e: any) => {}, musicTextColor, onMusicTextColorChange: (e: any) => {}, musicHasNeon, onMusicHasNeonChange: (e: any) => {}, musicNeonStrength, onMusicNeonStrengthChange: (e: any) => {}, isAutoPlay: isMusicAutoPlay, onAutoPlayChange: (e: any) => {}, onBack: handleBack, onNext: handleNext}} />}
+            {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: (e: any) => {}, showSuggestions, onShowSuggestionsChange: (e: any) => {}, filteredCities: [], selectedCountStyle, onCountStyleChange: (e: any) => {}, dateFont, onDateFontChange: (e: any) => {}, dateIsBold, onDateIsBoldChange: (e: any) => {}, dateHasNeon, onDateHasNeonChange: (e: any) => {}, dateNeonStrength, onDateNeonStrengthChange: (e: any) => {}, dateColor, onDateColorChange: (e: any) => {}, dateBoxBgColor, onDateBoxBgColorChange: (e: any) => {}, dateBoxBorderColor, onDateBoxBorderColorChange: (e: any) => {}, onBack: handleBack, onNext: handleNext}} />}
             {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} memories={memories} onMemoriesChange={setMemories} journeyPoints={journeyPoints} onJourneyPointsChange={setJourneyPoints} onBack={handleBack} onNext={handleSave} isModulesOnlyMode={isModulesOnlyMode} onSubModuleChange={setActiveModulePreview} />}
-
-            <div className="lg:hidden flex flex-col items-center mt-12 w-full gap-4">
-               <Dialog>
-                 <DialogTrigger asChild><Button variant="outline" className="w-full h-11 rounded-xl border-white/10 bg-white/5 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2"><Maximize2 className="w-4 h-4" /> Ver prévia cheia</Button></DialogTrigger>
-                 <DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[200] translate-x-0 translate-y-0 rounded-none">
-                   <DialogTitle className="sr-only">Prévia</DialogTitle>
-                   <DialogDescription className="sr-only">Visualização do site em edição.</DialogDescription>
-                   <div className="flex-1 overflow-hidden relative flex flex-col">
-                     <div className="absolute top-6 right-6 z-[250]"><DialogClose className="p-2.5 bg-black/60 hover:bg-black/80 rounded-full text-white transition-all border border-white/20 shadow-2xl backdrop-blur-md"><X className="w-5 h-5" /></DialogClose></div>
-                     {mounted && <DeviceMockup {...previewProps} isFullscreen />}
-                   </div>
-                 </DialogContent>
-               </Dialog>
+            <div className="lg:hidden mt-12 w-full gap-4">
+               <Dialog><DialogTrigger asChild><Button variant="outline" className="w-full h-11 rounded-xl border-white/10 bg-white/5 font-black text-[10px] uppercase tracking-widest gap-2"><Maximize2 className="w-4 h-4" /> Ver prévia</Button></DialogTrigger><DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[200] rounded-none"><div className="absolute top-6 right-6 z-[250]"><DialogClose className="p-2.5 bg-black/60 rounded-full text-white border border-white/20"><X className="w-5 h-5" /></DialogClose></div>{mounted && <DeviceMockup {...previewProps} isFullscreen />}</DialogContent></Dialog>
                {mounted && isMobile && <DeviceMockup {...previewProps} />}
             </div>
-
-            {step !== 'modules' && (
-              <div className="mt-12 flex flex-col gap-6 max-w-md mx-auto md:mx-0">
-                <div className="flex flex-col gap-4 pt-10 border-t border-white/5">
-                  <Button onClick={handleBack} variant="outline" className="w-full h-14 rounded-2xl border-white/10 bg-white/5 font-black text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2"><ChevronLeft className="w-4 h-4" /> Etapa Anterior</Button>
-                  {currentStepIndex < stepSequence.length - 1 ? (
-                    <Button onClick={handleNext} className="w-full h-14 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 bg-primary text-white hover:bg-primary/90 shadow-2xl shadow-primary/20">Próxima Etapa <ChevronRight className="w-4 h-4" /></Button>
-                  ) : (
-                    <Button onClick={handleSave} className="w-full h-14 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 bg-[#15803d] text-white hover:bg-[#166534] shadow-2xl shadow-green-500/20">Finalizar Edição <CheckCircle2 className="w-4 h-4" /></Button>
-                  )}
-                </div>
-              </div>
-            )}
+            <div className="mt-12 flex flex-col gap-4 pt-10 border-t border-white/5">
+              <Button onClick={handleBack} variant="outline" className="h-14 rounded-2xl">Voltar</Button>
+              <Button onClick={handleNext} className="h-14 rounded-2xl bg-primary text-white">Próxima Etapa</Button>
+            </div>
           </div>
-
           <div className="lg:sticky lg:top-24 self-start hidden lg:flex flex-col items-center gap-6">
              <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 w-full text-center">
-                <p className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center justify-center gap-2">
-                   <Pencil className="w-3 h-3" /> Modo Edição Ativo
-                </p>
+                <p className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center justify-center gap-2"><Pencil className="w-3 h-3" /> Modo Edição</p>
              </div>
              {mounted && !isMobile && <DeviceMockup {...previewProps} />}
           </div>
         </div>
       </div>
-
-      {isSaving && (
-        <div className="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center text-white p-6 animate-in fade-in duration-300">
-          <div className="relative mb-6">
-            <Loader2 className="w-16 h-16 text-primary animate-spin" />
-            <Heart className="w-6 h-6 text-primary absolute inset-0 m-auto animate-pulse" />
-          </div>
-          <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-2">Salvando...</h2>
-          <p className="text-white/40 text-sm font-medium animate-pulse">Suas memórias estão sendo atualizadas.</p>
-        </div>
-      )}
     </div>
   );
 }
