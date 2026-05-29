@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { collection, query, where, and } from 'firebase/firestore';
 import { useFirestore, useUser, useCollection, useAuth, useMemoFirebase } from '@/firebase';
-import { Heart, ExternalLink, Calendar, Loader2, Plus, ArrowLeft, LogOut, Layout, User, Pencil, ShieldAlert, Lock, X, CheckCircle2, Eye, EyeOff, Sparkles, Settings2, LayoutGrid, ChevronRight, QrCode, Copy, Share2 } from 'lucide-react';
+import { Heart, ExternalLink, Calendar, Loader2, Plus, ArrowLeft, LogOut, Layout, User, Pencil, ShieldAlert, Lock, X, CheckCircle2, Eye, EyeOff, Sparkles, Settings2, LayoutGrid, ChevronRight, QrCode, Copy, Share2, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
@@ -36,13 +36,13 @@ export default function MyPages() {
   // Share States
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [selectedSiteForShare, setSelectedSiteForShare] = useState<any>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Edit Choice States
   const [choiceDialogOpen, setChoiceDialogOpen] = useState(false);
   const [selectedSite, setSelectedSite] = useState<any>(null);
 
   // Query memoizada buscando ESTRITAMENTE por E-mail de Compra (customerEmail)
-  // Isso garante que apenas sites pagos/eternizados apareçam aqui, excluindo testes.
   const mySitesQuery = useMemoFirebase(() => {
     if (!firestore || !user?.email) return null;
     return query(
@@ -113,6 +113,37 @@ export default function MyPages() {
       title: "Link copiado! ❤️",
       description: "O endereço da sua página já está na área de transferência.",
     });
+  };
+
+  const downloadQRCode = async () => {
+    if (!selectedSiteForShare) return;
+    setIsDownloading(true);
+    
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=${encodeURIComponent(`https://eternizee.shop/site/${selectedSiteForShare.id}`)}`;
+    
+    try {
+      const response = await fetch(qrUrl);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `qrcode-eternize-${selectedSiteForShare.id}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      
+      toast({
+        title: "Download concluído!",
+        description: "O QR Code foi salvo na sua galeria.",
+      });
+    } catch (err) {
+      console.error("Erro ao baixar QR Code:", err);
+      // Fallback para abrir em nova aba se o fetch falhar (CORS)
+      window.open(qrUrl, '_blank');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   if (isUserLoading) {
@@ -295,7 +326,7 @@ export default function MyPages() {
               </DialogDescription>
             </div>
 
-            <div className="w-full bg-white p-6 rounded-3xl flex flex-col items-center gap-4 shadow-[0_0_50px_rgba(255,255,255,0.05)]">
+            <div className="w-full bg-white p-6 rounded-3xl flex flex-col items-center gap-4 shadow-[0_0_50px_rgba(255,255,255,0.05)] relative group/qr">
               <div className="relative w-48 h-48">
                 <img 
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://eternizee.shop/site/${selectedSiteForShare?.id}`)}`} 
@@ -303,6 +334,16 @@ export default function MyPages() {
                   className="w-full h-full object-contain"
                 />
               </div>
+              
+              <button 
+                onClick={downloadQRCode}
+                disabled={isDownloading}
+                className="absolute top-4 right-4 bg-black/5 hover:bg-black/10 p-2 rounded-xl transition-all text-black/20 hover:text-black flex items-center gap-1.5"
+              >
+                {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                <span className="text-[8px] font-black uppercase">Baixar</span>
+              </button>
+
               <p className="text-black/40 text-[10px] font-black uppercase tracking-widest">Aponte a câmera para testar</p>
             </div>
 
@@ -444,13 +485,13 @@ export default function MyPages() {
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">Nova Senha</label>
                     <div className="relative">
-                      <Input 
+                      <input 
                         type={showPass ? "text" : "password"}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="••••••••"
                         required
-                        className="bg-white/5 border-white/10 h-12 rounded-xl focus:border-primary/50 text-sm font-medium pr-10"
+                        className="w-full bg-white/5 border border-white/10 h-12 rounded-xl focus:border-primary/50 text-sm font-medium pr-10 outline-none px-4"
                       />
                       <button 
                         type="button" 
@@ -464,13 +505,13 @@ export default function MyPages() {
 
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">Confirmar Senha</label>
-                    <Input 
+                    <input 
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
                       required
-                      className="bg-white/5 border-white/10 h-12 rounded-xl focus:border-primary/50 text-sm font-medium"
+                      className="w-full bg-white/5 border border-white/10 h-12 rounded-xl focus:border-primary/50 text-sm font-medium outline-none px-4"
                     />
                   </div>
 
