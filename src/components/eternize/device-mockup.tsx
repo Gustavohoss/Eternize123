@@ -290,16 +290,6 @@ export function DeviceMockup({
         <div className="fixed inset-0 z-[2000] bg-[#121212] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
            {selectedTheme === 'spotify' ? (
              <div className="w-full h-full flex flex-col items-center justify-center relative">
-                {/* Header icons mimicking Spotify Wrapped gate */}
-                <div className="absolute top-8 left-8 flex items-center gap-4">
-                   <button className="text-white/40 hover:text-white transition-colors">
-                      <X className="w-6 h-6" />
-                   </button>
-                   <div className="bg-[#1DB954] text-black text-[10px] font-black uppercase px-4 py-1.5 rounded-full tracking-widest">
-                      Wrapped
-                   </div>
-                </div>
-
                 <div className="max-w-[320px] space-y-10 flex flex-col items-center">
                    <h2 className="text-[36px] font-black text-white leading-tight tracking-tighter font-['DM_Sans'] px-4">
                       {(pageTitle.split(' ')[0] || 'Alguém')} separou um <span className="text-[#1DB954]">presente especial!</span>
