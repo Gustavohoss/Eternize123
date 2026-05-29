@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -69,6 +68,7 @@ export default function EditSitePage() {
   const isModulesOnlyMode = useMemo(() => searchParams.get('startStep') === 'modules', [searchParams]);
 
   // States
+  const [senderName, setSenderName] = useState('');
   const [selectedTheme, setSelectedTheme] = useState<ThemeId>('classic');
   const [selectedBgColor, setSelectedBgColor] = useState<string>('#000000');
   const [selectedEffect, setSelectedEffect] = useState<string>('none');
@@ -154,6 +154,7 @@ export default function EditSitePage() {
             }
           });
 
+          setSenderName(config.senderName || '');
           setSelectedTheme(config.selectedTheme || 'classic');
           setSelectedBgColor(config.selectedBgColor || '#000000');
           setSelectedEffect(config.selectedEffect || 'none');
@@ -226,7 +227,7 @@ export default function EditSitePage() {
 
     try {
       const contentData = {
-        selectedTheme, selectedBgColor, selectedEffect, isEmojiRainEnabled, selectedEmojis,
+        senderName, selectedTheme, selectedBgColor, selectedEffect, isEmojiRainEnabled, selectedEmojis,
         emojiSize, emojiRainPosition, selectedCountStyle, photoEffect, date: date?.toISOString(),
         pageTitle, message, musicData, sparklesDensity, sparklesSpeed, sparklesColor,
         smokeIntensity, smokeColor, patternDuration, patternDensity, patternColor, cardColor,
@@ -303,7 +304,7 @@ export default function EditSitePage() {
   }
 
   const previewProps = {
-    selectedTheme, selectedBgColor, selectedEffect, isEmojiRainEnabled, selectedEmojis, emojiSize,
+    senderName, selectedTheme, selectedBgColor, selectedEffect, isEmojiRainEnabled, selectedEmojis, emojiSize,
     emojiRainPosition, step, uploadedPhotos, pageTitle, message, musicData, date,
     selectedCountStyle, photoEffect, titleColor, titleFont, titleIsBold, titleHasNeon,
     titleNeonStrength, cardColor, showCard, titlePosition, dateColor, dateFont, dateIsBold,

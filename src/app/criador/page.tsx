@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -15,6 +14,7 @@ import { doc, setDoc, serverTimestamp, collection, writeBatch } from 'firebase/f
 import { signInAnonymously } from 'firebase/auth';
 
 // Step Components
+import { StepSenderName } from '@/components/eternize/creator-steps/step-sender-name';
 import { StepThemeSelection } from '@/components/eternize/creator-steps/step-theme-selection';
 import { StepGiftType } from '@/components/eternize/creator-steps/step-gift-type';
 import { StepCustomizeBackground } from '@/components/eternize/creator-steps/step-customize-background';
@@ -38,7 +38,6 @@ const compressImage = (base64Str: string): Promise<string> => {
     img.src = base64Str;
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      // Aumentado para 1000px pois agora cada foto tem seu próprio documento de 1MB
       const MAX_WIDTH = 1000;
       const MAX_HEIGHT = 1000;
       let width = img.width;
@@ -48,7 +47,6 @@ const compressImage = (base64Str: string): Promise<string> => {
       canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx?.drawImage(img, 0, 0, width, height);
-      // Qualidade 0.75 é segura para ficar abaixo de 1MB Base64
       resolve(canvas.toDataURL('image/jpeg', 0.75));
     };
   });
@@ -60,10 +58,11 @@ export default function CriadorApp() {
   const auth = useAuth();
   
   const [mounted, setMounted] = useState(false);
-  const [step, setStep] = useState<Step>('theme-selection');
+  const [step, setStep] = useState<Step>('sender-name');
   const [isSaving, setIsSaving] = useState(false);
 
   // States
+  const [senderName, setSenderName] = useState('');
   const [selectedTheme, setSelectedTheme] = useState<ThemeId>('classic');
   const [selectedGiftType, setSelectedGiftType] = useState<string>('amor');
   const [selectedBgColor, setSelectedBgColor] = useState<string>('#000000');
@@ -124,7 +123,7 @@ export default function CriadorApp() {
   useEffect(() => { setMounted(true); }, []);
 
   const stepSequence = useMemo((): Step[] => {
-    const base: Step[] = ['theme-selection', 'gift-type'];
+    const base: Step[] = ['sender-name', 'theme-selection', 'gift-type'];
     if (selectedTheme === 'netflix' || selectedTheme === 'spotify' || selectedTheme === 'instagram') {
       return [...base, 'data-location', 'page-title', 'message', 'photos', 'music', 'plans', 'order-bump', 'subdomain-config'];
     }
@@ -133,6 +132,7 @@ export default function CriadorApp() {
 
   const isStepValid = useMemo(() => {
     switch (step) {
+      case 'sender-name': return senderName.trim().length >= 2;
       case 'theme-selection': return !!selectedTheme;
       case 'gift-type': return !!selectedGiftType;
       case 'photos': return uploadedPhotos.length > 0;
@@ -142,7 +142,7 @@ export default function CriadorApp() {
       case 'data-location': return !!date;
       default: return true;
     }
-  }, [step, selectedTheme, selectedGiftType, uploadedPhotos, pageTitle, message, musicData, date]);
+  }, [step, senderName, selectedTheme, selectedGiftType, uploadedPhotos, pageTitle, message, musicData, date]);
 
   const currentStepIndex = stepSequence.indexOf(step);
 
@@ -171,9 +171,8 @@ export default function CriadorApp() {
       currentUserId = currentUser?.uid || null;
       if (!currentUserId) throw new Error("Falha na identificação do usuário.");
 
-      // REMOVEMOS AS FOTOS DO JSON PRINCIPAL
       const contentData = {
-        selectedTheme, selectedBgColor, selectedEffect, isEmojiRainEnabled, selectedEmojis,
+        senderName, selectedTheme, selectedBgColor, selectedEffect, isEmojiRainEnabled, selectedEmojis,
         emojiSize, emojiRainPosition, selectedCountStyle, photoEffect, date: date?.toISOString(),
         pageTitle, message, musicData, sparklesDensity, sparklesSpeed, sparklesColor,
         smokeIntensity, smokeColor, patternDuration, patternDensity, patternColor, cardColor,
@@ -181,7 +180,6 @@ export default function CriadorApp() {
         dateColor, dateFont, dateIsBold, dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor,
         messageColor, messageFont, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength,
         isMusicAutoPlay, locationQuery, isPackEnabled, selectedPlan,
-        // Mantemos apenas flags ou dados leves, as fotos vão para a subcoleção
         hasPhotos: uploadedPhotos.length > 0,
         hasSpotifyCardPhoto: !!spotifyCardPhoto
       };
@@ -202,16 +200,13 @@ export default function CriadorApp() {
 
       await setDoc(publishedRef, docData);
 
-      // SALVAMOS AS FOTOS NA SUBCOLEÇÃO "media" (Batch de 1MB por documento)
       const batch = writeBatch(firestore);
       
-      // Fotos do álbum
       uploadedPhotos.forEach((base64, index) => {
         const photoRef = doc(collection(publishedRef, 'media'), `album_${index}`);
         batch.set(photoRef, { base64, type: 'album' });
       });
 
-      // Foto do Spotify Card se existir
       if (spotifyCardPhoto) {
         const spotifyRef = doc(collection(publishedRef, 'media'), 'spotify_card');
         batch.set(spotifyRef, { base64: spotifyCardPhoto, type: 'spotify' });
@@ -276,7 +271,7 @@ export default function CriadorApp() {
   }, [cardColor, selectedBgColor, showCard, userHasManuallyChangedTitleColor, selectedTheme, userHasManuallyChangedDateColor]);
 
   const previewProps = {
-    selectedTheme, selectedBgColor, selectedEffect, isEmojiRainEnabled, selectedEmojis, emojiSize,
+    senderName, selectedTheme, selectedBgColor, selectedEffect, isEmojiRainEnabled, selectedEmojis, emojiSize,
     emojiRainPosition, step, uploadedPhotos, pageTitle, message, musicData, date,
     selectedCountStyle, photoEffect, titleColor, titleFont, titleIsBold, titleHasNeon,
     titleNeonStrength, cardColor, showCard, titlePosition, dateColor, dateFont, dateIsBold,
@@ -289,10 +284,11 @@ export default function CriadorApp() {
   return (
     <div className="min-h-screen bg-black text-white selection:bg-primary selection:text-white relative font-body overflow-x-hidden">
       <div className="fixed inset-0 bg-hero-glow pointer-events-none z-0" />
+      {step === 'sender-name' && <StepSenderName senderName={senderName} onSenderNameChange={setSenderName} onNext={handleNext} />}
       {step === 'theme-selection' && <StepThemeSelection selectedTheme={selectedTheme} onThemeSelect={setSelectedTheme} onNext={handleNext} />}
       {step === 'gift-type' && <StepGiftType selectedGiftType={selectedGiftType} onSelect={setSelectedGiftType} onNext={handleNext} onBack={handleBack} />}
 
-      {step !== 'theme-selection' && step !== 'gift-type' && (
+      {step !== 'sender-name' && step !== 'theme-selection' && step !== 'gift-type' && (
         <div className="relative z-10 container mx-auto px-4 pt-16 md:pt-20 pb-12 max-w-7xl">
           <div className="fixed top-0 left-0 right-0 z-[110] px-4 md:px-10 bg-black/60 backdrop-blur-md h-12 flex items-center">
             <div className="max-w-7xl mx-auto w-full flex items-center gap-4">

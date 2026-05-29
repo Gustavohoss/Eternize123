@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
@@ -33,6 +32,7 @@ import { StoriesView } from './themes/stories-view';
 import { SpotifyWrappedView } from './themes/spotify-wrapped-view';
 
 interface DeviceMockupProps {
+  senderName?: string;
   selectedTheme?: ThemeId;
   selectedBgColor: string;
   selectedEffect: string;
@@ -87,6 +87,7 @@ interface DeviceMockupProps {
 }
 
 export function DeviceMockup({
+  senderName = '',
   selectedTheme = 'classic',
   selectedBgColor,
   selectedEffect,
@@ -292,7 +293,8 @@ export function DeviceMockup({
              <div className="w-full h-full flex flex-col items-center justify-center relative">
                 <div className="max-w-[320px] space-y-10 flex flex-col items-center">
                    <h2 className="text-[36px] font-black text-white leading-tight tracking-tighter font-['DM_Sans'] px-4">
-                      {(pageTitle.split(' ')[0] || 'Alguém')} separou um <span className="text-[#1DB954]">presente especial!</span>
+                      <span className="block mb-2">{senderName || 'Alguém'} separou um</span>
+                      <span className="text-[#1DB954]">presente especial!</span>
                    </h2>
                    <p className="text-white/60 text-base font-medium leading-relaxed font-['DM_Sans'] px-6">
                       Um momento único feito com carinho para celebrar a jornada de vocês
