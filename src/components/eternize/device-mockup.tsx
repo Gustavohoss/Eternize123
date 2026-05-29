@@ -286,13 +286,13 @@ export function DeviceMockup({
   return (
     <div className={cn("w-full transition-all duration-500 flex flex-col relative", isFullscreen ? "h-full" : "max-w-[400px] mx-auto")}>
       
-      {/* Gatilho de interação para o site publicado */}
+      {/* Gatilho de interação para o site publicado (Agora 100% opaco e prioritário) */}
       {isFullscreen && !hasStarted && (
-        <div className="fixed inset-0 z-[2000] bg-[#0c0c0c] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500 overflow-hidden">
+        <div className="absolute inset-0 z-[2000] bg-[#0c0c0c] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500 overflow-hidden">
            {selectedTheme === 'spotify' ? (
              <div className="w-full h-full flex flex-col items-center justify-center relative">
                 {/* Efeito de brilho de fundo */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(circle_at_center,rgba(29,185,84,0.1)_0%,transparent_60%)] pointer-events-none" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(circle_at_center,rgba(29,185,84,0.12)_0%,transparent_60%)] pointer-events-none" />
                 
                 <div className="max-w-[320px] flex flex-col items-center relative z-10">
                    <div className="flex flex-col items-center gap-2 mb-12">
@@ -353,112 +353,117 @@ export function DeviceMockup({
         </div>
       )}
 
-      {!isFullscreen && (
-        <div className="bg-white border-x border-t border-neutral-200 p-2.5 flex items-center justify-center shrink-0 rounded-t-2xl">
-          <div className="bg-neutral-100 rounded-full h-8 w-full flex items-center px-4 gap-2 border border-neutral-200 max-w-[400px]">
-            <Lock className="w-3 h-3 text-neutral-400" />
-            <div className="text-[11px] text-neutral-600 font-medium truncate">eternizee.shop/site/{slugifiedTitle || 'seu-nome'}</div>
+      {/* Somente renderiza a estrutura do site se o usuário não estiver na tela de entrada OU se não for modo tela cheia (editor) */}
+      {(hasStarted || !isFullscreen) && (
+        <>
+          {!isFullscreen && (
+            <div className="bg-white border-x border-t border-neutral-200 p-2.5 flex items-center justify-center shrink-0 rounded-t-2xl">
+              <div className="bg-neutral-100 rounded-full h-8 w-full flex items-center px-4 gap-2 border border-neutral-200 max-w-[400px]">
+                <Lock className="w-3 h-3 text-neutral-400" />
+                <div className="text-[11px] text-neutral-600 font-medium truncate">eternizee.shop/site/{slugifiedTitle || 'seu-nome'}</div>
+              </div>
+            </div>
+          )}
+
+          <div className={cn("relative bg-black border-white/10 shadow-2xl flex-1 overflow-hidden no-scrollbar flex flex-col", isFullscreen ? "rounded-none" : "rounded-b-[2.5rem] aspect-[9/19] border-x border-b")}>
+            <div className="absolute inset-0 transition-colors duration-500" style={{ backgroundColor: (selectedTheme === 'instagram') ? '#000000' : (selectedTheme === 'netflix' || selectedTheme === 'spotify') ? '#121212' : selectedBgColor }}>
+              
+              {/* Effects Layers */}
+              {isEmojiRainEnabled && (
+                <div className={cn("absolute inset-0 pointer-events-none overflow-hidden", emojiRainPosition === 'front' ? "z-[100]" : "z-[15]")}>
+                  {[...Array(15)].map((_, i) => (
+                    <span key={i} className="absolute animate-fall" style={{ left: `${Math.random() * 100}%`, top: `-${Math.random() * 200}px`, animationDuration: `${3 + Math.random() * 4}s`, animationDelay: `${Math.random() * 5}s`, fontSize: `${emojiSize}px`, opacity: 0.8 }}>{selectedEmojis[i % selectedEmojis.length]}</span>
+                  ))}
+                </div>
+              )}
+              {selectedEffect === 'sparkles' && selectedTheme === 'classic' && <div className="absolute inset-0 pointer-events-none z-10"><SparklesCore background="transparent" minSize={0.4} maxSize={1.2} particleDensity={sparklesDensity} className="w-full h-full" particleColor={sparklesColor} speed={sparklesSpeed} /></div>}
+              {selectedEffect === 'smoke' && selectedTheme === 'classic' && <div className="absolute inset-0 pointer-events-none z-10"><SmokeBackground smokeColor={smokeColor} backgroundColor={selectedBgColor} intensity={smokeIntensity} /></div>}
+              {selectedEffect === 'pattern' && selectedTheme === 'classic' && <div className="absolute inset-0 pointer-events-none z-10 opacity-40"><FallingPattern color={patternColor} backgroundColor="transparent" density={patternDensity} duration={patternDuration} className="p-0" /></div>}
+
+              {/* Theme Viewport */}
+              <div className="absolute inset-0 flex flex-col items-center overflow-y-auto no-scrollbar z-20">
+                <div className={cn("w-full flex flex-col items-center min-h-full", isFullscreen && "max-w-[480px]")}>
+                  {selectedTheme === 'classic' && (
+                    <ClassicView {...{uploadedPhotos, photoEffect, showCard, cardColor, titlePosition, pageTitle, titleStyle, message, messageColor, messageFontFamily: getFontFamily(messageFont || 'inter'), date, selectedCountStyle, dateStyle, dateIsBold, dateBoxBgColor, dateBoxBorderColor, timeDiff, totalDays, isPackEnabled, onModuleClick: setPreviewModuleId}} />
+                  )}
+                  {selectedTheme === 'netflix' && (
+                    <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: () => setShowStories(true), onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList), isPackEnabled, onModuleClick: setPreviewModuleId}} />
+                  )}
+                  {selectedTheme === 'spotify' && (
+                    <SpotifyView {...{uploadedPhotos, activeHeroIndex, pageTitle, totalDays, timeDiff, date, activeTab, onTabChange: setActiveTab, onPhotoClick: (i) => { setActiveHeroIndex(i); setShowSpotifyFullscreen(true); }, isLiked, onLikeToggle: () => setIsLiked(!isLiked), isAudioPlaying, onAudioToggle: setIsAudioPlaying, dynamicSpotifyColor: '#121212', spotifyHeaderOpacity, onHeaderScroll: (e) => setSpotifyHeaderOpacity(Math.min(1, e.currentTarget.scrollTop / 100)), onShowFullscreen: () => setShowSpotifyFullscreen(true), onCloseFullscreen: () => setShowSpotifyFullscreen(false), showSpotifyFullscreen, message, isPackEnabled, onModuleClick: setPreviewModuleId, spotifyCardPhoto, onStartWrapped: () => setShowSpotifyWrapped(true), musicData}} />
+                  )}
+                  {selectedTheme === 'instagram' && (
+                    <InstagramView {...{uploadedPhotos, pageTitle, totalDays, timeDiff, date, message, isFollowing, onFollowToggle: () => setIsFollowing(!isFollowing), activeTab, onTabChange: setActiveTab, onStartStories: () => { setShowStories(true); setCurrentStoryIndex(0); setStoryProgress(0); }, onPostClick: (i) => { setSelectedPostIndex(i); setShowInstagramPost(true); }, showPostDetail: showInstagramPost, selectedPostIndex, onClosePost: () => setShowInstagramPost(false), likedPosts, onLikePost: (i) => setLikedPosts(prev => ({...prev, [i]: !prev[i]})), savedPosts, onSavePost: (i) => setSavedPosts(prev => ({...prev, [i]: !prev[i]})), isAudioPlaying, onAudioToggle: setIsAudioPlaying, isPackEnabled, onModuleClick: setPreviewModuleId}} />
+                  )}
+                </div>
+              </div>
+
+              {/* Stories Layer */}
+              {showStories && (
+                <StoriesView 
+                  photos={uploadedPhotos} 
+                  currentIndex={currentStoryIndex} 
+                  progress={storyProgress} 
+                  isPaused={isStoryPaused} 
+                  isFading={isFading} 
+                  pageTitle={pageTitle} 
+                  formattedDays={formattedTotalDays} 
+                  onClose={() => setShowStories(false)} 
+                  onPrev={prevStory} 
+                  onNext={nextStory} 
+                  onPauseToggle={setIsStoryPaused}
+                  theme={selectedTheme}
+                />
+              )}
+
+              {/* Spotify Wrapped Intro Layer */}
+              {showSpotifyWrapped && (
+                <SpotifyWrappedView 
+                  pageTitle={pageTitle}
+                  totalDays={totalDays}
+                  photos={uploadedPhotos}
+                  onClose={() => setShowSpotifyWrapped(false)}
+                  onComplete={() => setShowSpotifyWrapped(false)}
+                />
+              )}
+
+              {/* MUSIC PLAYER */}
+              {musicData && (
+                <div className="absolute bottom-6 left-4 right-4 z-[100] animate-in slide-in-from-bottom-4 duration-500">
+                   <MusicPlayer 
+                     ref={musicPlayerRef}
+                     musicData={musicData} 
+                     musicBoxColor={selectedTheme === 'classic' ? musicBoxColor : 'rgba(12,12,12,0.9)'}
+                     musicTextColor={selectedTheme === 'classic' ? musicTextColor : '#ffffff'}
+                     musicHasNeon={selectedTheme === 'classic' ? musicHasNeon : false}
+                     musicNeonStrength={musicNeonStrength}
+                     isAutoPlay={isAudioPlaying}
+                     onStateChange={setIsAudioPlaying}
+                   />
+                </div>
+              )}
+
+              {/* Module Overlay */}
+              {previewModuleId && (
+                <div className="absolute inset-0 z-[500] bg-black flex flex-col animate-in slide-in-from-bottom-4 duration-500 overflow-hidden">
+                   <div className="relative h-full flex flex-col">
+                      <div className="absolute top-6 right-6 z-[550]">
+                        <Button onClick={() => setPreviewModuleId(null)} className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/10 hover:bg-black/80 flex items-center justify-center text-white shadow-2xl transition-all active:scale-90"><X className="w-5 h-5" /></Button>
+                      </div>
+                      <div className="flex-1 overflow-y-auto no-scrollbar custom-scroll">
+                         {previewModuleId === 'memorias' && <MemoriesModulePreview memories={memories} />}
+                         {previewModuleId === 'conquistas' && <AchievementsModulePreview />}
+                         {previewModuleId === 'curiosidades' && <CuriosidadesModulePreview date={date} />}
+                         {previewModuleId === 'jornada' && <JourneyModulePreview points={journeyPoints} />}
+                         {previewModuleId === 'surpresa' && <RouletteModulePreview />}
+                      </div>
+                   </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
-
-      <div className={cn("relative bg-black border-white/10 shadow-2xl flex-1 overflow-hidden no-scrollbar flex flex-col", isFullscreen ? "rounded-none" : "rounded-b-[2.5rem] aspect-[9/19] border-x border-b")}>
-        <div className="absolute inset-0 transition-colors duration-500" style={{ backgroundColor: (selectedTheme === 'instagram') ? '#000000' : (selectedTheme === 'netflix' || selectedTheme === 'spotify') ? '#121212' : selectedBgColor }}>
-          
-          {/* Effects Layers */}
-          {isEmojiRainEnabled && (
-            <div className={cn("absolute inset-0 pointer-events-none overflow-hidden", emojiRainPosition === 'front' ? "z-[100]" : "z-[15]")}>
-              {[...Array(15)].map((_, i) => (
-                <span key={i} className="absolute animate-fall" style={{ left: `${Math.random() * 100}%`, top: `-${Math.random() * 200}px`, animationDuration: `${3 + Math.random() * 4}s`, animationDelay: `${Math.random() * 5}s`, fontSize: `${emojiSize}px`, opacity: 0.8 }}>{selectedEmojis[i % selectedEmojis.length]}</span>
-              ))}
-            </div>
-          )}
-          {selectedEffect === 'sparkles' && selectedTheme === 'classic' && <div className="absolute inset-0 pointer-events-none z-10"><SparklesCore background="transparent" minSize={0.4} maxSize={1.2} particleDensity={sparklesDensity} className="w-full h-full" particleColor={sparklesColor} speed={sparklesSpeed} /></div>}
-          {selectedEffect === 'smoke' && selectedTheme === 'classic' && <div className="absolute inset-0 pointer-events-none z-10"><SmokeBackground smokeColor={smokeColor} backgroundColor={selectedBgColor} intensity={smokeIntensity} /></div>}
-          {selectedEffect === 'pattern' && selectedTheme === 'classic' && <div className="absolute inset-0 pointer-events-none z-10 opacity-40"><FallingPattern color={patternColor} backgroundColor="transparent" density={patternDensity} duration={patternDuration} className="p-0" /></div>}
-
-          {/* Theme Viewport */}
-          <div className="absolute inset-0 flex flex-col items-center overflow-y-auto no-scrollbar z-20">
-            <div className={cn("w-full flex flex-col items-center min-h-full", isFullscreen && "max-w-[480px]")}>
-              {selectedTheme === 'classic' && (
-                <ClassicView {...{uploadedPhotos, photoEffect, showCard, cardColor, titlePosition, pageTitle, titleStyle, message, messageColor, messageFontFamily: getFontFamily(messageFont || 'inter'), date, selectedCountStyle, dateStyle, dateIsBold, dateBoxBgColor, dateBoxBorderColor, timeDiff, totalDays, isPackEnabled, onModuleClick: setPreviewModuleId}} />
-              )}
-              {selectedTheme === 'netflix' && (
-                <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: () => setShowStories(true), onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList), isPackEnabled, onModuleClick: setPreviewModuleId}} />
-              )}
-              {selectedTheme === 'spotify' && (
-                <SpotifyView {...{uploadedPhotos, activeHeroIndex, pageTitle, totalDays, timeDiff, date, activeTab, onTabChange: setActiveTab, onPhotoClick: (i) => { setActiveHeroIndex(i); setShowSpotifyFullscreen(true); }, isLiked, onLikeToggle: () => setIsLiked(!isLiked), isAudioPlaying, onAudioToggle: setIsAudioPlaying, dynamicSpotifyColor: '#121212', spotifyHeaderOpacity, onHeaderScroll: (e) => setSpotifyHeaderOpacity(Math.min(1, e.currentTarget.scrollTop / 100)), onShowFullscreen: () => setShowSpotifyFullscreen(true), onCloseFullscreen: () => setShowSpotifyFullscreen(false), showSpotifyFullscreen, message, isPackEnabled, onModuleClick: setPreviewModuleId, spotifyCardPhoto, onStartWrapped: () => setShowSpotifyWrapped(true), musicData}} />
-              )}
-              {selectedTheme === 'instagram' && (
-                <InstagramView {...{uploadedPhotos, pageTitle, totalDays, timeDiff, date, message, isFollowing, onFollowToggle: () => setIsFollowing(!isFollowing), activeTab, onTabChange: setActiveTab, onStartStories: () => { setShowStories(true); setCurrentStoryIndex(0); setStoryProgress(0); }, onPostClick: (i) => { setSelectedPostIndex(i); setShowInstagramPost(true); }, showPostDetail: showInstagramPost, selectedPostIndex, onClosePost: () => setShowInstagramPost(false), likedPosts, onLikePost: (i) => setLikedPosts(prev => ({...prev, [i]: !prev[i]})), savedPosts, onSavePost: (i) => setSavedPosts(prev => ({...prev, [i]: !prev[i]})), isAudioPlaying, onAudioToggle: setIsAudioPlaying, isPackEnabled, onModuleClick: setPreviewModuleId}} />
-              )}
-            </div>
-          </div>
-
-          {/* Stories Layer */}
-          {showStories && (
-            <StoriesView 
-              photos={uploadedPhotos} 
-              currentIndex={currentStoryIndex} 
-              progress={storyProgress} 
-              isPaused={isStoryPaused} 
-              isFading={isFading} 
-              pageTitle={pageTitle} 
-              formattedDays={formattedTotalDays} 
-              onClose={() => setShowStories(false)} 
-              onPrev={prevStory} 
-              onNext={nextStory} 
-              onPauseToggle={setIsStoryPaused}
-              theme={selectedTheme}
-            />
-          )}
-
-          {/* Spotify Wrapped Intro Layer */}
-          {showSpotifyWrapped && (
-            <SpotifyWrappedView 
-              pageTitle={pageTitle}
-              totalDays={totalDays}
-              photos={uploadedPhotos}
-              onClose={() => setShowSpotifyWrapped(false)}
-              onComplete={() => setShowSpotifyWrapped(false)}
-            />
-          )}
-
-          {/* MUSIC PLAYER */}
-          {musicData && (
-            <div className="absolute bottom-6 left-4 right-4 z-[100] animate-in slide-in-from-bottom-4 duration-500">
-               <MusicPlayer 
-                 ref={musicPlayerRef}
-                 musicData={musicData} 
-                 musicBoxColor={selectedTheme === 'classic' ? musicBoxColor : 'rgba(12,12,12,0.9)'}
-                 musicTextColor={selectedTheme === 'classic' ? musicTextColor : '#ffffff'}
-                 musicHasNeon={selectedTheme === 'classic' ? musicHasNeon : false}
-                 musicNeonStrength={musicNeonStrength}
-                 isAutoPlay={isAudioPlaying}
-                 onStateChange={setIsAudioPlaying}
-               />
-            </div>
-          )}
-
-          {/* Module Overlay */}
-          {previewModuleId && (
-            <div className="absolute inset-0 z-[500] bg-black flex flex-col animate-in slide-in-from-bottom-4 duration-500 overflow-hidden">
-               <div className="relative h-full flex flex-col">
-                  <div className="absolute top-6 right-6 z-[550]">
-                    <Button onClick={() => setPreviewModuleId(null)} className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/10 hover:bg-black/80 flex items-center justify-center text-white shadow-2xl transition-all active:scale-90"><X className="w-5 h-5" /></Button>
-                  </div>
-                  <div className="flex-1 overflow-y-auto no-scrollbar custom-scroll">
-                     {previewModuleId === 'memorias' && <MemoriesModulePreview memories={memories} />}
-                     {previewModuleId === 'conquistas' && <AchievementsModulePreview />}
-                     {previewModuleId === 'curiosidades' && <CuriosidadesModulePreview date={date} />}
-                     {previewModuleId === 'jornada' && <JourneyModulePreview points={journeyPoints} />}
-                     {previewModuleId === 'surpresa' && <RouletteModulePreview />}
-                  </div>
-               </div>
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 }
