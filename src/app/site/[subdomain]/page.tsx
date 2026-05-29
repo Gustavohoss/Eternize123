@@ -23,7 +23,7 @@ export default function PublishedSitePage() {
 
   const { data: siteData, isLoading: isDocLoading, error } = useDoc(siteRef as any);
 
-  // Memo para identificar o tema antes mesmo de carregar as fotos
+  // Memo para identificar o tema assim que os dados do documento chegam
   const theme = useMemo(() => {
     if (!siteData) return null;
     try {
@@ -82,62 +82,76 @@ export default function PublishedSitePage() {
     }
   }, [siteData, firestore, siteRef]);
 
+  // ESTADO DE LOADING
   if (isDocLoading || isLoadingMedia || !siteRef) {
-    // LOADING ESPECIAL SPOTIFY
+    // 1. LOADING ESPECIAL SPOTIFY (Só aparece se o tema for Spotify)
     if (theme === 'spotify') {
       return (
-        <div className="min-h-screen bg-[#121212] flex flex-col items-center justify-center gap-10 text-white overflow-hidden">
-          <div className="relative">
-            {/* Efeito de brilho verde ao fundo */}
-            <div className="absolute inset-0 bg-[#1DB954]/20 rounded-full blur-3xl animate-pulse scale-150" />
-            
-            <div className="relative w-24 h-24 flex items-center justify-center">
-              {/* Círculo externo pulsante */}
-              <div className="absolute inset-0 border-2 border-[#1DB954]/30 rounded-full animate-[ping_2s_infinite]" />
-              
-              {/* Logo Spotify estilizada */}
-              <div className="bg-[#1DB954] rounded-full w-20 h-24 flex items-center justify-center shadow-[0_0_40px_rgba(29,185,84,0.4)]">
-                 <svg width="45" height="45" viewBox="0 0 40 40" fill="none">
+        <div className="fixed inset-0 bg-[#000000] flex flex-col items-center justify-center text-white overflow-hidden">
+          {/* Fundo com gradiente verde sutil pulsante */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(29,185,84,0.08)_0%,transparent_70%)] animate-pulse" />
+          
+          <div className="relative flex flex-col items-center gap-12 z-10">
+            {/* Logo Central Premium */}
+            <div className="relative">
+               <div className="absolute inset-0 bg-[#1DB954]/20 rounded-full blur-[40px] animate-pulse scale-150" />
+               <div className="w-24 h-24 bg-[#1DB954] rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(29,185,84,0.3)]">
+                  <svg width="50" height="50" viewBox="0 0 40 40" fill="none">
                     <circle cx="20" cy="20" r="20" fill="black"></circle>
-                    <path d="M10 26.5 Q20 22 31 24.5" stroke="#1DB954" strokeWidth="2.5" strokeLinecap="round" fill="none"></path>
-                    <path d="M9 21 Q20 15.5 32 19" stroke="#1DB954" strokeWidth="2.5" strokeLinecap="round" fill="none"></path>
-                    <path d="M8 15 Q20 8 33 13" stroke="#1DB954" strokeWidth="2.5" strokeLinecap="round" fill="none"></path>
+                    <path d="M10 26.5 Q20 22 31 24.5" stroke="#1DB954" strokeWidth="2.8" strokeLinecap="round" fill="none"></path>
+                    <path d="M9 21 Q20 15.5 32 19" stroke="#1DB954" strokeWidth="2.8" strokeLinecap="round" fill="none"></path>
+                    <path d="M8 15 Q20 8 33 13" stroke="#1DB954" strokeWidth="2.8" strokeLinecap="round" fill="none"></path>
                   </svg>
-              </div>
+               </div>
+            </div>
+
+            {/* Texto e Visualizer */}
+            <div className="flex flex-col items-center gap-6">
+               <p className="text-[#1DB954] text-[10px] font-black uppercase tracking-[0.6em] animate-pulse">Sintonizando</p>
+               
+               <div className="flex gap-1.5 items-end h-8">
+                  {[0.1, 0.4, 0.2, 0.5, 0.3, 0.6, 0.2].map((delay, i) => (
+                    <div 
+                      key={i} 
+                      className="w-1.5 bg-[#1DB954] rounded-full animate-wave" 
+                      style={{ animationDelay: `${delay}s`, height: '10px' }} 
+                    />
+                  ))}
+               </div>
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-4">
-             <p className="text-[#1DB954] text-[11px] font-black uppercase tracking-[0.5em] animate-pulse">Sintonizando Histórias</p>
-             
-             {/* Visualizer de áudio animado */}
-             <div className="flex gap-1.5 items-end h-6">
-                <div className="w-1 bg-[#1DB954] rounded-full animate-[wave-ani_1s_ease-in-out_infinite]" style={{ animationDelay: '0.1s' }} />
-                <div className="w-1 bg-[#1DB954] rounded-full animate-[wave-ani_1.2s_ease-in-out_infinite]" style={{ animationDelay: '0.3s' }} />
-                <div className="w-1 bg-[#1DB954] rounded-full animate-[wave-ani_0.8s_ease-in-out_infinite]" style={{ animationDelay: '0.5s' }} />
-                <div className="w-1 bg-[#1DB954] rounded-full animate-[wave-ani_1.1s_ease-in-out_infinite]" style={{ animationDelay: '0.2s' }} />
-                <div className="w-1 bg-[#1DB954] rounded-full animate-[wave-ani_0.9s_ease-in-out_infinite]" style={{ animationDelay: '0.4s' }} />
-             </div>
-          </div>
-
           <style jsx>{`
-            @keyframes wave-ani {
-              0%, 100% { height: 10px; }
-              50% { height: 24px; }
+            @keyframes wave {
+              0%, 100% { height: 8px; opacity: 0.3; }
+              50% { height: 32px; opacity: 1; }
+            }
+            .animate-wave {
+              animation: wave 1s ease-in-out infinite;
             }
           `}</style>
         </div>
       );
     }
 
-    // LOADING DEFAULT (PARA OUTROS TEMAS)
+    // 2. LOADING NEUTRO PREMIUM (Para quando ainda não sabemos o tema ou temas clássicos)
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 text-white">
-        <div className="relative">
-          <Loader2 className="w-12 h-12 text-primary animate-spin" />
-          <Heart className="w-4 h-4 text-primary absolute inset-0 m-auto animate-pulse" />
+      <div className="fixed inset-0 bg-black flex flex-col items-center justify-center text-white">
+        <div className="relative flex flex-col items-center gap-6">
+           <div className="relative w-16 h-16">
+              <div className="absolute inset-0 border-2 border-white/5 rounded-full" />
+              <div className="absolute inset-0 border-t-2 border-primary rounded-full animate-spin" />
+              <Heart className="w-5 h-5 text-primary absolute inset-0 m-auto animate-pulse fill-current" />
+           </div>
+           <div className="flex flex-col items-center gap-1">
+              <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/40">Eternizando</p>
+              <div className="flex gap-1">
+                 <div className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
+                 <div className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                 <div className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+              </div>
+           </div>
         </div>
-        <p className="text-xs font-black uppercase tracking-[0.3em] animate-pulse">Carregando sua história...</p>
       </div>
     );
   }
