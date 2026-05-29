@@ -67,6 +67,14 @@ export default function EditSitePage() {
 
   const isModulesOnlyMode = useMemo(() => searchParams.get('startStep') === 'modules', [searchParams]);
 
+  useEffect(() => { 
+    setMounted(true); 
+    // Se o parâmetro startStep estiver presente, pula direto para os módulos
+    if (searchParams.get('startStep') === 'modules') {
+      setStep('modules');
+    }
+  }, [searchParams]);
+
   // States
   const [senderName, setSenderName] = useState('');
   const [selectedTheme, setSelectedTheme] = useState<ThemeId>('classic');
@@ -122,8 +130,6 @@ export default function EditSitePage() {
   const [isMusicAutoPlay, setIsMusicAutoPlay] = useState<boolean>(false);
   const [locationQuery, setLocationQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
-
-  useEffect(() => { setMounted(true); }, []);
 
   // BUSCA FOTOS DA SUBCOLEÇÃO
   useEffect(() => {
@@ -341,10 +347,12 @@ export default function EditSitePage() {
                <Dialog><DialogTrigger asChild><Button variant="outline" className="w-full h-11 rounded-xl border-white/10 bg-white/5 font-black text-[10px] uppercase tracking-widest gap-2"><Maximize2 className="w-4 h-4" /> Ver prévia</Button></DialogTrigger><DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[200] rounded-none"><div className="absolute top-6 right-6 z-[250]"><DialogClose className="p-2.5 bg-black/60 rounded-full text-white border border-white/20"><X className="w-5 h-5" /></DialogClose></div>{mounted && <DeviceMockup {...previewProps} isFullscreen />}</DialogContent></Dialog>
                {mounted && isMobile && <DeviceMockup {...previewProps} />}
             </div>
-            <div className="mt-12 flex flex-col gap-4 pt-10 border-t border-white/5">
-              <Button onClick={handleBack} variant="outline" className="h-14 rounded-2xl">Voltar</Button>
-              <Button onClick={handleNext} className="h-14 rounded-2xl bg-primary text-white">Próxima Etapa</Button>
-            </div>
+            {step !== 'modules' && (
+              <div className="mt-12 flex flex-col gap-4 pt-10 border-t border-white/5">
+                <Button onClick={handleBack} variant="outline" className="h-14 rounded-2xl">Voltar</Button>
+                <Button onClick={handleNext} className="h-14 rounded-2xl bg-primary text-white">Próxima Etapa</Button>
+              </div>
+            )}
           </div>
           <div className="lg:sticky lg:top-24 self-start hidden lg:flex flex-col items-center gap-6">
              <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 w-full text-center">
