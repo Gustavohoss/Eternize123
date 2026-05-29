@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -23,6 +22,15 @@ import { StepMessage } from '@/components/eternize/creator-steps/step-message';
 import { StepMusic } from '@/components/eternize/creator-steps/step-music';
 import { StepDataLocation } from '@/components/eternize/creator-steps/step-data-location';
 import { StepModulesEdit } from '@/components/eternize/creator-steps/step-modules-edit';
+
+const DEFAULT_ROULETTE = [
+  "O dia que nos conhecemos",
+  "Aquele jantar especial", 
+  "Nossa primeira janta",
+  "Quando decidimos morar juntos",
+  "Nosso primeiro beijo",
+  "Nossa primeira viagem"
+];
 
 export default function EditSitePage() {
   const params = useParams();
@@ -76,6 +84,7 @@ export default function EditSitePage() {
   const [hasPackPurchased, setHasPackPurchased] = useState<boolean>(false);
   const [memories, setMemories] = useState<any[]>([]);
   const [journeyPoints, setJourneyPoints] = useState<any[]>([]);
+  const [rouletteItems, setRouletteItems] = useState<string[]>(DEFAULT_ROULETTE);
   const [spotifyCardPhoto, setSpotifyCardPhoto] = useState<string>('');
   
   const [sparklesDensity, setSparklesDensity] = useState<number>(100);
@@ -176,6 +185,7 @@ export default function EditSitePage() {
           
           setMemories(loadedMemories);
           setJourneyPoints(loadedJourneyPoints);
+          setRouletteItems(config.rouletteItems || DEFAULT_ROULETTE);
           
           const packPurchased = siteData.isPackEnabled === true;
           setHasPackPurchased(packPurchased);
@@ -237,7 +247,7 @@ export default function EditSitePage() {
         showCard, titlePosition, titleColor, titleFont, titleIsBold, titleHasNeon, titleNeonStrength,
         dateColor, dateFont, dateIsBold, dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor,
         messageColor, messageFont, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength,
-        isMusicAutoPlay, locationQuery, isPackEnabled
+        isMusicAutoPlay, locationQuery, isPackEnabled, rouletteItems
       };
 
       await updateDoc(siteRef, {
@@ -345,7 +355,7 @@ export default function EditSitePage() {
     dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor, messageColor, messageFont,
     musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength, isAutoPlay: false,
     sparklesDensity, sparklesSpeed, sparklesColor, smokeIntensity, smokeColor, patternDuration,
-    patternDensity, patternColor, isPackEnabled, memories, journeyPoints,
+    patternDensity, patternColor, isPackEnabled, memories, journeyPoints, rouletteItems,
     activeModuleId: activeModulePreview,
     spotifyCardPhoto
   };
@@ -370,7 +380,7 @@ export default function EditSitePage() {
             {step === 'message' && <StepMessage {...{selectedTheme, message, onMessageChange: setMessage, messageFont, onMessageFontChange: (e: any) => {}, messageColor, onMessageColorChange: (e: any) => {}, onBack: handleBack, onNext: handleNext}} />}
             {step === 'music' && <StepMusic {...{selectedTheme, musicData, onMusicSelect: setMusicData, musicBoxColor, onMusicBoxColorChange: (e: any) => {}, musicTextColor, onMusicTextColorChange: (e: any) => {}, musicHasNeon, onMusicHasNeonChange: (e: any) => {}, musicNeonStrength, onMusicNeonStrengthChange: (e: any) => {}, isAutoPlay: isMusicAutoPlay, onAutoPlayChange: (e: any) => {}, onBack: handleBack, onNext: handleNext}} />}
             {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: (e: any) => {}, showSuggestions, onShowSuggestionsChange: (e: any) => {}, filteredCities: [], selectedCountStyle, onCountStyleChange: (e: any) => {}, dateFont, onDateFontChange: (e: any) => {}, dateIsBold, onDateIsBoldChange: (e: any) => {}, dateHasNeon, onDateHasNeonChange: (e: any) => {}, dateNeonStrength, onDateNeonStrengthChange: (e: any) => {}, dateColor, onDateColorChange: (e: any) => {}, dateBoxBgColor, onDateBoxBgColorChange: (e: any) => {}, dateBoxBorderColor, onDateBoxBorderColorChange: (e: any) => {}, onBack: handleBack, onNext: handleNext}} />}
-            {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} memories={memories} onMemoriesChange={setMemories} journeyPoints={journeyPoints} onJourneyPointsChange={setJourneyPoints} onBack={handleBack} onNext={handleSave} isModulesOnlyMode={isModulesOnlyMode} onSubModuleChange={setActiveModulePreview} onRemoveMemory={handleRemoveMemory} onRemoveJourneyPoint={handleRemoveJourneyPoint} />}
+            {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} memories={memories} onMemoriesChange={setMemories} journeyPoints={journeyPoints} onJourneyPointsChange={setJourneyPoints} rouletteItems={rouletteItems} onRouletteItemsChange={setRouletteItems} onBack={handleBack} onNext={handleSave} isModulesOnlyMode={isModulesOnlyMode} onSubModuleChange={setActiveModulePreview} onRemoveMemory={handleRemoveMemory} onRemoveJourneyPoint={handleRemoveJourneyPoint} />}
             <div className="lg:hidden mt-12 w-full gap-4">
                <Dialog><DialogTrigger asChild><Button variant="outline" className="w-full h-11 rounded-xl border-white/10 bg-white/5 font-black text-[10px] uppercase tracking-widest gap-2"><Maximize2 className="w-4 h-4" /> Ver prévia</Button></DialogTrigger><DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[200] rounded-none"><div className="absolute top-6 right-6 z-[250]"><DialogClose className="p-2.5 bg-black/60 rounded-full text-white border border-white/20"><X className="w-5 h-5" /></DialogClose></div>{mounted && <DeviceMockup {...previewProps} isFullscreen />}</DialogContent></Dialog>
                {mounted && isMobile && <DeviceMockup {...previewProps} />}

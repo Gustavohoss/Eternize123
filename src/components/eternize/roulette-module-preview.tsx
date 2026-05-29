@@ -3,20 +3,26 @@
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 
-export function RouletteModulePreview() {
+interface RouletteModulePreviewProps {
+  items?: string[];
+}
+
+const DEFAULT_MOMENTS = [
+  "O dia que nos conhecemos",
+  "Aquele jantar especial", 
+  "Nossa primeira janta",
+  "Quando decidimos morar juntos",
+  "Nosso primeiro beijo",
+  "Nossa primeira viagem"
+];
+
+export function RouletteModulePreview({ items }: RouletteModulePreviewProps) {
   const [currentRotation, setCurrentRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [result, setResult] = useState('');
 
-  const moments = [
-    "O dia que nos conhecemos",
-    "Aquele jantar especial", 
-    "Nossa primeira janta",
-    "Quando decidimos morar juntos",
-    "Nosso primeiro beijo",
-    "Nossa primeira viagem"
-  ];
+  const displayItems = items && items.length === 6 ? items : DEFAULT_MOMENTS;
 
   const handleSpin = () => {
     if (isSpinning) return;
@@ -32,7 +38,7 @@ export function RouletteModulePreview() {
       const actualDeg = newRotation % 360;
       const sliceIndex = Math.floor(((360 - actualDeg) % 360) / 60);
       
-      setResult(moments[sliceIndex]);
+      setResult(displayItems[sliceIndex]);
       setShowResult(true);
       setIsSpinning(false);
     }, 4000);
@@ -110,12 +116,12 @@ export function RouletteModulePreview() {
             transform: translateX(-50%) rotate(30deg);
             text-align: center;
             width: 80px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             color: #ffffff;
+            line-height: 1.2;
         }
 
-        /* Cores Alternadas em tons de Vermelho e Preto */
         .slice:nth-child(1) { transform: rotate(0deg) skewY(-30deg); }
         .slice:nth-child(1) .slice-content { background-color: #1a0000; transform: skewY(30deg) rotate(30deg); }
         
@@ -161,14 +167,13 @@ export function RouletteModulePreview() {
         }
       `}</style>
 
-      {/* Background Gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#2a0000_0%,#050505_100%)] pointer-events-none" />
 
       <div className="relative z-10 text-center w-full px-5 flex flex-col items-center">
         <h1 className="text-[2.2rem] font-bold mb-2 leading-none">
           Roleta <span className="bg-gradient-to-r from-[#ff4d4d] to-[#8b0000] bg-clip-text text-transparent">Surpresa</span>
         </h1>
-        <p className="text-[1.1rem] opacity-80 mb-10 max-w-[280px] mx-auto">Qual foi o melhor momento que vivemos juntos?</p>
+        <p className="text-[1.1rem] opacity-80 mb-10 max-w-[280px] mx-auto">Qual será a surpresa de hoje?</p>
 
         <div className="wheel-wrapper">
           <div 
@@ -176,12 +181,13 @@ export function RouletteModulePreview() {
             style={{ transform: `rotate(${currentRotation}deg)` }}
           >
             <ul className="wheel-inner">
-              <li className="slice" data-text="O dia que nos conhecemos"> <div className="slice-content"><span>O dia que...</span></div></li>
-              <li className="slice" data-text="Nossa primeira viagem"> <div className="slice-content"><span>Nossa pr...</span></div></li>
-              <li className="slice" data-text="Nosso primeiro beijo"> <div className="slice-content"><span>Nosso pr...</span></div></li>
-              <li className="slice" data-text="Quando decidimos morar juntos"> <div className="slice-content"><span>Quando n...</span></div></li>
-              <li className="slice" data-text="Nossa primeira janta"> <div className="slice-content"><span>Nossa pr...</span></div></li>
-              <li className="slice" data-text="Aquele jantar especial"> <div className="slice-content"><span>Aquele j...</span></div></li>
+              {displayItems.map((item, i) => (
+                <li key={i} className="slice">
+                  <div className="slice-content">
+                    <span className="line-clamp-2">{item}</span>
+                  </div>
+                </li>
+              ))}
             </ul>
           </div>
           <div className="center-btn" onClick={handleSpin}>
@@ -194,11 +200,10 @@ export function RouletteModulePreview() {
         <p className="mt-[50px] opacity-50 text-[0.8rem] tracking-[1px] uppercase font-bold">TOQUE NO BOTÃO PARA GIRAR</p>
       </div>
 
-      {/* Modal de Resultado */}
       {showResult && (
         <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center backdrop-blur-md animate-in fade-in duration-300 p-6">
            <div className="bg-[#1a0000] p-8 md:p-10 rounded-[30px] border-2 border-[#FF0000] text-center shadow-[0_0_30px_rgba(255,0,0,0.4)] animate-pop-in max-w-[320px] w-full">
-              <p className="text-[1.1rem] text-[#ffcccc] mb-1">O momento sorteado foi:</p>
+              <p className="text-[1.1rem] text-[#ffcccc] mb-1">Sorteado!</p>
               <h2 className="text-[#ff4d4d] text-[1.8rem] font-bold mb-8 leading-tight">{result}</h2>
               <button 
                 onClick={closeModal}

@@ -82,6 +82,7 @@ interface DeviceMockupProps {
   step?: string;
   memories?: any[];
   journeyPoints?: JourneyPoint[];
+  rouletteItems?: string[];
   activeModuleId?: string | null;
   spotifyCardPhoto?: string;
 }
@@ -136,6 +137,7 @@ export function DeviceMockup({
   isPackEnabled = false,
   memories = [],
   journeyPoints = [],
+  rouletteItems = [],
   activeModuleId = null,
   spotifyCardPhoto = ''
 }: DeviceMockupProps) {
@@ -320,7 +322,7 @@ export function DeviceMockup({
                    
                    <button 
                      onClick={handleStartExperience}
-                     className="bg-[#1DB954] text-black px-16 py-5 rounded-full text-base font-black tracking-tight hover:scale-105 active:scale-95 transition-all shadow-[0_20px_40px_rgba(0,0,0,0.5)] border-none cursor-pointer"
+                     className="bg-[#1DB954] text-black px-16 py-5 rounded-full text-base font-black tracking-tight hover:scale-105 active:scale-95 shadow-[0_20px_40px_rgba(0,0,0,0.5)] border-none cursor-pointer"
                    >
                      Ver Presente
                    </button>
@@ -454,7 +456,7 @@ export function DeviceMockup({
                      {previewModuleId === 'conquistas' && <AchievementsModulePreview />}
                      {previewModuleId === 'curiosidades' && <CuriosidadesModulePreview date={date} />}
                      {previewModuleId === 'jornada' && <JourneyModulePreview points={journeyPoints} />}
-                     {previewModuleId === 'surpresa' && <RouletteModulePreview />}
+                     {previewModuleId === 'surpresa' && <RouletteModulePreview items={rouletteItems} />}
                   </div>
                </div>
             </div>

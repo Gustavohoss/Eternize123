@@ -1,8 +1,7 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { LayoutGrid, Check, X, CreditCard, Sparkles, Info, Plus, Image as ImageIcon, Trash2, Calendar, MessageSquare, Type, ChevronLeft, ChevronRight, Heart, Trophy, Star, Compass, RotateCcw, Map as MapIcon, ChevronDown, MapPin, Search, Loader2 } from 'lucide-react';
+import { LayoutGrid, Check, X, CreditCard, Sparkles, Info, Plus, Image as ImageIcon, Trash2, Calendar, MessageSquare, Type, ChevronLeft, ChevronRight, Heart, Trophy, Star, Compass, RotateCcw, Map as MapIcon, ChevronDown, MapPin, Search, Loader2, GripVertical } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +26,8 @@ interface StepModulesEditProps {
   onMemoriesChange: (memories: Memory[]) => void;
   journeyPoints?: JourneyPoint[];
   onJourneyPointsChange?: (points: JourneyPoint[]) => void;
+  rouletteItems?: string[];
+  onRouletteItemsChange?: (items: string[]) => void;
   onBack: () => void;
   onNext: () => void;
   isModulesOnlyMode?: boolean;
@@ -34,6 +35,15 @@ interface StepModulesEditProps {
   onRemoveMemory?: (id: string) => void;
   onRemoveJourneyPoint?: (id: string) => void;
 }
+
+const DEFAULT_ROULETTE = [
+  "O dia que nos conhecemos",
+  "Aquele jantar especial", 
+  "Nossa primeira janta",
+  "Quando decidimos morar juntos",
+  "Nosso primeiro beijo",
+  "Nossa primeira viagem"
+];
 
 const compressImage = (base64Str: string): Promise<string> => {
   return new Promise((resolve) => {
@@ -64,6 +74,8 @@ export function StepModulesEdit({
   onMemoriesChange, 
   journeyPoints = [],
   onJourneyPointsChange,
+  rouletteItems = DEFAULT_ROULETTE,
+  onRouletteItemsChange,
   onBack, 
   onNext,
   isModulesOnlyMode = false,
@@ -167,6 +179,13 @@ export function StepModulesEdit({
   const updateJourneyPoint = (id: string, updates: Partial<JourneyPoint>) => {
     if (!onJourneyPointsChange) return;
     onJourneyPointsChange(journeyPoints.map(p => p.id === id ? { ...p, ...updates } : p));
+  };
+
+  const updateRouletteItem = (index: number, text: string) => {
+    if (!onRouletteItemsChange) return;
+    const newItems = [...rouletteItems];
+    newItems[index] = text;
+    onRouletteItemsChange(newItems);
   };
 
   const searchLocation = (query: string) => {
@@ -362,6 +381,47 @@ export function StepModulesEdit({
                   </div>
                 ))}
                 {journeyPoints.length < 8 && (<button onClick={addJourneyPoint} className="w-full h-16 rounded-[2rem] border-2 border-dashed border-white/5 bg-white/[0.02] hover:bg-white/5 transition-all flex items-center justify-center gap-3 text-white/20 hover:text-primary group"><Plus className="w-5 h-5 group-hover:scale-110 transition-transform" /><span className="text-xs font-black uppercase tracking-widest">Adicionar novo local</span></button>)}
+             </div>
+          </div>
+        ) : activeSubModule === 'surprise' ? (
+          <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
+             <div className="flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl">
+                <div className="flex items-center gap-3">
+                   <div className="bg-orange-500/20 p-2 rounded-xl"><RotateCcw className="w-4 h-4 text-orange-500" /></div>
+                   <div>
+                      <h4 className="text-xs font-black text-white uppercase tracking-wider">Módulo Roleta</h4>
+                      <p className="text-[9px] font-bold text-white/30 uppercase">6 fatias personalizáveis</p>
+                   </div>
+                </div>
+                <Button onClick={() => setActiveSubModule('menu')} variant="ghost" className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 gap-1"><ChevronLeft className="w-3 h-3" /> Voltar ao menu</Button>
+             </div>
+
+             <div className="bg-[#0c0c0c] border border-white/5 rounded-3xl p-6 space-y-4">
+                <div className="space-y-3">
+                   {rouletteItems.map((item, index) => (
+                     <div key={index} className="space-y-1.5">
+                        <Label className="text-[9px] font-black uppercase text-white/40 ml-1">Fatia {index + 1}</Label>
+                        <div className="relative group">
+                           <Input 
+                             value={item} 
+                             onChange={(e) => updateRouletteItem(index, e.target.value)} 
+                             placeholder={`Opção ${index + 1}...`}
+                             className="bg-white/5 border-white/5 h-11 rounded-xl text-xs font-bold pl-10 focus:border-orange-500/50"
+                           />
+                           <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-orange-500/50">
+                              <Star className="w-3.5 h-3.5 fill-current" />
+                           </div>
+                        </div>
+                     </div>
+                   ))}
+                </div>
+                
+                <div className="bg-orange-500/5 border border-orange-500/20 p-4 rounded-xl flex items-start gap-3">
+                   <Info className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+                   <p className="text-[10px] text-white/50 leading-relaxed font-medium uppercase tracking-wider">
+                     Use frases curtas para que o texto caiba perfeitamente dentro da roleta.
+                   </p>
+                </div>
              </div>
           </div>
         ) : null}
