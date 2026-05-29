@@ -23,27 +23,7 @@ export const THEME_OPTIONS = [
     color: '#1db954',
     image: 'https://picsum.photos/seed/spotify-theme/400/600',
     videoUrl: 'AnnrA22c2ls',
-    demoUrl: '/site/demo-spotify?muted=true'
-  },
-  { 
-    id: 'classic', 
-    name: 'Clássico', 
-    description: 'O estilo romântico e atemporal. Perfeito para declarações tradicionais.', 
-    badge: 'Clássico',
-    color: '#e11d48',
-    image: 'https://picsum.photos/seed/classic-theme/400/600',
-    videoUrl: 'H7pUAJdpK4Y',
-    demoUrl: '/site/demo-classico?muted=true'
-  },
-  { 
-    id: 'netflix', 
-    name: 'Netflix', 
-    description: 'Estilo cinematográfico inspirado na Netflix. Transforme sua história em uma série épica.', 
-    badge: 'Série',
-    color: '#e50914',
-    image: 'https://picsum.photos/seed/netflix-theme/400/600',
-    videoUrl: 'rfVydSVztXc',
-    demoUrl: '/site/funcionando11111111-jfh8?muted=true'
+    demoUrl: '/site/pedro-e-camila-jtt2?muted=true'
   },
   { 
     id: 'instagram', 
@@ -53,7 +33,27 @@ export const THEME_OPTIONS = [
     color: '#e1306c',
     image: 'https://picsum.photos/seed/insta-theme/400/600',
     videoUrl: 'fYln5Smsn6w',
-    demoUrl: '/site/fernando-e-clara-kwt5?muted=true'
+    demoUrl: '/site/pedro-e-camila-2-inmp?muted=true'
+  },
+  { 
+    id: 'netflix', 
+    name: 'Netflix', 
+    description: 'Estilo cinematográfico inspirado na Netflix. Transforme sua história em uma série épica.', 
+    badge: 'Série',
+    color: '#e50914',
+    image: 'https://picsum.photos/seed/netflix-theme/400/600',
+    videoUrl: 'rfVydSVztXc',
+    demoUrl: '/site/pedro-e-camila-3-bjrn?muted=true'
+  },
+  { 
+    id: 'classic', 
+    name: 'Clássico', 
+    description: 'O estilo romântico e atemporal. Perfeito para declarações tradicionais.', 
+    badge: 'Clássico',
+    color: '#e11d48',
+    image: 'https://picsum.photos/seed/classic-theme/400/600',
+    videoUrl: 'H7pUAJdpK4Y',
+    demoUrl: '/site/pedro-e-camila-4-rhwm?muted=true'
   },
 ];
 
