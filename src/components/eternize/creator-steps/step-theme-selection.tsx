@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -6,12 +7,6 @@ import { ChevronLeft, ChevronRight, Play, X, Sparkles } from 'lucide-react';
 import { THEME_OPTIONS, ThemeId } from '@/app/criador/constants';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
-
-interface StepThemeSelectionProps {
-  selectedTheme: ThemeId;
-  onThemeSelect: (theme: ThemeId) => void;
-  onNext: () => void;
-}
 
 export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: StepThemeSelectionProps) {
   const [currentIndex, setCurrentIndex] = useState(() => {
@@ -22,6 +17,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const nextStep = () => {
@@ -187,7 +183,6 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                     }}
                   >
                     <div className="absolute inset-0 bg-neutral-900 z-0">
-                      {/* VÍDEO NATIVO PARA AUTOPLAY NO TIKTOK */}
                       {videoId ? (
                         <div className="absolute inset-0 pointer-events-none overflow-hidden">
                            <video 
@@ -199,7 +194,6 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                              className="absolute inset-0 w-full h-full object-cover opacity-60"
                            >
                              <source src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`} type="video/mp4" />
-                             {/* Fallback para Iframe caso o usuário prefira manter YouTube */}
                              <iframe
                                className="w-full h-full scale-[1.25] border-none"
                                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&playsinline=1`}
@@ -223,19 +217,22 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                       </div>
                     )}
 
-                    <div className="absolute bottom-4 left-3 right-3 flex items-end justify-between z-20">
+                    <div className="absolute bottom-6 left-4 right-4 z-20 flex flex-col gap-3">
                       <span 
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-white text-[10px] font-black uppercase tracking-wider" 
+                        className="w-fit px-3 py-1.5 rounded-full text-white text-[10px] font-black uppercase tracking-wider" 
                         style={{ background: getGradient(theme.id) }}
                       >
                         {theme.name}
                       </span>
                       
                       {isActive && (
-                        <Dialog>
+                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                           <DialogTrigger asChild>
-                            <button className="w-10 h-10 rounded-full flex items-center justify-center bg-white/15 backdrop-blur-sm border border-white/20 pointer-events-auto">
-                              <Play className="w-4 h-4 text-white fill-white" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></Play>
+                            <button 
+                              className="w-full h-11 rounded-xl flex items-center justify-center gap-2 bg-white text-black font-black text-[10px] uppercase tracking-wider hover:bg-neutral-100 transition-all active:scale-95 pointer-events-auto shadow-2xl"
+                            >
+                              <Play className="w-3.5 h-3.5 fill-current" />
+                              Ver demo ao vivo
                             </button>
                           </DialogTrigger>
                           <DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[500] translate-x-0 translate-y-0 rounded-none max-w-none">

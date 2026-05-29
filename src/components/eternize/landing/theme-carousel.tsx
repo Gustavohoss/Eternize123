@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import NextImage from 'next/image';
-import { ChevronLeft, ChevronRight, Play, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, X, ExternalLink } from 'lucide-react';
 import { THEME_OPTIONS } from '@/app/criador/constants';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
@@ -13,6 +13,7 @@ export function ThemeCarousel() {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [origin, setOrigin] = useState('https://www.eternizee.shop');
 
@@ -31,14 +32,15 @@ export function ThemeCarousel() {
   };
 
   useEffect(() => {
-    if (isDragging) return;
+    // Pausa o carrossel se o usuário estiver arrastando ou se a janela de demo estiver aberta
+    if (isDragging || isDialogOpen) return;
     
     const timer = setInterval(() => {
       nextStep();
     }, 4000);
 
     return () => clearInterval(timer);
-  }, [currentIndex, isDragging]);
+  }, [currentIndex, isDragging, isDialogOpen]);
 
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDragging(true);
@@ -177,7 +179,7 @@ export function ThemeCarousel() {
                         <iframe
                           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.25] border-none"
                           src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}&playsinline=1`}
-                          allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allow="autoplay"
                           title={theme.name}
                           loading="eager"
                         />
@@ -202,19 +204,22 @@ export function ThemeCarousel() {
                     </div>
                   )}
 
-                  <div className="absolute bottom-4 left-3 right-3 flex items-end justify-between z-20">
+                  <div className="absolute bottom-6 left-4 right-4 z-20 flex flex-col gap-3">
                     <span 
-                      className="px-2.5 py-1 rounded-full text-white text-[11px] font-bold shadow-lg" 
+                      className="w-fit px-2.5 py-1 rounded-full text-white text-[11px] font-bold shadow-lg" 
                       style={{ background: getGradient(theme.id) }}
                     >
                       {theme.name}
                     </span>
                     
                     {isActive && (
-                      <Dialog>
+                      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
-                          <button className="w-9 h-9 rounded-full flex items-center justify-center bg-white/15 backdrop-blur-sm border border-white/20 hover:bg-white/30 transition-all active:scale-90 pointer-events-auto">
-                            <Play className="w-4 h-4 text-white fill-white" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></Play>
+                          <button 
+                            className="w-full h-11 rounded-xl flex items-center justify-center gap-2 bg-white text-black font-black text-[10px] uppercase tracking-wider hover:bg-neutral-100 transition-all active:scale-95 pointer-events-auto shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-500"
+                          >
+                            <Play className="w-3.5 h-3.5 fill-current" />
+                            Ver demo ao vivo
                           </button>
                         </DialogTrigger>
                         <DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[500] translate-x-0 translate-y-0 rounded-none max-w-none">
