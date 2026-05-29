@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { Lock, X, Play, Heart } from 'lucide-react';
+import { Lock, X, Play, Heart, Sparkles as SparkleIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { intervalToDuration } from 'date-fns';
 import { MusicPlayer, type MusicPlayerRef } from './music-player';
@@ -288,24 +288,48 @@ export function DeviceMockup({
       
       {/* Gatilho de interação para o site publicado */}
       {isFullscreen && !hasStarted && (
-        <div className="fixed inset-0 z-[2000] bg-[#121212] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
+        <div className="fixed inset-0 z-[2000] bg-[#0c0c0c] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500 overflow-hidden">
            {selectedTheme === 'spotify' ? (
              <div className="w-full h-full flex flex-col items-center justify-center relative">
-                <div className="max-w-[320px] space-y-10 flex flex-col items-center">
-                   <h2 className="text-[36px] font-black text-white leading-tight tracking-tighter font-['DM_Sans'] px-4">
-                      <span className="block mb-2">{senderName || 'Alguém'} separou um</span>
-                      <span className="text-[#1DB954]">presente especial!</span>
-                   </h2>
-                   <p className="text-white/60 text-base font-medium leading-relaxed font-['DM_Sans'] px-6">
+                {/* Efeito de brilho de fundo */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(circle_at_center,rgba(29,185,84,0.1)_0%,transparent_60%)] pointer-events-none" />
+                
+                <div className="max-w-[320px] flex flex-col items-center relative z-10">
+                   <div className="flex flex-col items-center gap-2 mb-12">
+                      <h2 className="text-white text-3xl md:text-4xl font-black tracking-tight leading-none font-['DM_Sans']">
+                        {senderName || 'Alguém'} separou
+                      </h2>
+                      <h2 className="text-white text-3xl md:text-4xl font-black tracking-tight leading-none font-['DM_Sans']">
+                        um
+                      </h2>
+                      
+                      <div className="mt-4 flex flex-col items-center">
+                         <h2 className="text-[#1DB954] text-[52px] md:text-[60px] font-black tracking-tighter leading-[0.85] uppercase italic font-['DM_Sans']">
+                           presente
+                         </h2>
+                         <h2 className="text-[#1DB954] text-[52px] md:text-[60px] font-black tracking-tighter leading-[0.85] uppercase italic font-['DM_Sans']">
+                           especial!
+                         </h2>
+                      </div>
+                   </div>
+
+                   <p className="text-white/30 text-[11px] font-black leading-relaxed max-w-[260px] mb-14 uppercase tracking-[0.2em] font-['DM_Sans']">
                       Um momento único feito com carinho para celebrar a jornada de vocês
                    </p>
                    
                    <button 
                      onClick={handleStartExperience}
-                     className="mt-6 bg-[#1DB954] text-black px-14 py-4 rounded-full text-base font-black tracking-tight hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(29,185,84,0.3)]"
+                     className="bg-[#1DB954] text-black px-16 py-5 rounded-full text-base font-black tracking-tight hover:scale-105 active:scale-95 transition-all shadow-[0_20px_40px_rgba(0,0,0,0.5)] border-none cursor-pointer"
                    >
                      Ver Presente
                    </button>
+                </div>
+
+                {/* Ícone sutil no rodapé */}
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 opacity-10">
+                   <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.485 17.303c-.215.354-.674.464-1.028.249-2.855-1.745-6.446-2.137-10.68-1.168-.406.094-.813-.162-.907-.568-.094-.406.162-.813.568-.907 4.636-1.06 8.59-.61 11.798 1.346.354.215.464.674.249 1.028zm1.464-3.262c-.272.441-.832.578-1.273.307-3.266-2.008-8.245-2.593-12.106-1.42-.496.149-1.02-.132-1.169-.628-.149-.496.132-1.02.628-1.169 4.412-1.34 9.9-1.01 13.64 1.288.441.272.578.832.307 1.273zm.126-3.415c-3.916-2.325-10.374-2.54-14.135-1.4c-.6.182-1.23-.165-1.413-.765-.182-.6.165-1.23.765-1.413 4.316-1.309 11.434-1.05 15.938 1.623.54.32.716 1.014.396 1.554-.32.54-1.014.716-1.554.396z"/>
+                   </svg>
                 </div>
              </div>
            ) : (
