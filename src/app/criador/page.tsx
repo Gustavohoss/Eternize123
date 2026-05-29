@@ -45,8 +45,9 @@ const compressImage = (base64Str: string): Promise<string> => {
     img.src = base64Str;
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const MAX_WIDTH = 1200;
-      const MAX_HEIGHT = 1200;
+      // Reduzido para 800 para economizar espaço no Firestore (limite de 1MB)
+      const MAX_WIDTH = 800;
+      const MAX_HEIGHT = 800;
       let width = img.width;
       let height = img.height;
       if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
@@ -54,7 +55,8 @@ const compressImage = (base64Str: string): Promise<string> => {
       canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx?.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/jpeg', 0.85));
+      // Qualidade reduzida para 0.6 para garantir que caiba no limite de 1MB do Firestore
+      resolve(canvas.toDataURL('image/jpeg', 0.6));
     };
   });
 };

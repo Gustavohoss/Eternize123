@@ -39,9 +39,9 @@ const compressImage = (base64Str: string): Promise<string> => {
     img.src = base64Str;
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      // Aumentado de 600 para 1024 para melhor nitidez nos módulos
-      const MAX_WIDTH = 1024;
-      const MAX_HEIGHT = 1024;
+      // Reduzido para 600 para economizar espaço no Firestore em documentos com muitos módulos
+      const MAX_WIDTH = 600;
+      const MAX_HEIGHT = 600;
       let width = img.width;
       let height = img.height;
       if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
@@ -49,8 +49,8 @@ const compressImage = (base64Str: string): Promise<string> => {
       canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx?.drawImage(img, 0, 0, width, height);
-      // Qualidade aumentada de 0.6 para 0.85
-      resolve(canvas.toDataURL('image/jpeg', 0.85));
+      // Qualidade reduzida para 0.6 para garantir que caiba no limite de 1MB do Firestore
+      resolve(canvas.toDataURL('image/jpeg', 0.6));
     };
   });
 };
@@ -254,7 +254,7 @@ export function StepModulesEdit({
   }
 
   return (
-    <div className="space-y-8 md:space-y-10 flex flex-col items-center md:items-start w-full max-w-xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-8 md:space-y-10 flex flex-col items-center md:items-start w-full max-xl animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="space-y-3 text-center md:text-left w-full">
         <div className="flex flex-col md:flex-row items-center gap-4">
           <div className="bg-white/5 p-2 rounded-2xl border border-white/10">
