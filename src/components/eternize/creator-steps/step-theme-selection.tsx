@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -7,6 +6,12 @@ import { ChevronLeft, ChevronRight, Play, X, Sparkles } from 'lucide-react';
 import { THEME_OPTIONS, ThemeId } from '@/app/criador/constants';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
+
+interface StepThemeSelectionProps {
+  selectedTheme: ThemeId;
+  onThemeSelect: (theme: ThemeId) => void;
+  onNext: () => void;
+}
 
 export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: StepThemeSelectionProps) {
   const [currentIndex, setCurrentIndex] = useState(() => {
@@ -153,6 +158,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                 const blur = distanceFromCenter < 0.1 ? "none" : "blur(1.5px)";
                 const shadow = isActive ? `0 32px 80px -8px ${getGlowColor(theme.id)}` : "none";
                 const videoId = (theme as any).videoUrl;
+                const localVideo = (theme as any).localVideo;
                 const isHot = (theme as any).isHot;
 
                 return (
@@ -183,23 +189,24 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                     }}
                   >
                     <div className="absolute inset-0 bg-neutral-900 z-0">
-                      {videoId ? (
+                      {localVideo ? (
+                        <video 
+                          key={localVideo}
+                          autoPlay 
+                          muted 
+                          loop 
+                          playsInline 
+                          className="absolute inset-0 w-full h-full object-cover opacity-70"
+                        >
+                          <source src={localVideo} type="video/mp4" />
+                        </video>
+                      ) : videoId ? (
                         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                           <video 
-                             key={videoId}
-                             autoPlay 
-                             muted 
-                             loop 
-                             playsInline 
-                             className="absolute inset-0 w-full h-full object-cover opacity-60"
-                           >
-                             <source src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`} type="video/mp4" />
-                             <iframe
-                               className="w-full h-full scale-[1.25] border-none"
-                               src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&playsinline=1`}
-                               allow="autoplay"
-                             />
-                           </video>
+                           <iframe
+                             className="w-full h-full scale-[1.25] border-none opacity-60"
+                             src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&playsinline=1`}
+                             allow="autoplay"
+                           />
                         </div>
                       ) : (
                         <NextImage src={theme.image} fill className="object-cover" alt={theme.name} priority />

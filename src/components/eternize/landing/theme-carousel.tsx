@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -150,6 +149,7 @@ export function ThemeCarousel() {
               const blur = distanceFromCenter < 0.1 ? "none" : "blur(1.5px)";
               const shadow = isActive ? `0 32px 80px -8px ${getGlowColor(theme.id)}` : "none";
               const videoId = (theme as any).videoUrl;
+              const localVideo = (theme as any).localVideo;
 
               return (
                 <div
@@ -174,10 +174,21 @@ export function ThemeCarousel() {
                   onClick={() => { if(!isActive && !isDragging) { setCurrentIndex(i); } }}
                 >
                   <div className="absolute inset-0 bg-neutral-900 z-0">
-                    {videoId ? (
+                    {localVideo ? (
+                      <video 
+                        key={localVideo}
+                        autoPlay 
+                        muted 
+                        loop 
+                        playsInline 
+                        className="absolute inset-0 w-full h-full object-cover opacity-80"
+                      >
+                        <source src={localVideo} type="video/mp4" />
+                      </video>
+                    ) : videoId ? (
                       <div className="absolute inset-0 pointer-events-none overflow-hidden">
                         <iframe
-                          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.25] border-none"
+                          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.25] border-none opacity-60"
                           src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}&playsinline=1`}
                           allow="autoplay"
                           title={theme.name}

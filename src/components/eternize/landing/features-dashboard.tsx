@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -66,6 +65,8 @@ export function FeaturesDashboard() {
       }))
     );
   }, []);
+
+  const currentPreviewTheme = THEME_OPTIONS[previewThemeIndex];
 
   return (
     <section className="py-24 bg-[#0a0a0a] border-t border-white/5">
@@ -329,12 +330,23 @@ export function FeaturesDashboard() {
             </div>
 
             <div className="aspect-[4/3] rounded-2xl bg-[#0d0005] border border-[#2a0010] overflow-hidden relative flex items-center justify-center shadow-2xl">
-               {(THEME_OPTIONS[previewThemeIndex] as any).videoUrl ? (
+               {(currentPreviewTheme as any).localVideo ? (
+                 <video 
+                    key={(currentPreviewTheme as any).localVideo}
+                    autoPlay 
+                    muted 
+                    loop 
+                    playsInline 
+                    className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity"
+                  >
+                    <source src={(currentPreviewTheme as any).localVideo} type="video/mp4" />
+                  </video>
+               ) : (currentPreviewTheme as any).videoUrl ? (
                  <div className="absolute inset-0 pointer-events-none">
                    <iframe
                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full scale-[1.25] border-none opacity-40 group-hover:opacity-60 transition-opacity"
-                     src={`https://www.youtube.com/embed/${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}?autoplay=1&mute=1&loop=1&playlist=${(THEME_OPTIONS[previewThemeIndex] as any).videoUrl}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}&playsinline=1`}
-                     allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                     src={`https://www.youtube.com/embed/${(currentPreviewTheme as any).videoUrl}?autoplay=1&mute=1&loop=1&playlist=${(currentPreviewTheme as any).videoUrl}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&origin=${encodeURIComponent(origin)}&widget_referrer=${encodeURIComponent(origin)}&playsinline=1`}
+                     allow="autoplay"
                      title="Preview"
                      loading="eager"
                    />
