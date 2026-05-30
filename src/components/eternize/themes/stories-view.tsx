@@ -88,20 +88,23 @@ export function StoriesView({
 
       {/* Áreas de toque para navegação */}
       <div className="absolute inset-0 z-[605] flex">
-        <div className="flex-1 h-full cursor-pointer" onClick={onPrev} />
+        {/* Esquerda: Volta Story */}
+        <div className="w-1/3 h-full cursor-pointer" onClick={(e) => { e.stopPropagation(); onPrev(); }} />
+        
+        {/* Direita: Próximo Story (Segurar para pausar) */}
         <div 
-          className="flex-1 h-full cursor-pointer" 
+          className="w-2/3 h-full cursor-pointer" 
+          onClick={(e) => { e.stopPropagation(); onNext(); }}
           onMouseDown={() => onPauseToggle(true)} 
           onMouseUp={() => onPauseToggle(false)} 
           onTouchStart={() => onPauseToggle(true)} 
           onTouchEnd={() => onPauseToggle(false)} 
         />
-        <div className="flex-1 h-full cursor-pointer" onClick={onNext} />
       </div>
 
       {/* Visualização da Imagem */}
       <div className="flex-1 relative flex flex-col items-center justify-center bg-black">
-        <div className={cn("absolute inset-0 transition-all duration-[800ms] ease-in-out", isFading ? "opacity-0 scale-95" : "opacity-100 scale-100")}>
+        <div className={cn("absolute inset-0 transition-all duration-[400ms] ease-in-out", isFading ? "opacity-0 scale-95" : "opacity-100 scale-100")}>
           {currentPhoto && currentPhoto.length > 0 ? (
             <Image src={currentPhoto} fill className="object-cover" alt={`Story ${currentIndex}`} priority />
           ) : (

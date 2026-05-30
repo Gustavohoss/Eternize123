@@ -235,28 +235,58 @@ export function DeviceMockup({
   // Story Logic
   const triggerFade = useCallback((callback: () => void) => {
     setIsFading(true);
-    setTimeout(() => { callback(); setIsFading(false); }, 800);
+    setTimeout(() => { 
+      callback(); 
+      setIsFading(false); 
+    }, 400); // Reduzido para 400ms para ser mais rápido
   }, []);
 
   const nextStory = useCallback(() => {
     if (isFading) return;
-    if (currentStoryIndex < uploadedPhotos.length - 1) triggerFade(() => { setCurrentStoryIndex(prev => prev + 1); setStoryProgress(0); });
-    else setShowStories(false);
+    if (currentStoryIndex < uploadedPhotos.length - 1) {
+      triggerFade(() => { 
+        setCurrentStoryIndex(prev => prev + 1); 
+        setStoryProgress(0); 
+      });
+    } else {
+      setShowStories(false);
+    }
   }, [uploadedPhotos.length, currentStoryIndex, triggerFade, isFading]);
 
   const prevStory = useCallback(() => {
     if (isFading) return;
-    if (currentStoryIndex > 0) triggerFade(() => { setCurrentStoryIndex(prev => prev - 1); setStoryProgress(0); });
+    if (currentStoryIndex > 0) {
+      triggerFade(() => { 
+        setCurrentStoryIndex(prev => prev - 1); 
+        setStoryProgress(0); 
+      });
+    }
   }, [currentStoryIndex, triggerFade, isFading]);
 
+  // Efeito para o temporizador dos Stories
   useEffect(() => {
     if (!showStories || uploadedPhotos.length === 0 || isStoryPaused || isFading) return;
-    const intervalTime = 50; const duration = 5000; const step = (intervalTime / duration) * 100;
+    
+    const intervalTime = 50; 
+    const duration = 5000; 
+    const step = (intervalTime / duration) * 100;
+    
     const timer = setInterval(() => {
-      setStoryProgress(prev => { if (prev >= 100) { nextStory(); return 0; } return prev + step; });
+      setStoryProgress(prev => {
+        if (prev >= 100) return 100;
+        return prev + step;
+      });
     }, intervalTime);
-    return () => clearInterval(interval);
-  }, [showStories, nextStory, uploadedPhotos.length, isStoryPaused, isFading]);
+
+    return () => clearInterval(timer); // Corrigido de 'interval' para 'timer'
+  }, [showStories, uploadedPhotos.length, isStoryPaused, isFading, currentStoryIndex]);
+
+  // Efeito para passar o story quando chegar em 100%
+  useEffect(() => {
+    if (storyProgress >= 100 && !isFading) {
+      nextStory();
+    }
+  }, [storyProgress, nextStory, isFading]);
 
   // Dynamic Styles
   const dateStyle: React.CSSProperties = {
@@ -388,7 +418,7 @@ export function DeviceMockup({
                 <ClassicView {...{uploadedPhotos, photoEffect, showCard, cardColor, titlePosition, pageTitle, titleStyle, message, messageColor, messageFontFamily: getFontFamily(messageFont || 'inter'), date, selectedCountStyle, dateStyle, dateIsBold, dateBoxBgColor, dateBoxBorderColor, timeDiff, totalDays, isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'netflix' && (
-                <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: () => setShowStories(true), onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList), isPackEnabled, onModuleClick: setPreviewModuleId}} />
+                <NetflixView {...{uploadedPhotos, activeHeroIndex, pageTitle, titleStyle, date, message, timeDiff, totalDays, dateStyle, activeTab, onTabChange: setActiveTab, onStartExperience: () => { setCurrentStoryIndex(0); setStoryProgress(0); setShowStories(true); }, onPhotoClick: setActiveHeroIndex, isInList, onListToggle: () => setIsInList(!isInList), isPackEnabled, onModuleClick: setPreviewModuleId}} />
               )}
               {selectedTheme === 'spotify' && (
                 <SpotifyView {...{uploadedPhotos, activeHeroIndex, pageTitle, totalDays, timeDiff, date, activeTab, onTabChange: setActiveTab, onPhotoClick: (i) => { setActiveHeroIndex(i); setShowSpotifyFullscreen(true); }, isLiked, onLikeToggle: () => setIsLiked(!isLiked), isAudioPlaying, onAudioToggle: setIsAudioPlaying, dynamicSpotifyColor: '#121212', spotifyHeaderOpacity, onHeaderScroll: (e) => setSpotifyHeaderOpacity(Math.min(1, e.currentTarget.scrollTop / 100)), onShowFullscreen: () => setShowSpotifyFullscreen(true), onCloseFullscreen: () => setShowSpotifyFullscreen(false), showSpotifyFullscreen, message, isPackEnabled, onModuleClick: setPreviewModuleId, spotifyCardPhoto, onStartWrapped: () => setShowSpotifyWrapped(true), musicData}} />
