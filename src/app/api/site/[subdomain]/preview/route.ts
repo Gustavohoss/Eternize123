@@ -26,6 +26,10 @@ export async function GET(
 
     const base64Data = metaPhotoSnap.data().base64;
     
+    if (!base64Data) {
+        return new NextResponse('Empty data', { status: 404 });
+    }
+
     // Extrai apenas a parte dos dados binários, ignorando o prefixo data:image/...
     const base64Image = base64Data.includes(';base64,') 
       ? base64Data.split(';base64,').pop() 
@@ -37,7 +41,8 @@ export async function GET(
       headers: {
         'Content-Type': 'image/jpeg',
         'Content-Length': buffer.length.toString(),
-        'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+        // Reduzimos o tempo de cache para facilitar testes e atualizações
+        'Cache-Control': 'public, max-age=60, s-maxage=60',
       },
     });
   } catch (error) {

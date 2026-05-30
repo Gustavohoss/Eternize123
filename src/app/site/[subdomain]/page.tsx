@@ -40,9 +40,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const title = config.metaTitle || siteData.name || 'Um presente especial para você';
     const description = 'Abra para ver a surpresa que preparei... ❤️';
     
-    // URL absoluta para a imagem
+    // Cache busting: adicionamos um timestamp para forçar o WhatsApp a atualizar a imagem quando ela mudar
+    const lastUpdate = siteData.updatedAt ? siteData.updatedAt.toMillis() : Date.now();
+    
+    // URL absoluta para a imagem com parâmetro de versão para burlar o cache
     const imageUrl = hasCustomPhoto 
-      ? `${baseUrl}/api/site/${subdomain}/preview`
+      ? `${baseUrl}/api/site/${subdomain}/preview?v=${lastUpdate}`
       : 'https://s3.typebotstorage.com/public/workspaces/cm7vfrzsh0001xixq5auwzryb/typebots/cmor2i57p000007huwd9cnpp5/blocks/rnrd9dgoh72piuhxaqenuibb?v=1777891185088';
     
     return {
