@@ -7,12 +7,6 @@ import { THEME_OPTIONS, ThemeId } from '@/app/criador/constants';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 
-interface StepThemeSelectionProps {
-  selectedTheme: ThemeId;
-  onThemeSelect: (theme: ThemeId) => void;
-  onNext: () => void;
-}
-
 export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: StepThemeSelectionProps) {
   const [currentIndex, setCurrentIndex] = useState(() => {
     const idx = THEME_OPTIONS.findIndex(t => t.id === selectedTheme);
@@ -24,6 +18,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
   const [dragOffset, setDragOffset] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const nextStep = () => {
     const nextIdx = (currentIndex + 1) % THEME_OPTIONS.length;
@@ -86,6 +81,19 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
       window.removeEventListener('touchend', onTouchEnd);
     };
   }, [isDragging, dragOffset]);
+
+  // Efeito para forçar o play do vídeo quando ele mudar
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.load();
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Autoplay foi bloqueado, o que é esperado em alguns cenários de bateria baixa
+        });
+      }
+    }
+  }, [currentIndex]);
 
   const currentTheme = THEME_OPTIONS[currentIndex];
 
@@ -191,11 +199,14 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                     <div className="absolute inset-0 bg-neutral-900 z-0">
                       {localVideo ? (
                         <video 
+                          ref={isActive ? videoRef : null}
                           key={localVideo}
                           autoPlay 
                           muted 
                           loop 
                           playsInline 
+                          webkit-playsinline="true"
+                          preload="auto"
                           className="absolute inset-0 w-full h-full object-cover opacity-70"
                         >
                           <source src={localVideo} type="video/mp4" />
@@ -247,7 +258,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                             <DialogDescription className="sr-only">Visualização ao vivo do tema {theme.name}</DialogDescription>
                             <div className="flex-1 relative">
                                <div className="absolute top-6 right-6 z-[600]">
-                                  <DialogClose className="p-2.5 bg-black/60 hover:bg-black/80 rounded-full text-white transition-all border border-white/20 shadow-2xl backdrop-blur-md">
+                                  <DialogClose className="p-2.5 bg-black/60 rounded-full text-white border border-white/20 shadow-2xl backdrop-blur-md">
                                      <X className="w-5 h-5" />
                                   </DialogClose>
                                </div>
@@ -329,4 +340,10 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
       `}</style>
     </div>
   );
+}
+
+interface StepThemeSelectionProps {
+  selectedTheme: ThemeId;
+  onThemeSelect: (theme: ThemeId) => void;
+  onNext: () => void;
 }

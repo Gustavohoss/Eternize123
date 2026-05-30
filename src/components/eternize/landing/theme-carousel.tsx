@@ -15,6 +15,7 @@ export function ThemeCarousel() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [origin, setOrigin] = useState('https://www.eternizee.shop');
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -31,7 +32,6 @@ export function ThemeCarousel() {
   };
 
   useEffect(() => {
-    // Pausa o carrossel se o usuário estiver arrastando ou se a janela de demo estiver aberta
     if (isDragging || isDialogOpen) return;
     
     const timer = setInterval(() => {
@@ -86,6 +86,15 @@ export function ThemeCarousel() {
       window.removeEventListener('touchend', onTouchEnd);
     };
   }, [isDragging, dragOffset]);
+
+  // Efeito para garantir que o vídeo atual esteja tocando
+  useEffect(() => {
+    const currentVideo = videoRefs.current[currentIndex];
+    if (currentVideo) {
+      currentVideo.load();
+      currentVideo.play().catch(() => {});
+    }
+  }, [currentIndex]);
 
   const currentTheme = THEME_OPTIONS[currentIndex];
 
@@ -176,11 +185,14 @@ export function ThemeCarousel() {
                   <div className="absolute inset-0 bg-neutral-900 z-0">
                     {localVideo ? (
                       <video 
+                        ref={el => { videoRefs.current[i] = el; }}
                         key={localVideo}
                         autoPlay 
                         muted 
                         loop 
                         playsInline 
+                        webkit-playsinline="true"
+                        preload="auto"
                         className="absolute inset-0 w-full h-full object-cover opacity-80"
                       >
                         <source src={localVideo} type="video/mp4" />

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -92,6 +91,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
   const [dragOffset, setDragOffset] = useState(0);
   const [previewModuleId, setPreviewModuleId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   const nextStep = () => {
     setCurrentIndex(prev => (prev + 1) % MODULES.length);
@@ -147,6 +147,15 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
       window.removeEventListener('touchend', onTouchEnd);
     };
   }, [isDragging]);
+
+  // Força o play do vídeo selecionado
+  useEffect(() => {
+    const currentVideo = videoRefs.current[currentIndex];
+    if (currentVideo) {
+      currentVideo.load();
+      currentVideo.play().catch(() => {});
+    }
+  }, [currentIndex]);
 
   const currentModule = MODULES[currentIndex];
 
@@ -228,11 +237,14 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
                     <div className="absolute inset-0 bg-neutral-900 z-0">
                       {module.localVideo ? (
                         <video 
+                          ref={el => { videoRefs.current[i] = el; }}
                           key={module.localVideo}
                           autoPlay 
                           muted 
                           loop 
                           playsInline 
+                          webkit-playsinline="true"
+                          preload="auto"
                           className="absolute inset-0 w-full h-full object-cover opacity-70"
                         >
                           <source src={module.localVideo} type="video/mp4" />
