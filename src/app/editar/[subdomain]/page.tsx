@@ -417,7 +417,10 @@ export default function EditSitePage() {
               {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Salvar
            </Button>
         </div>
-        <div className="grid lg:grid-cols-[1fr_420px] gap-8 md:gap-16 items-start pt-8">
+        <div className={cn(
+          "grid gap-8 md:gap-16 items-start pt-8",
+          step === 'share-preview' ? "grid-cols-1 max-w-2xl mx-auto" : "lg:grid-cols-[1fr_420px]"
+        )}>
           <div className="w-full min-w-0">
             {step === 'customize-background' && <StepCustomizeBackground {...{selectedBgColor, onBgColorChange: setSelectedBgColor, selectedEffect, onEffectChange: setSelectedEffect, isEmojiRainEnabled, onEmojiRainToggle: setIsEmojiRainEnabled, selectedEmojis, onToggleEmoji: (e: any) => {}, emojiSize, onEmojiSizeChange: (e: any) => {}, emojiRainPosition, onEmojiRainPositionChange: (e: any) => {}, isEmojiPickerOpen, onEmojiPickerOpenChange: (e: any) => {}, sparklesDensity, onSparklesDensityChange: (e: any) => {}, sparklesSpeed, onSparklesSpeedChange: (e: any) => {}, sparklesColor, onSparklesColorChange: (e: any) => {}, smokeIntensity, onSmokeIntensityChange: (e: any) => {}, smokeColor, onSmokeColorChange: (e: any) => {}, patternDuration, onPatternDurationChange: (e: any) => {}, patternDensity, onPatternDensityChange: (e: any) => {}, patternColor, onPatternColorChange: (e: any) => {}, onBack: handleBack, onNext: handleNext}} />}
             {step === 'photos' && <StepPhotos {...{selectedTheme, uploadedPhotos, onPhotoUpload: (e: any) => {}, onRemovePhoto: (e: any) => {}, showCard, onShowCardChange: (e: any) => {}, cardColor, onCardColorChange: (e: any) => {}, titlePosition, onTitlePositionChange: (e: any) => {}, photoEffect, onPhotoEffectChange: (e: any) => {} }} />}
@@ -428,10 +431,13 @@ export default function EditSitePage() {
             {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} memories={memories} onMemoriesChange={setMemories} journeyPoints={journeyPoints} onJourneyPointsChange={setJourneyPoints} rouletteItems={rouletteItems} onRouletteItemsChange={setRouletteItems} onBack={handleBack} onNext={handleNext} isModulesOnlyMode={isDirectMode === 'modules'} onSubModuleChange={setActiveModulePreview} onRemoveMemory={handleRemoveMemory} onRemoveJourneyPoint={handleRemoveJourneyPoint} />}
             {step === 'share-preview' && <StepSharePreview metaTitle={metaTitle} onMetaTitleChange={setMetaTitle} metaPhoto={metaPhoto} onMetaPhotoChange={handleMetaPhotoUpload} pageTitle={pageTitle} onBack={handleBack} onSave={handleSave} />}
             
-            <div className="lg:hidden mt-12 w-full gap-4">
-               <Dialog><DialogTrigger asChild><Button variant="outline" className="w-full h-11 rounded-xl border-white/10 bg-white/5 font-black text-[10px] uppercase tracking-widest gap-2"><Maximize2 className="w-4 h-4" /> Ver prévia</Button></DialogTrigger><DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[200] rounded-none"><div className="absolute top-6 right-6 z-[250]"><DialogClose className="p-2.5 bg-black/60 rounded-full text-white border border-white/20"><X className="w-5 h-5" /></DialogClose></div>{mounted && <DeviceMockup {...previewProps} isFullscreen />}</DialogContent></Dialog>
-               {mounted && isMobile && <DeviceMockup {...previewProps} />}
-            </div>
+            {step !== 'share-preview' && (
+              <div className="lg:hidden mt-12 w-full gap-4">
+                 <Dialog><DialogTrigger asChild><Button variant="outline" className="w-full h-11 rounded-xl border-white/10 bg-white/5 font-black text-[10px] uppercase tracking-widest gap-2"><Maximize2 className="w-4 h-4" /> Ver prévia</Button></DialogTrigger><DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[200] rounded-none"><div className="absolute top-6 right-6 z-[250]"><DialogClose className="p-2.5 bg-black/60 rounded-full text-white border border-white/20"><X className="w-5 h-5" /></DialogClose></div>{mounted && <DeviceMockup {...previewProps} isFullscreen />}</DialogContent></Dialog>
+                 {mounted && isMobile && <DeviceMockup {...previewProps} />}
+              </div>
+            )}
+
             {step !== 'modules' && step !== 'share-preview' && (
               <div className="mt-12 flex flex-col gap-4 pt-10 border-t border-white/5">
                 <Button onClick={handleBack} variant="outline" className="h-14 rounded-2xl">Voltar</Button>
@@ -439,12 +445,15 @@ export default function EditSitePage() {
               </div>
             )}
           </div>
-          <div className="lg:sticky lg:top-24 self-start hidden lg:flex flex-col items-center gap-6">
-             <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 w-full text-center">
-                <p className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center justify-center gap-2"><Pencil className="w-3 h-3" /> Modo Edição</p>
-             </div>
-             {mounted && !isMobile && <DeviceMockup {...previewProps} />}
-          </div>
+          
+          {step !== 'share-preview' && (
+            <div className="lg:sticky lg:top-24 self-start hidden lg:flex flex-col items-center gap-6">
+               <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 w-full text-center">
+                  <p className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center justify-center gap-2"><Pencil className="w-3 h-3" /> Modo Edição</p>
+               </div>
+               {mounted && !isMobile && <DeviceMockup {...previewProps} />}
+            </div>
+          )}
         </div>
       </div>
     </div>
