@@ -1,15 +1,25 @@
+
 # Firebase Studio
 
 This is a NextJS starter in Firebase Studio.
 
-## Estrutura de Vídeos
-Os vídeos dos temas devem ser colocados em:
-`public/videos/themes/`
+## Estrutura de Vídeos Local (.mp4)
 
-Nomes obrigatórios:
+Para que os vídeos funcionem nativamente sem depender do YouTube, coloque os arquivos nas seguintes pastas:
+
+### Vídeos dos Temas
+Pasta: `public/videos/themes/`
 - `spotify.mp4`
 - `instagram.mp4`
 - `netflix.mp4`
 - `classic.mp4`
 
-Para começar, dê uma olhada em `src/app/page.tsx`.
+### Vídeos dos Módulos (Checkout)
+Pasta: `public/videos/modules/`
+- `memorias.mp4`
+- `conquistas.mp4`
+- `curiosidades.mp4`
+- `jornada.mp4`
+- `roleta.mp4`
+
+Certifique-se de que os nomes estão exatamente em letras minúsculas.

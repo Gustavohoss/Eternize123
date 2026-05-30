@@ -26,6 +26,7 @@ interface ModuleItem {
   image: string;
   color: string;
   videoUrl?: string;
+  localVideo?: string;
 }
 
 const MODULES: ModuleItem[] = [
@@ -35,7 +36,8 @@ const MODULES: ModuleItem[] = [
     description: 'Uma linha do tempo interativa dos momentos mais especiais do casal, com fotos e música por memória.',
     image: 'https://picsum.photos/seed/memories-module/600/800',
     color: '#e11d48',
-    videoUrl: '0rJ7Muz78eQ'
+    videoUrl: '0rJ7Muz78eQ',
+    localVideo: '/videos/modules/memorias.mp4'
   },
   {
     id: 'conquistas',
@@ -43,7 +45,8 @@ const MODULES: ModuleItem[] = [
     description: 'Desbloqueie marcos exclusivos conforme o tempo passa. Mostre ao mundo o nível do amor de vocês.',
     image: 'https://picsum.photos/seed/achievements-module/600/800',
     color: '#f97316',
-    videoUrl: 'ecCOldZHSlc'
+    videoUrl: 'ecCOldZHSlc',
+    localVideo: '/videos/modules/conquistas.mp4'
   },
   {
     id: 'curiosidades',
@@ -51,7 +54,8 @@ const MODULES: ModuleItem[] = [
     description: 'Descubra a fase da lua, a estação do ano e fatos astronômicos do dia em que vocês se conheceram.',
     image: 'https://picsum.photos/seed/curiosities-module/600/800',
     color: '#7c3aed',
-    videoUrl: 'D2ZOGUFp25I'
+    videoUrl: 'D2ZOGUFp25I',
+    localVideo: '/videos/modules/curiosidades.mp4'
   },
   {
     id: 'jornada',
@@ -59,7 +63,8 @@ const MODULES: ModuleItem[] = [
     description: 'Um rastro interativo no mapa mundi conectando os lugares onde vocês criaram as melhores lembranças.',
     image: 'https://picsum.photos/seed/journey-module/600/800',
     color: '#10b981',
-    videoUrl: 'JRAr-Txiyb0'
+    videoUrl: 'JRAr-Txiyb0',
+    localVideo: '/videos/modules/jornada.mp4'
   },
   {
     id: 'roleta',
@@ -67,7 +72,8 @@ const MODULES: ModuleItem[] = [
     description: 'Um jogo interativo para sortear desafios, encontros e momentos divertidos para fazerem juntos.',
     image: 'https://picsum.photos/seed/roulette-module/600/800',
     color: '#f59e0b',
-    videoUrl: 'l6tXdAXzkPI'
+    videoUrl: 'l6tXdAXzkPI',
+    localVideo: '/videos/modules/roleta.mp4'
   }
 ];
 
@@ -220,10 +226,21 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
                     onClick={() => { if(!isActive && !isDragging) { setCurrentIndex(i); } }}
                   >
                     <div className="absolute inset-0 bg-neutral-900 z-0">
-                      {module.videoUrl ? (
+                      {module.localVideo ? (
+                        <video 
+                          key={module.localVideo}
+                          autoPlay 
+                          muted 
+                          loop 
+                          playsInline 
+                          className="absolute inset-0 w-full h-full object-cover opacity-70"
+                        >
+                          <source src={module.localVideo} type="video/mp4" />
+                        </video>
+                      ) : module.videoUrl ? (
                         <div className="absolute inset-0 pointer-events-none overflow-hidden">
                            <iframe
-                             className="w-full h-full scale-[1.3] border-none"
+                             className="w-full h-full scale-[1.3] border-none opacity-60"
                              src={`https://www.youtube.com/embed/${module.videoUrl}?autoplay=1&mute=1&loop=1&playlist=${module.videoUrl}&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&playsinline=1`}
                              allow="autoplay"
                            />
@@ -305,7 +322,6 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
           <Switch checked={isPackEnabled} onCheckedChange={onPackToggle} className="scale-110" />
         </div>
 
-        {/* MENSAGEM DE DESTAQUE REFORÇADA */}
         <div className="bg-primary/10 border-2 border-primary/20 rounded-[2rem] p-6 space-y-4 animate-in zoom-in-95 duration-500">
            <div className="flex items-center gap-3">
               <div className="bg-primary p-1.5 rounded-lg shadow-[0_0_15px_rgba(225,29,72,0.5)]">
