@@ -26,17 +26,22 @@ export async function GET(
 
     const base64Data = metaPhotoSnap.data().base64;
     
-    // Remove o prefixo "data:image/jpeg;base64," se existir
-    const base64Image = base64Data.split(';base64,').pop();
+    // Extrai apenas a parte dos dados binários, ignorando o prefixo data:image/...
+    const base64Image = base64Data.includes(';base64,') 
+      ? base64Data.split(';base64,').pop() 
+      : base64Data;
+
     const buffer = Buffer.from(base64Image, 'base64');
 
     return new NextResponse(buffer, {
       headers: {
         'Content-Type': 'image/jpeg',
+        'Content-Length': buffer.length.toString(),
         'Cache-Control': 'public, max-age=3600, s-maxage=3600',
       },
     });
   } catch (error) {
+    console.error('Error serving preview image:', error);
     return new NextResponse('Error loading image', { status: 500 });
   }
 }

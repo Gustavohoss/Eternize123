@@ -6,7 +6,6 @@ import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import SiteClient from './SiteClient';
 
-// Inicialização segura para o servidor
 function getDb() {
   const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
   return getFirestore(app);
@@ -20,8 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { subdomain } = await params;
   const db = getDb();
   
-  // URL base para a imagem de prévia (ajuste conforme seu domínio final)
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://go.eternizeee.shop';
+  // Define o domínio base. Prioriza variável de ambiente, depois o domínio final.
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://eternizee.shop';
   
   try {
     const siteRef = doc(db, 'published_sites', subdomain);
@@ -34,14 +33,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const siteData = siteSnap.data();
     const config = JSON.parse(siteData.contentJson || '{}');
     
-    // Verifica se existe foto personalizada
+    // Verifica se existe foto personalizada na subcoleção media
     const metaPhotoSnap = await getDoc(doc(db, 'published_sites', subdomain, 'media', 'meta_preview'));
     const hasCustomPhoto = metaPhotoSnap.exists();
 
     const title = config.metaTitle || siteData.name || 'Um presente especial para você';
     const description = 'Abra para ver a surpresa que preparei... ❤️';
     
-    // Se tiver foto personalizada, usa a URL da nossa API. Se não, usa a logo padrão.
+    // URL absoluta para a imagem
     const imageUrl = hasCustomPhoto 
       ? `${baseUrl}/api/site/${subdomain}/preview`
       : 'https://s3.typebotstorage.com/public/workspaces/cm7vfrzsh0001xixq5auwzryb/typebots/cmor2i57p000007huwd9cnpp5/blocks/rnrd9dgoh72piuhxaqenuibb?v=1777891185088';
@@ -52,6 +51,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       openGraph: {
         title: title,
         description: description,
+        url: `${baseUrl}/site/${subdomain}`,
+        siteName: 'Eternize',
         type: 'website',
         images: [
           {
