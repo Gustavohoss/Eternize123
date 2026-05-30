@@ -22,6 +22,7 @@ import { StepMessage } from '@/components/eternize/creator-steps/step-message';
 import { StepMusic } from '@/components/eternize/creator-steps/step-music';
 import { StepDataLocation } from '@/components/eternize/creator-steps/step-data-location';
 import { StepModulesEdit } from '@/components/eternize/creator-steps/step-modules-edit';
+import { StepSharePreview } from '@/components/eternize/creator-steps/step-share-preview';
 
 const DEFAULT_ROULETTE = [
   "O dia que nos conhecemos",
@@ -31,6 +32,26 @@ const DEFAULT_ROULETTE = [
   "Nosso primeiro beijo",
   "Nossa primeira viagem"
 ];
+
+const compressImage = (base64Str: string): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = base64Str;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX_WIDTH = 1000;
+      const MAX_HEIGHT = 1000;
+      let width = img.width;
+      let height = img.height;
+      if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
+      else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', 0.75));
+    };
+  });
+};
 
 export default function EditSitePage() {
   const params = useParams();
@@ -54,13 +75,13 @@ export default function EditSitePage() {
   const [step, setStep] = useState<Step>('customize-background');
   const [activeModulePreview, setActiveModulePreview] = useState<string | null>(null);
 
-  const isModulesOnlyMode = useMemo(() => searchParams.get('startStep') === 'modules', [searchParams]);
+  const isDirectMode = useMemo(() => searchParams.get('startStep'), [searchParams]);
 
   useEffect(() => { 
     setMounted(true); 
-    if (searchParams.get('startStep') === 'modules') {
-      setStep('modules');
-    }
+    const start = searchParams.get('startStep');
+    if (start === 'modules') setStep('modules');
+    else if (start === 'share-preview') setStep('share-preview');
   }, [searchParams]);
 
   // States
@@ -86,6 +107,8 @@ export default function EditSitePage() {
   const [journeyPoints, setJourneyPoints] = useState<any[]>([]);
   const [rouletteItems, setRouletteItems] = useState<string[]>(DEFAULT_ROULETTE);
   const [spotifyCardPhoto, setSpotifyCardPhoto] = useState<string>('');
+  const [metaTitle, setMetaTitle] = useState('');
+  const [metaPhoto, setMetaPhoto] = useState('');
   
   const [sparklesDensity, setSparklesDensity] = useState<number>(100);
   const [sparklesSpeed, setSparklesSpeed] = useState<number>(0.5);
@@ -134,6 +157,7 @@ export default function EditSitePage() {
           const mediaSnap = await getDocs(collection(siteRef!, 'media'));
           const albumPhotos: string[] = [];
           let spotifyCard = '';
+          let sharePhoto = '';
           const loadedMemories: any[] = [];
           const loadedJourneyPoints: any[] = [];
 
@@ -144,6 +168,8 @@ export default function EditSitePage() {
               albumPhotos[idx] = data.base64;
             } else if (data.type === 'spotify') {
               spotifyCard = data.base64;
+            } else if (data.type === 'meta_preview') {
+              sharePhoto = data.base64;
             } else if (data.type === 'memory') {
               loadedMemories.push({
                 id: doc.id.replace('memory_', ''),
@@ -182,6 +208,8 @@ export default function EditSitePage() {
           setMusicData(config.musicData);
           setUploadedPhotos(albumPhotos.filter(p => !!p));
           setSpotifyCardPhoto(spotifyCard);
+          setMetaTitle(config.metaTitle || '');
+          setMetaPhoto(sharePhoto);
           
           setMemories(loadedMemories);
           setJourneyPoints(loadedJourneyPoints);
@@ -247,7 +275,7 @@ export default function EditSitePage() {
         showCard, titlePosition, titleColor, titleFont, titleIsBold, titleHasNeon, titleNeonStrength,
         dateColor, dateFont, dateIsBold, dateHasNeon, dateNeonStrength, dateBoxBgColor, dateBoxBorderColor,
         messageColor, messageFont, musicBoxColor, musicTextColor, musicHasNeon, musicNeonStrength,
-        isMusicAutoPlay, locationQuery, isPackEnabled, rouletteItems
+        isMusicAutoPlay, locationQuery, isPackEnabled, rouletteItems, metaTitle
       };
 
       await updateDoc(siteRef, {
@@ -270,7 +298,12 @@ export default function EditSitePage() {
         batch.set(doc(mediaCollection, 'spotify_card'), { base64: spotifyCardPhoto, type: 'spotify' });
       }
 
-      // Salva Memórias (Metadados + Foto em 1 documento individual)
+      // Salva foto de metadados
+      if (metaPhoto) {
+        batch.set(doc(mediaCollection, 'meta_preview'), { base64: metaPhoto, type: 'meta_preview' });
+      }
+
+      // Salva Memórias
       memories.forEach(m => {
         batch.set(doc(mediaCollection, `memory_${m.id}`), {
           type: 'memory',
@@ -281,7 +314,7 @@ export default function EditSitePage() {
         });
       });
 
-      // Salva Jornada (Metadados + Foto em 1 documento individual)
+      // Salva Jornada
       journeyPoints.forEach(p => {
         batch.set(doc(mediaCollection, `journey_${p.id}`), {
           type: 'journey',
@@ -309,6 +342,17 @@ export default function EditSitePage() {
     }
   };
 
+  const handleMetaPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const compressed = await compressImage(reader.result as string);
+      setMetaPhoto(compressed);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleRemoveMemory = useCallback((id: string) => {
     setMemories(prev => prev.filter(m => m.id !== id));
     setDeletedMediaIds(prev => [...prev, `memory_${id}`]);
@@ -323,16 +367,17 @@ export default function EditSitePage() {
     const isFixed = selectedTheme === 'netflix' || selectedTheme === 'spotify' || selectedTheme === 'instagram';
     let steps: Step[] = isFixed ? ['data-location', 'page-title', 'message', 'photos', 'music'] : ['customize-background', 'photos', 'page-title', 'message', 'data-location', 'music'];
     if (hasPackPurchased) steps.push('modules');
+    steps.push('share-preview');
     return steps;
   }, [selectedTheme, hasPackPurchased]);
 
   const currentStepIndex = stepSequence.indexOf(step);
 
   const handleBack = useCallback(() => {
-    if (isModulesOnlyMode && step === 'modules') { router.push('/minhas-paginas'); return; }
+    if (isDirectMode && (step === 'modules' || step === 'share-preview')) { router.push('/minhas-paginas'); return; }
     if (currentStepIndex <= 0) { router.push('/minhas-paginas'); return; }
     setStep(stepSequence[currentStepIndex - 1]);
-  }, [currentStepIndex, stepSequence, router, isModulesOnlyMode, step]);
+  }, [currentStepIndex, stepSequence, router, isDirectMode, step]);
 
   const handleNext = useCallback(() => {
     if (currentStepIndex < stepSequence.length - 1) setStep(stepSequence[currentStepIndex + 1]);
@@ -380,12 +425,14 @@ export default function EditSitePage() {
             {step === 'message' && <StepMessage {...{selectedTheme, message, onMessageChange: setMessage, messageFont, onMessageFontChange: (e: any) => {}, messageColor, onMessageColorChange: (e: any) => {}, onBack: handleBack, onNext: handleNext}} />}
             {step === 'music' && <StepMusic {...{selectedTheme, musicData, onMusicSelect: setMusicData, musicBoxColor, onMusicBoxColorChange: (e: any) => {}, musicTextColor, onMusicTextColorChange: (e: any) => {}, musicHasNeon, onMusicHasNeonChange: (e: any) => {}, musicNeonStrength, onMusicNeonStrengthChange: (e: any) => {}, isAutoPlay: isMusicAutoPlay, onAutoPlayChange: (e: any) => {}, onBack: handleBack, onNext: handleNext}} />}
             {step === 'data-location' && <StepDataLocation {...{selectedTheme, date, onDateSelect: setDate, locationQuery, onLocationQueryChange: (e: any) => {}, showSuggestions, onShowSuggestionsChange: (e: any) => {}, filteredCities: [], selectedCountStyle, onCountStyleChange: (e: any) => {}, dateFont, onDateFontChange: (e: any) => {}, dateIsBold, onDateIsBoldChange: (e: any) => {}, dateHasNeon, onDateHasNeonChange: (e: any) => {}, dateNeonStrength, onDateNeonStrengthChange: (e: any) => {}, dateColor, onDateColorChange: (e: any) => {}, dateBoxBgColor, onDateBoxBgColorChange: (e: any) => {}, dateBoxBorderColor, onDateBoxBorderColorChange: (e: any) => {}, onBack: handleBack, onNext: handleNext}} />}
-            {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} memories={memories} onMemoriesChange={setMemories} journeyPoints={journeyPoints} onJourneyPointsChange={setJourneyPoints} rouletteItems={rouletteItems} onRouletteItemsChange={setRouletteItems} onBack={handleBack} onNext={handleSave} isModulesOnlyMode={isModulesOnlyMode} onSubModuleChange={setActiveModulePreview} onRemoveMemory={handleRemoveMemory} onRemoveJourneyPoint={handleRemoveJourneyPoint} />}
+            {step === 'modules' && <StepModulesEdit isPackEnabled={isPackEnabled} onPackToggle={setIsPackEnabled} memories={memories} onMemoriesChange={setMemories} journeyPoints={journeyPoints} onJourneyPointsChange={setJourneyPoints} rouletteItems={rouletteItems} onRouletteItemsChange={setRouletteItems} onBack={handleBack} onNext={handleNext} isModulesOnlyMode={isDirectMode === 'modules'} onSubModuleChange={setActiveModulePreview} onRemoveMemory={handleRemoveMemory} onRemoveJourneyPoint={handleRemoveJourneyPoint} />}
+            {step === 'share-preview' && <StepSharePreview metaTitle={metaTitle} onMetaTitleChange={setMetaTitle} metaPhoto={metaPhoto} onMetaPhotoChange={handleMetaPhotoUpload} pageTitle={pageTitle} onBack={handleBack} onSave={handleSave} />}
+            
             <div className="lg:hidden mt-12 w-full gap-4">
                <Dialog><DialogTrigger asChild><Button variant="outline" className="w-full h-11 rounded-xl border-white/10 bg-white/5 font-black text-[10px] uppercase tracking-widest gap-2"><Maximize2 className="w-4 h-4" /> Ver prévia</Button></DialogTrigger><DialogContent className="fixed inset-0 w-full h-[100dvh] p-0 bg-black border-none overflow-hidden flex flex-col z-[200] rounded-none"><div className="absolute top-6 right-6 z-[250]"><DialogClose className="p-2.5 bg-black/60 rounded-full text-white border border-white/20"><X className="w-5 h-5" /></DialogClose></div>{mounted && <DeviceMockup {...previewProps} isFullscreen />}</DialogContent></Dialog>
                {mounted && isMobile && <DeviceMockup {...previewProps} />}
             </div>
-            {step !== 'modules' && (
+            {step !== 'modules' && step !== 'share-preview' && (
               <div className="mt-12 flex flex-col gap-4 pt-10 border-t border-white/5">
                 <Button onClick={handleBack} variant="outline" className="h-14 rounded-2xl">Voltar</Button>
                 <Button onClick={handleNext} className="h-14 rounded-2xl bg-primary text-white">Próxima Etapa</Button>

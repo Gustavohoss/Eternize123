@@ -1,11 +1,10 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { collection, query, where, and } from 'firebase/firestore';
 import { useFirestore, useUser, useCollection, useAuth, useMemoFirebase } from '@/firebase';
-import { Heart, ExternalLink, Calendar, Loader2, Plus, ArrowLeft, LogOut, Layout, User, Pencil, ShieldAlert, Lock, X, CheckCircle2, Eye, EyeOff, Sparkles, Settings2, LayoutGrid, ChevronRight, QrCode, Copy, Share2, Download } from 'lucide-react';
+import { Heart, ExternalLink, Calendar, Loader2, Plus, ArrowLeft, LogOut, Layout, User, Pencil, ShieldAlert, Lock, X, CheckCircle2, Eye, EyeOff, Sparkles, Settings2, LayoutGrid, ChevronRight, QrCode, Copy, Share2, Download, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
@@ -435,6 +434,20 @@ export default function MyPages() {
                     ) : (
                       <Lock className="w-3.5 h-3.5 text-white/10" />
                     )}
+                 </div>
+               </Link>
+
+               {/* Option 3: Meta/WhatsApp Preview */}
+               <Link href={`/editar/${selectedSite?.id}?startStep=share-preview`}>
+                 <div className="group relative bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-5 hover:bg-white/10 hover:border-primary/50 transition-all cursor-pointer">
+                    <div className="w-12 h-12 bg-black rounded-xl border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                       <MessageSquare className="w-6 h-6 text-white/40 group-hover:text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                       <h4 className="text-sm font-black uppercase italic text-white group-hover:text-primary transition-colors">Configurar Prévia (WhatsApp)</h4>
+                       <p className="text-[10px] font-medium text-white/30 leading-relaxed uppercase tracking-widest">Personalize a foto e título ao enviar o link</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-white/10 group-hover:text-primary group-hover:translate-x-1 transition-all" />
                  </div>
                </Link>
             </div>

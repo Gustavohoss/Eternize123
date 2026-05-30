@@ -30,7 +30,7 @@ export const THEME_OPTIONS = [
     name: 'Instagram', 
     description: 'Transforme sua história em um perfil social. Feed, biografia e memórias em grade.', 
     badge: 'Social',
-    color: '#e1306c',
+    color: '#e11d48',
     image: 'https://picsum.photos/seed/insta-theme/400/600',
     videoUrl: 'fYln5Smsn6w',
     demoUrl: '/site/pedro-e-camila-2-inmp?muted=true'
@@ -59,4 +59,4 @@ export const THEME_OPTIONS = [
 
 export type ThemeId = 'classic' | 'netflix' | 'spotify' | 'instagram';
 
-export type Step = 'sender-name' | 'theme-selection' | 'gift-type' | 'customize-background' | 'photos' | 'page-title' | 'message' | 'music' | 'data-location' | 'plans' | 'order-bump' | 'subdomain-config' | 'modules';
+export type Step = 'sender-name' | 'theme-selection' | 'gift-type' | 'customize-background' | 'photos' | 'page-title' | 'message' | 'music' | 'data-location' | 'plans' | 'order-bump' | 'subdomain-config' | 'modules' | 'share-preview';
