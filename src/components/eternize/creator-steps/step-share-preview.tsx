@@ -18,6 +18,8 @@ interface StepSharePreviewProps {
   onSave: () => void;
 }
 
+const ETERNIZE_LOGO = "https://s3.typebotstorage.com/public/workspaces/cm7vfrzsh0001xixq5auwzryb/typebots/cmor2i57p000007huwd9cnpp5/blocks/rnrd9dgoh72piuhxaqenuibb?v=1777891185088";
+
 export function StepSharePreview({ 
   metaTitle, 
   onMetaTitleChange, 
@@ -48,14 +50,17 @@ export function StepSharePreview({
                <div className="bg-[#025144] rounded-lg overflow-hidden mb-2 border border-white/5">
                   <div className="flex items-center gap-3">
                     <div className="w-16 h-16 relative bg-[#121b22] shrink-0">
-                      {metaPhoto ? (
-                        <Image src={metaPhoto} fill className="object-cover" alt="Meta" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center opacity-20"><ImageIcon className="w-6 h-6" /></div>
-                      )}
+                      <Image 
+                        src={metaPhoto || ETERNIZE_LOGO} 
+                        fill 
+                        className="object-cover" 
+                        alt="Meta" 
+                      />
                     </div>
                     <div className="flex-1 min-w-0 pr-3">
-                       <p className="text-[#e9edef] font-bold text-[12px] truncate">{metaTitle || pageTitle || 'Eternize | Presente Especial'}</p>
+                       <p className="text-[#e9edef] font-bold text-[12px] truncate">
+                         {metaTitle || pageTitle || 'Eternize | Presente Especial'}
+                       </p>
                        <p className="text-[#8696a0] text-[11px] truncate">eternizee.shop</p>
                     </div>
                   </div>
@@ -74,9 +79,10 @@ export function StepSharePreview({
             <Input 
               value={metaTitle}
               onChange={(e) => onMetaTitleChange(e.target.value)}
-              placeholder="Ex: Um presente especial para você..."
+              placeholder={pageTitle || "Ex: Um presente especial para você..."}
               className="bg-white/5 border-white/10 h-14 rounded-xl font-bold"
             />
+            <p className="text-[9px] text-white/30 italic ml-1">Deixe em branco para usar o nome do casal.</p>
           </div>
 
           <div className="space-y-3">
@@ -85,24 +91,22 @@ export function StepSharePreview({
             </Label>
             <div className="flex items-center gap-5">
               <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-white/5 border border-white/10 shrink-0 group">
-                {metaPhoto ? (
-                  <>
-                    <Image src={metaPhoto} fill className="object-cover" alt="Meta" />
-                    <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                       <Upload className="w-5 h-5 text-white" />
-                       <input type="file" className="hidden" accept="image/*" onChange={onMetaPhotoChange} />
-                    </label>
-                  </>
-                ) : (
-                  <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition-colors">
-                     <Upload className="w-5 h-5 text-white/20" />
-                     <input type="file" className="hidden" accept="image/*" onChange={onMetaPhotoChange} />
-                  </label>
-                )}
+                <Image 
+                  src={metaPhoto || ETERNIZE_LOGO} 
+                  fill 
+                  className={cn("object-cover", !metaPhoto && "opacity-40 p-2")} 
+                  alt="Meta" 
+                />
+                <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                   <Upload className="w-5 h-5 text-white" />
+                   <input type="file" className="hidden" accept="image/*" onChange={onMetaPhotoChange} />
+                </label>
               </div>
               <div className="flex-1 space-y-1">
-                <p className="text-[11px] font-bold text-white/60 leading-tight">Dica: Use uma foto quadrada ou em paisagem para o WhatsApp exibir melhor.</p>
-                <p className="text-[9px] text-white/20 uppercase tracking-widest">Limite de 1MB para esta foto.</p>
+                <p className="text-[11px] font-bold text-white/60 leading-tight">
+                  {metaPhoto ? "Foto personalizada ativa." : "Usando foto padrão da Eternize."}
+                </p>
+                <p className="text-[9px] text-white/20 uppercase tracking-widest">Toque no ícone para trocar.</p>
               </div>
             </div>
           </div>
@@ -111,7 +115,7 @@ export function StepSharePreview({
         <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex items-start gap-3">
           <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
           <p className="text-[11px] text-white/50 leading-relaxed font-medium">
-            Lembre-se que o WhatsApp às vezes demora alguns minutos para atualizar a prévia após você salvar.
+            Se você não personalizar, enviaremos o link com o nome do casal e nossa logo oficial.
           </p>
         </div>
       </div>
