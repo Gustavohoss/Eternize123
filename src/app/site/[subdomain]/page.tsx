@@ -2,7 +2,7 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import SiteClient from './SiteClient';
 
@@ -20,6 +20,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { subdomain } = await params;
   const db = getDb();
   
+  // URL base para a imagem de prévia (ajuste conforme seu domínio final)
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://go.eternizeee.shop';
+  
   try {
     const siteRef = doc(db, 'published_sites', subdomain);
     const siteSnap = await getDoc(siteRef);
@@ -31,12 +34,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const siteData = siteSnap.data();
     const config = JSON.parse(siteData.contentJson || '{}');
     
-    // Tenta buscar a foto personalizada na subcoleção media
+    // Verifica se existe foto personalizada
     const metaPhotoSnap = await getDoc(doc(db, 'published_sites', subdomain, 'media', 'meta_preview'));
-    const metaPhoto = metaPhotoSnap.exists() ? metaPhotoSnap.data().base64 : null;
+    const hasCustomPhoto = metaPhotoSnap.exists();
 
     const title = config.metaTitle || siteData.name || 'Um presente especial para você';
     const description = 'Abra para ver a surpresa que preparei... ❤️';
+    
+    // Se tiver foto personalizada, usa a URL da nossa API. Se não, usa a logo padrão.
+    const imageUrl = hasCustomPhoto 
+      ? `${baseUrl}/api/site/${subdomain}/preview`
+      : 'https://s3.typebotstorage.com/public/workspaces/cm7vfrzsh0001xixq5auwzryb/typebots/cmor2i57p000007huwd9cnpp5/blocks/rnrd9dgoh72piuhxaqenuibb?v=1777891185088';
     
     return {
       title: title,
@@ -45,14 +53,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: title,
         description: description,
         type: 'website',
-        // Nota: WhatsApp prefere URLs para imagens. Base64 pode funcionar em alguns casos, 
-        // mas o título agora aparecerá 100% das vezes.
-        images: metaPhoto ? [metaPhoto] : ['https://s3.typebotstorage.com/public/workspaces/cm7vfrzsh0001xixq5auwzryb/typebots/cmor2i57p000007huwd9cnpp5/blocks/rnrd9dgoh72piuhxaqenuibb?v=1777891185088'],
+        images: [
+          {
+            url: imageUrl,
+            width: 1200,
+            height: 630,
+            alt: title,
+          }
+        ],
       },
       twitter: {
         card: 'summary_large_image',
         title: title,
         description: description,
+        images: [imageUrl],
       }
     };
   } catch (e) {
