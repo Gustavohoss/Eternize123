@@ -82,15 +82,12 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
     };
   }, [isDragging, dragOffset]);
 
-  // Efeito para forçar o play do vídeo quando ele mudar
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.load();
       const playPromise = videoRef.current.play();
       if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Autoplay foi bloqueado, o que é esperado em alguns cenários de bateria baixa
-        });
+        playPromise.catch(() => {});
       }
     }
   }, [currentIndex]);
@@ -207,6 +204,7 @@ export function StepThemeSelection({ selectedTheme, onThemeSelect, onNext }: Ste
                           playsInline 
                           webkit-playsinline="true"
                           preload="auto"
+                          poster={theme.image}
                           className="absolute inset-0 w-full h-full object-cover opacity-70"
                         >
                           <source src={localVideo} type="video/mp4" />

@@ -87,7 +87,6 @@ export function ThemeCarousel() {
     };
   }, [isDragging, dragOffset]);
 
-  // Efeito para garantir que o vídeo atual esteja tocando
   useEffect(() => {
     const currentVideo = videoRefs.current[currentIndex];
     if (currentVideo) {
@@ -193,6 +192,7 @@ export function ThemeCarousel() {
                         playsInline 
                         webkit-playsinline="true"
                         preload="auto"
+                        poster={theme.image}
                         className="absolute inset-0 w-full h-full object-cover opacity-80"
                       >
                         <source src={localVideo} type="video/mp4" />

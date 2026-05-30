@@ -148,7 +148,6 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
     };
   }, [isDragging]);
 
-  // Força o play do vídeo selecionado
   useEffect(() => {
     const currentVideo = videoRefs.current[currentIndex];
     if (currentVideo) {
@@ -245,6 +244,7 @@ export function StepOrderBump({ onBack, onFinish, date, isPackEnabled, onPackTog
                           playsInline 
                           webkit-playsinline="true"
                           preload="auto"
+                          poster={module.image}
                           className="absolute inset-0 w-full h-full object-cover opacity-70"
                         >
                           <source src={module.localVideo} type="video/mp4" />

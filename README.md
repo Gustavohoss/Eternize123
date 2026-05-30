@@ -1,11 +1,11 @@
 
-# Firebase Studio
+# Eternize — Presentes Digitais
 
-This is a NextJS starter in Firebase Studio.
+Esta é a plataforma Eternize, desenvolvida com NextJS e Firebase.
 
 ## Estrutura de Vídeos Local (.mp4)
 
-Para que os vídeos funcionem nativamente sem depender do YouTube, coloque os arquivos nas seguintes pastas:
+Para garantir a melhor performance, os vídeos devem ser comprimidos antes do upload. O recomendado é que cada vídeo tenha **menos de 5MB**.
 
 ### Vídeos dos Temas
 Pasta: `public/videos/themes/`
@@ -22,4 +22,4 @@ Pasta: `public/videos/modules/`
 - `jornada.mp4`
 - `roleta.mp4`
 
-Certifique-se de que os nomes estão exatamente em letras minúsculas.
+Certifique-se de que os nomes estão exatamente em letras minúsculas. Use ferramentas como Handbrake para reduzir o tamanho dos arquivos.
