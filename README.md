@@ -9,10 +9,10 @@ Para garantir a melhor performance, os vídeos devem ser comprimidos antes do up
 
 ### Vídeos dos Temas
 Pasta: `public/videos/themes/`
-- `spotify.mp4`
-- `instagram.mp4`
-- `netflix.mp4`
-- `classic.mp4`
+- `spotify1.mp4`
+- `instagram1.mp4`
+- `netflix1.mp4`
+- `classic1.mp4`
 
 ### Vídeos dos Módulos (Checkout)
 Pasta: `public/videos/modules/`

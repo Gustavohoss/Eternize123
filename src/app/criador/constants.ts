@@ -23,7 +23,7 @@ export const THEME_OPTIONS = [
     color: '#1db954',
     image: 'https://picsum.photos/seed/spotify-theme/400/600',
     videoUrl: 'AnnrA22c2ls',
-    localVideo: '/videos/themes/spotify.mp4',
+    localVideo: '/videos/themes/spotify1.mp4',
     demoUrl: '/site/pedro-e-camila-jtt2?muted=true'
   },
   { 
@@ -34,7 +34,7 @@ export const THEME_OPTIONS = [
     color: '#e11d48',
     image: 'https://picsum.photos/seed/insta-theme/400/600',
     videoUrl: 'fYln5Smsn6w',
-    localVideo: '/videos/themes/instagram.mp4',
+    localVideo: '/videos/themes/instagram1.mp4',
     demoUrl: '/site/pedro-e-camila-2-inmp?muted=true'
   },
   { 
@@ -45,7 +45,7 @@ export const THEME_OPTIONS = [
     color: '#e50914',
     image: 'https://picsum.photos/seed/netflix-theme/400/600',
     videoUrl: 'rfVydSVztXc',
-    localVideo: '/videos/themes/netflix.mp4',
+    localVideo: '/videos/themes/netflix1.mp4',
     demoUrl: '/site/pedro-e-camila-3-bjrn?muted=true'
   },
   { 
@@ -56,7 +56,7 @@ export const THEME_OPTIONS = [
     color: '#e11d48',
     image: 'https://picsum.photos/seed/classic-theme/400/600',
     videoUrl: 'H7pUAJdpK4Y',
-    localVideo: '/videos/themes/classic.mp4',
+    localVideo: '/videos/themes/classic1.mp4',
     demoUrl: '/site/pedro-e-camila-4-rhwm?muted=true'
   },
 ];
