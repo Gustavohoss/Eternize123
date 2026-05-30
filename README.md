@@ -2,5 +2,14 @@
 
 This is a NextJS starter in Firebase Studio.
 
-git config --global credential.helper cache
-To get started, take a look at src/app/page.tsx.
+## Estrutura de Vídeos
+Os vídeos dos temas devem ser colocados em:
+`public/videos/themes/`
+
+Nomes obrigatórios:
+- `spotify.mp4`
+- `instagram.mp4`
+- `netflix.mp4`
+- `classic.mp4`
+
+Para começar, dê uma olhada em `src/app/page.tsx`.
